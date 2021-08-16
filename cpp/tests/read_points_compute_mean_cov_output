@@ -1,0 +1,21 @@
+
+Here is the output of read_points_compute_mean_cov.cpp on the file data.csv
+
+with commands
+ g++ read_points_compute_mean_cov.cpp -o ./read_points_compute_mean_cov.out -I ../../../../../../../../usr/include/eigen3/
+
+and 
+./read_points_compute_mean_cov.out ../data/data.csv 
+
+
+
+
+The mean of the sample of points is :
+  3.757 1.18004
+The covariance matrix of the sample of points is :
+  1.49825 -0.653236
+-0.653236   1.03727
+The non-biased covariance matrix of the sample of points is :
+  1.52364 -0.664307
+-0.664307   1.05485
+

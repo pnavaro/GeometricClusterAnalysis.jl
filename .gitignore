@@ -1,2 +1,4 @@
 .Rproj.user/
 Manifest.toml
+*.swp
+Manifest.toml

@@ -1,77 +1,52 @@
 using Random
+using RCall
+using Statistics
+using Test
+
+import KPLMCenters: mahalanobis
 
 rng = MersenneTwister(1234)
 
+# Traductions de quelques fonctions R en Julia pour plus de lisibilité
+
+nrow(M :: AbstractArray) = size(M)[1]
+ncol(M :: AbstractArray) = size(M)[2]
+rbind( a, b ) = vcat( a, b)
+cbind( a, b ) = hcat( a, b)
+
+R"""
+P1 <- matrix(0,10,3)
+P2 <- matrix(0,5,3)
 """
-    simule_noise(N,dim,m,M)
-Génération des données sur le symbole infini avec bruit
+
+P1 = @rget P1
+P2 = @rget P2
+
+@test rbind(P1, P2) ≈ rcopy(R"rbind(P1, P2)")
+
+colMeans(x) = vec(mean(x, dims=1))
+
+# Quelques examples de l'utilisation du calcul de la distance de Mahalanobis 
+# avec le package [Distances.jl](https://github.com/JuliaStats/Distances.jl)
+
+R"""
+x1 <- c(131.37, 132.37, 134.47, 135.50, 136.17)
+x2 <- c(133.60, 132.70, 133.80, 132.30, 130.33)
+x3 <- c(99.17, 99.07, 96.03, 94.53, 93.50)
+x4 <- c(50.53, 50.23, 50.57, 51.97, 51.37)
+
+x <- cbind(x1, x2, x3, x4) 
+
+d <- mahalanobis(x, colMeans(x), cov(x))
 """
-function simule_noise(rng, N,dim,m,M)
 
+@rget d
 
-  return (-m+M) .* rand(rng, (N, dim)) .+ m
+x = @rget x
 
-end
+@test cov(x) ≈ rcopy(R"cov(x)") # la fonction julia et la fonction R donne la meme chose
 
-long = (3/2*pi+2)*(sqrt(2)+sqrt(9/8))
-seuil = zeros(5)
-seuil[1] = 3/2*pi*sqrt(2)/long
-seuil[2] += 3/2*pi*sqrt(9/8)/long
-seuil[3] += sqrt(2)/long
-seuil[4] += sqrt(2)/long
-seuil[5] += sqrt(9/8)/long
+@test colMeans(x) ≈ rcopy(R"colMeans(x)") # la fonction julia et la fonction R donne la meme chose
 
-function generate_infinity_symbol(rng, N,sigma,dim)
+@test mahalanobis(x, colMeans(x), cov(x)) ≈ d
 
-  P = sigma .* randn(rng, (N, dim))
-
-  vectU = randn(rng, N)
-  vectV = randn(rng, N)
-
-  for i in 1:N
-
-    P[i,1] = P[i,1] - 2
-
-    U = vectU[i]
-    V = vectV[i]
-
-    if U<=seuil[1]
-      theta = 6*pi/4*V+pi/4
-      P[i,1] = P[i,1] + sqrt(2)*cos(theta)
-      P[i,2] = P[i,2] + sqrt(2)*sin(theta)
-    
-    else
-
-      if U<=seuil[2]
-        theta = 6*pi/4*V - 3*pi/4
-        P[i,1] = P[i,1] + sqrt(9/8)*cos(theta) + 14/4
-        P[i,2] = P[i,2] + sqrt(9/8)*sin(theta)
-      
-      else
-
-        if U<=seuil[3]
-          P[i,1] = P[i,1] + 1+V
-          P[i,2] = P[i,2] + 1-V
-        
-        else
-          if U<=seuil[4]
-            P[i,1] = P[i,1] + 1+V
-            P[i,2] = P[i,2] + -1+V
-          else
-            if U<=seuil[5]
-              P[i,1] = P[i,1] + 2 + 3/4*V
-              P[i,2] = P[i,2] + - V * 3/4
-            else
-              P[i,1] = P[i,1] + 2 + 3/4*V
-              P[i,2] = P[i,2] + V * 3/4
-            end
-          end
-        end
-      end
-    end
-
-  end
-
-  return P
-
-end

@@ -20,7 +20,7 @@ function f_Σ(Σ) end
 iter_max = 10
 nstart = 1
 
-centers, μ, weights, colors, Σ, cost = ll_minimizer_multidim_trimmed_lem(rng, points, k, c, signal, iter_max, nstart, f_Σ)
+centers, μ, weights, colors, Σ, cost = kplm(rng, points, k, c, signal, iter_max, nstart, f_Σ)
 
 @test true
 

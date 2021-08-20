@@ -7,6 +7,6 @@ include("infinity_symbol.jl")
 include("mahalanobis.jl")
 include("nearest_neighbors.jl")
 include("colorize.jl")
-include("ll_minimizer_multidim_trimmed_lem.jl")
+include("kplm.jl")
 
 end 

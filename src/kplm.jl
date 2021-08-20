@@ -1,9 +1,9 @@
 using LinearAlgebra
 import Statistics: cov
 
-export  ll_minimizer_multidim_trimmed_lem
+export kplm
 
-function ll_minimizer_multidim_trimmed_lem(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
+function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
     # Initialisation
 
@@ -111,9 +111,6 @@ function ll_minimizer_multidim_trimmed_lem(rng, points, k, n_centers, signal, it
                     nearest_neighbors!( dists, idxs, k, points, centers[i], Σ_old[i])
 
                     μ[i] .= mean(view(points, idxs[1:k]))
-
-                    @show centers[i]
-                    @show μ[i]
 
                     Σ[i] .= (μ[i] .- centers[i]) * (μ[i] .- centers[i])'
                     Σ[i] .+= (k-1)/k .* cov(points[idxs[1:k]])

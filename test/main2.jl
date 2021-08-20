@@ -22,7 +22,7 @@ end
 
 iter_max, nstart = 10, 1
 
-centers, μ, weights, colors, Σ, cost = ll_minimizer_multidim_trimmed_lem(rng, points, k, c, signal, iter_max, nstart, f_Σ_det1)
+centers, μ, weights, colors, Σ, cost = kplm(rng, points, k, c, signal, iter_max, nstart, f_Σ_det1)
 
 @test true
 

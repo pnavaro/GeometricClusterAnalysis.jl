@@ -2,191 +2,195 @@ using LinearAlgebra
 
 export  ll_minimizer_multidim_trimmed_lem
 
+function ll_minimizer_multidim_trimmed_lem(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ)
 
-struct KPLM 
+    # Initialisation
 
-    cost :: Float64
-    centers :: Array{Float64, 2}
-    Sigma :: Vector{Diagonal{Float64, Vector{Float64}}}
-    color :: Vector{Int}
-    kept_centers :: BitVector
+    n_points = length(points)
+    dimension = length(first(points))
 
-    function KPLM( n, d, c )
-    
-        cost = Inf
-        centers = zeros(c, d)
-        Sigma = [Diagonal(ones(d)) for i in 1:c]
-        color = zeros(n)
-        kept_centers = trues(c)
-        new( cost, centers, Sigma, color, kept_centers )
-
+    if !( 1 < k <= n_points ) 
+       @error "The number of nearest neighbours, k, should be in {2,...,N}."
     end
 
-end
+    if !(0 < n_centers <= n_points)
+       @error "The number of clusters, c, should be in {1,2,...,N}."
+    end
 
-function ll_minimizer_multidim_trimmed_lem(s, k, c, sig, iter_max, nstart, f_Sigma)
+    cost_opt = Inf
+    centers_opt = [zeros(dimension) for i in 1:n_centers]
+    Σ_opt = [Diagonal(ones(dimension)) for i in 1:n_centers]
+    colors_opt = zeros(Int, n_points)
+    kept_centers_opt = trues(n_centers)
 
-  # Initialisation
+    # Some arrays for nearest neighbors computation
 
-  n = s.n
-  d = s.dim
+    dists = zeros(Float64, n_points)
+    idxs = zeros(Int, n_points)
 
-  if (k>N || k<=1) 
-     @error "The number of nearest neighbours, k, should be in {2,...,N}."
-  end
+    for n_times in 1:nstart
 
-  if (c>N || c<=0)
-     @error "The number of clusters, c, should be in {1,2,...,N}."
-  end
 
-  opt = KPLM( n, d, c )
+        centers_old = [fill(Inf,dimension) for i in 1:n_centers]
+        Σ_old = [Diagonal(ones(dimension)) for i in 1:n_centers]
+        first_centers = shuffle(rng, 1:n_points)[1:n_centers] 
 
-  # BEGIN FOR
-  for n_times in 1:nstart
+        centers = points[first_centers]
+        Σ = [Diagonal(ones(dimension)) for i in 1:n_centers]
+        colors = zeros(Int, n_points)
+        kept_centers = trues(n_centers)
+        μ = [zeros(dimension) for i in 1:n_centers] 
+        weights = zeros(n_centers)
 
-    old = Dict(  :centers => fill(Inf,(c,d)),
-                 :Sigma => [Diagonal(d) for i in 1:c])
-    first_centers_ind = shuffle(rng, 1:N)[1:c]
+        nstep = 0
 
-    new = Dict(  :cost => Inf,
-                 :centers => matrix(P[first_centers_ind,:],c,d),
-                 :Sigma => rep(list(diag(1,d)),c),
-                 :color => rep(0,N),
-                 :kept_centers => rep(TRUE,c),
-                 :means => matrix(data=0,nrow=c,ncol=d), # moyennes des \tilde P_{θ,h}
-                 :weights => rep(0,c)
-    )
-
-    Nstep = 0
-
-    continu_Sigma = TRUE
-
-    # BEGIN WHILE
-    while ((continu_Sigma||(!(all(old[:centers] .== new[:centers])))) && (Nstep<=iter_max))
-
-      Nstep += 1
-      old[:centers] = new[:centers]
-      old[:Sigma] = new[:Sigma]
-
-      # Step 1 : Update means ans weights
-
-      for i in 1:c
-        nn = sortperm(mahalanobis(P,old[:centers][i,:],old[:Sigma][i]))
-        new[:means][i] = colMeans(matrix(P[nn[1:k],:],k,d))
-        new[:weights][i] = mean(mahalanobis(P[nn[1:k],:],new[:means][i],old[:Sigma][i])) + log(det(old[:Sigma][i]))
-      end
-
-      # Step 2 : Update color
-
-      distance_min = zeros(N)
-
-      for j in 1:N
         cost = Inf
-        best_ind = 1
-        for i in 1:c
-          if(new$kept_centers[i])
-            newcost = mahalanobis(P[j,:],new[:means][i,:],old[:Sigma][i]) + new[:weights][i]
-            if newcost<=cost
-              cost = newcost
-              best_ind = i
+        continu_Σ = true
+
+        while ((continu_Σ || !(all(centers_old .== centers))) && (nstep<=iter_max))
+
+            nstep += 1
+
+            for i in 1:n_centers
+               centers_old[i] .= centers[i]
+               Σ_old[i] .= Σ[i]
             end
-          end
+
+            # Step 1 : Update means and weights
+
+            for i in 1:n_centers
+
+                nearest_neighbors!( dists, idxs, k, points, centers_old[i], Σ_old[i])
+
+                μ[i] .= mean(view(points, idxs[1:k]))
+
+                weights[i] = mean([sqmahalanobis(points[j], μ[i], Σ_old[i]) for j in idxs[1:k]]) + log(det(Σ_old[i]))
+
+            end
+
+            # Step 2 : Update color
+
+            for j in 1:n_points
+                cost = Inf
+                best_ind = 1
+                for i in 1:n_centers
+                    if kept_centers[i]
+                        newcost = sqmahalanobis(points[j], μ[i], Σ_old[i]) + weights[i]
+                        if newcost <= cost
+                            cost = newcost
+                            best_ind = i
+                        end
+                    end
+                end
+                colors[j] = best_ind
+                dists[j] = cost
+            end
+
+            # Step 3 : Trimming and Update cost
+
+            sortperm!(idxs, dists, rev = true)
+
+            if signal < n_points
+                for i in idxs[1:(n_points-signal)]
+                    colors[i] = 0
+                end
+            end
+
+            cost = mean(view(dists, idxs[(n_points-signal+1):n_points]))
+
+            # Step 4 : Update centers
+
+            for i in 1:n_centers
+
+                nb_points_cloud = sum( colors .== i)
+
+                if nb_points_cloud > 1
+
+                    centers[i] .= mean(points[colors .== i])
+
+                    nearest_neighbors!( dists, idxs, k, points, centers[i], Σ_old[i])
+
+                    μ[i] .= mean(view(points, idxs[1:k]))
+
+                    Σ[i] .= (((μ[i] .- centers[i])'(μ[i] .- centers[i])) 
+                               + ((k-1)/k) .* cov(points[idxs[1:k]]) 
+                               + ((nb_points_cloud-1)/nb_points_cloud) .* cov(points[colors .==i]))
+                    new[:Σ][i] = f_Σ(new[:Σ][i])
+
+                # Probleme si k=1 a cause de la covariance egale a NA car division par 0...
+
+                else
+
+                    if(nb_points_cloud==1)
+
+                        centers[i] = points[color .== i]
+                        nearest_neighbors!( dists, idxs, k, points, centers[i], Σ_old[i])
+                        μ[i] .= mean(view(points, idxs[1:k]))
+                        Σ[i] .= ((μ[i] .- centers[i])'(μ[i] .- centers[i])
+                                     + ((k-1)/k) .* cov(points[idxs[1:k]])) #+0 (car un seul element dans C)
+                        Σ[i] .= f_Σ(Σ[i])
+
+                    else
+
+                        kept_centers[i] = false
+
+                    end
+
+                end
+
+            end
+
+            # Step 5 : Condition for loop
+
+            stop_Σ = true # reste true tant que old_sigma et sigma sont egaux
+
+            for i in 1:n_centers
+
+                if kept_centers[i]
+
+                    stop_Σ *= all(Σ[i] .== Σ_old[i])
+
+                end
+
+            end
+
+            continu_Σ = !stop_Σ # Faux si tous les Σ sont egaux aux Σ_old
+
+        end # END WHILE
+
+        if cost < cost_opt
+            cost_opt = cost
+            centers_opt .= centers
+            Σ_opt .= Σ
+            colors_opt .= colors
+            kept_centers_opt .= kept_centers
         end
-        new[:color][j] = best_ind
-        distance_min[j] = cost
-      end
 
-      # Step 3 : Trimming and Update cost
+    end # END FOR
 
-      ix = sortperm(distance_min, rev = true)
+    # Return centers and colors for non-empty clusters
+    nb_kept_centers = sum(kept_centers_opt)
+    centers = zeros(nb_kept_centers, dimension)
+    Σ = []
+    colors_old = zeros(Int, n_points)
+    colors = zeros(Int, n_points)
+    index_center = 1
 
-      if sig<N
-        new[:color][ix[1:(N-sig)]] .= 0
-      end
+    for i in 1:n_centers
 
-      ds = distance_min[ix[(N-sig+1):N]]
+        if sum(colors_opt .== i) != 0
 
-      new[:cost] = mean(ds)
+            centers[index_center] .= centers_opt[i]
 
-      # Step 4 : Update centers
-
-      for i in 1:c
-
-        nb_points_cloud = sum( new[:color] .== i)
-
-        if nb_points_cloud > 1
-
-          new[:centers][i,] = colMeans(matrix(P[new[:color]==i,:],nb_points_cloud,d))
-          nn = sortperm(mahalanobis(P,new[:centers][i],old[:Sigma][i]))
-          new[:means][i] .= colMeans(matrix(P[nn[1:k],],k,d))
-          new[:Sigma][i] = ((new[:means][i]-new[:centers][i]) .* (new[:means][i] .- new[:centers][i])') + ((k-1)/k)*cov(P[nn[1:k],:]) + ((nb_points_cloud-1)/nb_points_cloud)*cov(P[new[:color]==i,:])
-          new[:Sigma][i] = f_Sigma(new[:Sigma][i])
-
-        # Probleme si k=1 a cause de la covariance egale a NA car division par 0...
-
-        else
-
-          if(nb_points_cloud==1)
-            new[:centers][i] = matrix(P[new[:color]==i,:],1,d)
-            nn = sortperm(mahalanobis(P,new[:centers][i],old[:Sigma][i]))
-            new[:means][i] .= colMeans(matrix(P[nn[1:k],],k,d))
-            new[:Sigma][i] .= ((new[:means][i]-new[:centers][i]) .* (new[:means][i]-new[:centers][i])) + ((k-1)/k)*cov(P[nn[1:k],:]) #+0 (car un seul element dans C)
-            new[:Sigma][i] .= f_Sigma(new[:Sigma][i])
-
-          else
-              new[:kept_centers][i] = false
-          end
+            Σ[index_center] .= Σ_opt[i]
+            colors_old[colors_opt .== i] .= index_center
+            index_center += 1
 
         end
-
-      end
-
-      # Step 5 : Condition for loop
-
-      stop_Sigma = true # reste true tant que old_sigma et sigma sont egaux
-      for i in 1:c
-        if new[:kept_centers][i]
-          stop_Sigma *= all(new[:Sigma][i],old[:Sigma][i])
-        end
-      end
-      continu_Sigma = !stop_Sigma # Faux si tous les sigma sont egaux aux oldsigma
-
-    end # END WHILE
-
-    if new$cost<opt$cost
-      opt[:cost] = new[:cost]
-      opt[:centers] = new[:centers]
-      opt[:Sigma] = new[:Sigma]
-      opt[:color] = new[:color]
-      opt[:kept_centers] = new[:kept_centers]
     end
 
-  end # END FOR
+    colorize!(colors, μ, weights, k, sig, centers, Σ, points)
 
-  # Return centers and colors for non-empty clusters
-  nb_kept_centers = sum(opt[:kept_centers])
-  centers = zeros(nb_kept_centers, d)
-  Sigma = []
-  color_old = zeros(N)
-  color = zeros(N)
-  index_center = 1
-  for i in 1:c
-    if sum(opt[:color] == i) != 0
-      centers[index_center,:] = opt[:centers][i,:]
-      Sigma[index_center] = opt[:Sigma][[i]]
-      color_old[opt[:color]==i] = index_center
-      index_center += 1
-    end
-  end
-
-  recolor = colorize(P,k,sig,centers,Sigma)
-
-  return Dict(:centers => centers,
-              :means => recolor[:means],
-              :weights => recolor[:weights],
-              :color_old => color_old,
-              :color => recolor[:color],
-              :Sigma => Sigma, 
-              :cost => opt[:cost])
+    return centers, μ, weights, colors, Σ, cost
 
 end

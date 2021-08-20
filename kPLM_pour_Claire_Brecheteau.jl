@@ -34,8 +34,12 @@ sig = 500 # Nombre de points que l'on considère comme du signal (les autres aur
 # MAIN 1 : Simple version -- Aucune contrainte sur les matrices de covariance.
 
 f_Sigma(Sigma) = Sigma
-LL = LL_minimizer_multidim_trimmed_lem(rng, P,k,c,sig,iter_max = 10,nstart = 1,f_Sigma)
-scatter(P[:,1], P[:,2], c=LL[:color])
+iter_max = 10
+nstart = 1
+ll1 = ll_minimizer_multidim_trimmed_lem( sample, k, c, sig, iter_max, nstart, f_Sigma)
+
+plot(sample.points[:,1], sample.points[:,2], sample.points[:,3], 
+     seriestype = :scatter, markercolor= ll1.color )
 
 #=
 

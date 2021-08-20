@@ -5,7 +5,7 @@ using Test
 
 import KPLMCenters: mahalanobis
 
-rng = MersenneTwister(1234)
+using KPLMCenters
 
 # Traductions de quelques fonctions R en Julia pour plus de lisibilité
 
@@ -50,3 +50,7 @@ x = @rget x
 
 @test mahalanobis(x, colMeans(x), cov(x)) ≈ d
 
+include("test_colorize.jl")
+# include("main1.jl")
+# include("main2.jl")
+# include("main3.jl")

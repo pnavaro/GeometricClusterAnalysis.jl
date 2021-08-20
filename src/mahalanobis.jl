@@ -1,5 +1,4 @@
 import Distances: mahalanobis, sqmahalanobis
-import Statistics: cov
 
 """ 
     mahalanobis( x, μ, Σ; inverted = false)

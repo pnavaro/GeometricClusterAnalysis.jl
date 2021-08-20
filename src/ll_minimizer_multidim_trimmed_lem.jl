@@ -1,24 +1,45 @@
-function ll_minimizer_multidim_trimmed_lem(rng, P, k, c, sig, iter_max = 10, nstart = 1, f_Sigma = nothing)
+using LinearAlgebra
+
+export  ll_minimizer_multidim_trimmed_lem
+
+
+struct KPLM 
+
+    cost :: Float64
+    centers :: Array{Float64, 2}
+    Sigma :: Vector{Diagonal{Float64, Vector{Float64}}}
+    color :: Vector{Int}
+    kept_centers :: BitVector
+
+    function KPLM( n, d, c )
+    
+        cost = Inf
+        centers = zeros(c, d)
+        Sigma = [Diagonal(ones(d)) for i in 1:c]
+        color = zeros(n)
+        kept_centers = trues(c)
+        new( cost, centers, Sigma, color, kept_centers )
+
+    end
+
+end
+
+function ll_minimizer_multidim_trimmed_lem(s, k, c, sig, iter_max, nstart, f_Sigma)
 
   # Initialisation
 
-  N = nrow(P)
-  d = ncol(P)
+  n = s.n
+  d = s.dim
 
   if (k>N || k<=1) 
-     return "The number of nearest neighbours, k, should be in {2,...,N}."
+     @error "The number of nearest neighbours, k, should be in {2,...,N}."
   end
 
   if (c>N || c<=0)
-     return "The number of clusters, c, should be in {1,2,...,N}."
+     @error "The number of clusters, c, should be in {1,2,...,N}."
   end
 
-  opt = Dict( :cost => Inf,
-              :centers => zeros(c,d),
-              :Sigma => [Diagonal(d) for i in 1:c],
-              :color => zeros(N),
-              :kept_centers => trues(c)
-  )
+  opt = KPLM( n, d, c )
 
   # BEGIN FOR
   for n_times in 1:nstart

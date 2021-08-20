@@ -18,7 +18,6 @@ function infinity_symbol(rng, n_points, n_noise, σ, dimension, noise_min, noise
     vect_v = rand(rng, n_points)
 
     points = Vector{Float64}[]
-    colors = Int[]
 
     for i in 1:n_points
 
@@ -74,7 +73,6 @@ function infinity_symbol(rng, n_points, n_noise, σ, dimension, noise_min, noise
         end
 
         push!(points, p[i,:])
-        push!(colors, 1)
 
   end
 
@@ -82,11 +80,10 @@ function infinity_symbol(rng, n_points, n_noise, σ, dimension, noise_min, noise
       noise = noise_min .+ (noise_max-noise_min) .* rand(rng, n_noise, dimension)
       for i in 1:n_noise
           push!(points, noise[i,:])
-          push!(colors, 0)
       end
   end
 
-  points, colors
+  return points
 
 end
 

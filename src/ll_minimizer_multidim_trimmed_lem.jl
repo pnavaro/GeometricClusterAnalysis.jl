@@ -1,8 +1,9 @@
 using LinearAlgebra
+import Statistics: cov
 
 export  ll_minimizer_multidim_trimmed_lem
 
-function ll_minimizer_multidim_trimmed_lem(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ)
+function ll_minimizer_multidim_trimmed_lem(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
     # Initialisation
 
@@ -19,7 +20,7 @@ function ll_minimizer_multidim_trimmed_lem(rng, points, k, n_centers, signal, it
 
     cost_opt = Inf
     centers_opt = [zeros(dimension) for i in 1:n_centers]
-    Σ_opt = [Diagonal(ones(dimension)) for i in 1:n_centers]
+    Σ_opt = [diagm(ones(dimension)) for i in 1:n_centers]
     colors_opt = zeros(Int, n_points)
     kept_centers_opt = trues(n_centers)
 
@@ -30,13 +31,12 @@ function ll_minimizer_multidim_trimmed_lem(rng, points, k, n_centers, signal, it
 
     for n_times in 1:nstart
 
-
         centers_old = [fill(Inf,dimension) for i in 1:n_centers]
-        Σ_old = [Diagonal(ones(dimension)) for i in 1:n_centers]
+        Σ_old = [diagm(ones(dimension)) for i in 1:n_centers]
         first_centers = shuffle(rng, 1:n_points)[1:n_centers] 
 
         centers = points[first_centers]
-        Σ = [Diagonal(ones(dimension)) for i in 1:n_centers]
+        Σ = [diagm(ones(dimension)) for i in 1:n_centers]
         colors = zeros(Int, n_points)
         kept_centers = trues(n_centers)
         μ = [zeros(dimension) for i in 1:n_centers] 
@@ -112,23 +112,31 @@ function ll_minimizer_multidim_trimmed_lem(rng, points, k, n_centers, signal, it
 
                     μ[i] .= mean(view(points, idxs[1:k]))
 
-                    Σ[i] .= (((μ[i] .- centers[i])'(μ[i] .- centers[i])) 
-                               + ((k-1)/k) .* cov(points[idxs[1:k]]) 
-                               + ((nb_points_cloud-1)/nb_points_cloud) .* cov(points[colors .==i]))
-                    new[:Σ][i] = f_Σ(new[:Σ][i])
+                    @show centers[i]
+                    @show μ[i]
 
-                # Probleme si k=1 a cause de la covariance egale a NA car division par 0...
+                    Σ[i] .= (μ[i] .- centers[i]) * (μ[i] .- centers[i])'
+                    Σ[i] .+= (k-1)/k .* cov(points[idxs[1:k]])
+                    Σ[i] .+= (nb_points_cloud-1)/nb_points_cloud .* cov(points[colors .==i])
+
+                    f_Σ!(Σ[i])
+
+                    # Probleme si k=1 a cause de la covariance egale a NA car division par 0...
 
                 else
 
-                    if(nb_points_cloud==1)
+                    if nb_points_cloud==1
 
-                        centers[i] = points[color .== i]
+                        centers[i] = points[findfirst(colors .== i)]
+
                         nearest_neighbors!( dists, idxs, k, points, centers[i], Σ_old[i])
+
                         μ[i] .= mean(view(points, idxs[1:k]))
-                        Σ[i] .= ((μ[i] .- centers[i])'(μ[i] .- centers[i])
-                                     + ((k-1)/k) .* cov(points[idxs[1:k]])) #+0 (car un seul element dans C)
-                        Σ[i] .= f_Σ(Σ[i])
+
+                        Σ[i] .= (μ[i] .- centers[i]) * (μ[i] .- centers[i])'
+                        Σ[i] .+= (k-1)/k .* cov(points[idxs[1:k]]) 
+
+                        f_Σ!(Σ[i])
 
                     else
 
@@ -160,37 +168,32 @@ function ll_minimizer_multidim_trimmed_lem(rng, points, k, n_centers, signal, it
 
         if cost < cost_opt
             cost_opt = cost
-            centers_opt .= centers
-            Σ_opt .= Σ
-            colors_opt .= colors
-            kept_centers_opt .= kept_centers
+            for i in 1:n_centers
+                centers_opt[i] .= centers[i]
+                Σ_opt[i] .= Σ[i]
+                colors_opt[i] = colors[i]
+                kept_centers_opt[i] = kept_centers[i]
+            end
         end
 
-    end # END FOR
+    end
 
     # Return centers and colors for non-empty clusters
-    nb_kept_centers = sum(kept_centers_opt)
-    centers = zeros(nb_kept_centers, dimension)
-    Σ = []
-    colors_old = zeros(Int, n_points)
-    colors = zeros(Int, n_points)
-    index_center = 1
+    centers = Vector{Float64}[]
+    Σ = Matrix{Float64}[]
 
     for i in 1:n_centers
 
-        if sum(colors_opt .== i) != 0
+        if sum(colors_opt .== i) > 0
 
-            centers[index_center] .= centers_opt[i]
-
-            Σ[index_center] .= Σ_opt[i]
-            colors_old[colors_opt .== i] .= index_center
-            index_center += 1
+            push!(centers, centers_opt[i])
+            push!(Σ, Σ_opt[i])
 
         end
     end
 
-    colorize!(colors, μ, weights, k, sig, centers, Σ, points)
+    colors, μ, weights = colorize(points, k, signal, centers, Σ)
 
-    return centers, μ, weights, colors, Σ, cost
+    return centers, μ, weights, colors, Σ, cost_opt
 
 end

@@ -2,16 +2,27 @@
 
 rng = MersenneTwister(1234)
 
-# Soit au total N+Nnoise points
-sample = InfinitySymbol(rng, 500, 50, 0.05, 3, -7, 7)
+signal = 500
+noise = 50
+σ = 0.05
+dimension = 3
+noise_min = -7
+noise_max = 7
+
+points = infinity_symbol(rng, signal, noise, σ, dimension, noise_min, noise_max)
 
 k = 20    # Nombre de plus proches voisins
 c = 10    # Nombre de centres ou d'ellipsoides
-sig = 500 # Nombre de points que l'on considère comme du signal (les autres auront une étiquette 0 et seront considérés comme des données aberrantes)
 
-f_Sigma_det1(Sigma) = Sigma/(det(Sigma))^(1/ncol(P))
+function f_Σ_det1(Σ) 
 
-ll2 = ll_minimizer_multidim_trimmed_lem(rng, P,k,c,sig,iter_max = 10,nstart = 1,f_Sigma_det1)
+    Σ .= Σ/(det(Σ))^(1/dimension)
+
+end
+
+iter_max, nstart = 10, 1
+
+centers, μ, weights, colors, Σ, cost = ll_minimizer_multidim_trimmed_lem(rng, points, k, c, signal, iter_max, nstart, f_Σ_det1)
 
 @test true
 

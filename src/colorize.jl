@@ -2,7 +2,7 @@ import Statistics: mean
 
 """
 
-    colorize!(color, means, weigths, k, signal, centers, Σ, points)
+    colorize(points, k, signal, centers, Σ)
 
 Fonction auxiliaire qui, étant donnés k centres, calcule les "nouvelles 
 distances tordues" de tous les points de P, à tous les centres
@@ -21,23 +21,26 @@ en ajoutant "inverted = true".
 
 
 """
-function colorize!(colors, means, weights, k, signal, centers, Σ, points)
+function colorize(points, k, signal, centers, Σ)
     
     n_points = length(points)
-
     n_centers = length(centers)
+
+    μ = deepcopy(centers)
+    colors = zeros(Int, n_points)
+    weights = zeros(n_centers)
 
     dists = zeros(Float64, n_points)
     idxs = zeros(Int, n_points)
 
-    # Step 1 : Update means and weights
+    # Step 1 : Update μ and weights
     for i in 1:n_centers
 
         nearest_neighbors!( dists, idxs, k, points, centers[i], Σ[i])
 
-        means[i] .= mean(view(points, idxs[1:k]))
+        μ[i] .= mean(view(points, idxs[1:k]))
 
-        weights[i] = mean([sqmahalanobis(points[j], means[i], Σ[i]) for j in idxs[1:k]]) + log(det(Σ[i]))
+        weights[i] = mean([sqmahalanobis(points[j], μ[i], Σ[i]) for j in idxs[1:k]]) + log(det(Σ[i]))
 
     end
 
@@ -47,7 +50,7 @@ function colorize!(colors, means, weights, k, signal, centers, Σ, points)
         cost = Inf
         best_index = 1
         for i in 1:n_centers
-            newcost = sqmahalanobis(points[j], means[i], Σ[i]) + weights[i]
+            newcost = sqmahalanobis(points[j], μ[i], Σ[i]) + weights[i]
             if newcost <= cost
                 cost = newcost
                 best_index = i
@@ -64,6 +67,8 @@ function colorize!(colors, means, weights, k, signal, centers, Σ, points)
             colors[i] = 0
         end
     end
+
+    return colors, μ, weights
     
 end
 

@@ -1,30 +1,21 @@
-
-
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+# -*- coding: utf-8 -*-
 # Fonction auxiliaires :
 
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Génération des données sur le symbole infini avec bruit
 
+set.seed(0)
 simule_noise<- function(N,dim,m,M){
   return(matrix((-m+M)*runif(dim*N)+m,N,dim))
 }
 
-long = (3/2*pi+2)*(sqrt(2)+sqrt(9/8))
-seuil = c(0,0,0,0,0)
-seuil[1] = 3/2*pi*sqrt(2)/long
-seuil[2] = seuil[1] + 3/2*pi*sqrt(9/8)/long
-seuil[3] = seuil[2] + sqrt(2)/long
-seuil[4] = seuil[3] + sqrt(2)/long
-seuil[5] = seuil[4] + sqrt(9/8)/long
-
 generate_infinity_symbol <- function(N,sigma,dim){
+  long = (3/2*pi+2)*(sqrt(2)+sqrt(9/8))
+  seuil = c(0,0,0,0,0)
+  seuil[1] = 3/2*pi*sqrt(2)/long
+  seuil[2] = seuil[1] + 3/2*pi*sqrt(9/8)/long
+  seuil[3] = seuil[2] + sqrt(2)/long
+  seuil[4] = seuil[3] + sqrt(2)/long
+  seuil[5] = seuil[4] + sqrt(9/8)/long
   P = matrix(sigma*rnorm(N*dim),N,dim)
   vectU = runif(N)
   vectV = runif(N)
@@ -73,18 +64,15 @@ generate_infinity_symbol <- function(N,sigma,dim){
 generate_infinity_symbol_noise <- function(N,Nnoise,sigma,dim){
   P1 = generate_infinity_symbol(N,sigma,dim)
   P2 = simule_noise(Nnoise,dim,-7,7)
-  return(list(points=rbind(P1,P2),color=cbind(rep(1,nrow(P1)),rep(0,nrow(P2)))))
+  return(list(points=rbind(P1,P2),color=rbind(rep(1,nrow(P1)),rep(0,nrow(P2)))))
 }
 
-
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Fonction auxiliaire qui, étant donnés k centres, calcule les "nouvelles distances tordues" de tous les points de P, à tous les centres
 # on colorie de la couleur du centre le plus proche.
 # La "distance" à un centre est le carré de la norme de Mahalanobis à la moyenne locale "mean" autour du centre + un poids qui dépend d'une variance locale autour du centre auquel on ajoute le log(det(Sigma))
 
 # On utilise souvent la fonction mahalanobis.
-# mahalanobis(P,c,Sigma) calcule le carré de la norme de Mahalanobis (p-c)^TSigma^{-1}(p-c), pour tout point p, ligne de P.
+# mahalanobis(P,c,Sigma) calcule le carré de la norme de Mahalanobis $(p-c)^T\Sigma^{-1}(p-c)$, pour tout point p, ligne de P.
 # C'est bien le carré ; par ailleurs la fonction inverse la matrice Sigma ; on peut décider de lui passer l'inverse de la matrice Sigma, en ajoutant "inverted = TRUE".
 
 
@@ -130,7 +118,7 @@ colorize <- function(P,k,sig,centers,Sigma){
 # Algorithme principal -
 
 
-LL_minimizer_multidim_trimmed_lem <- function(P,k,c,sig,iter_max = 10,nstart = 1,f_Sigma){
+kplm <- function(P,k,c,sig,iter_max = 10,nstart = 1,f_Sigma){
   # Initialisation
   N = nrow(P)
   d = ncol(P)
@@ -275,17 +263,9 @@ LL_minimizer_multidim_trimmed_lem <- function(P,k,c,sig,iter_max = 10,nstart = 1
   return(list(centers =  centers,means = recolor$means,weights = recolor$weights,color_old = color_old,color= recolor$color,Sigma = Sigma, cost = opt$cost))
 }
 
-
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 # Fonction main :
 
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-sample = generate_infinity_symbol_noise(N = 500,Nnoise = 50,sigma = 0.05,dim = 3)
+sample = generate_infinity_symbol_noise(N = 500, Nnoise = 50, sigma = 0.05, dim = 3)
 # Soit au total N+Nnoise points
 
 P = sample$points
@@ -299,7 +279,7 @@ sig = 500 # Nombre de points que l'on considère comme du signal (les autres aur
 # MAIN 1 : Simple version -- Aucune contrainte sur les matrices de covariance.
 
 f_Sigma <- function(Sigma){return(Sigma)}
-LL = LL_minimizer_multidim_trimmed_lem(P,k,c,sig,iter_max = 10,nstart = 1,f_Sigma)
+LL = kplm(P,k,c,sig,iter_max = 10,nstart = 1,f_Sigma)
 plot(P,col = LL$color)
 
 

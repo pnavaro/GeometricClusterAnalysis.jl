@@ -9,10 +9,10 @@ using KPLMCenters
 
 # Traductions de quelques fonctions R en Julia pour plus de lisibilité
 
-nrow(M :: AbstractArray) = size(M)[1]
-ncol(M :: AbstractArray) = size(M)[2]
-rbind( a, b ) = vcat( a, b)
-cbind( a, b ) = hcat( a, b)
+nrow(M::AbstractArray) = size(M)[1]
+ncol(M::AbstractArray) = size(M)[2]
+rbind(a, b) = vcat(a, b)
+cbind(a, b) = hcat(a, b)
 
 R"""
 P1 <- matrix(0,10,3)
@@ -24,7 +24,7 @@ P2 = @rget P2
 
 @test rbind(P1, P2) ≈ rcopy(R"rbind(P1, P2)")
 
-colMeans(x) = vec(mean(x, dims=1))
+colMeans(x) = vec(mean(x, dims = 1))
 
 # Quelques examples de l'utilisation du calcul de la distance de Mahalanobis 
 # avec le package [Distances.jl](https://github.com/JuliaStats/Distances.jl)

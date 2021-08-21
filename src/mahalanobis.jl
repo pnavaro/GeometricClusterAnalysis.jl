@@ -16,14 +16,18 @@ D^2 = (x - \\mu)' \\Sigma^{-1} (x - \\mu)
 - inverted : If true, Σ is supposed to contain the inverse of the covariance matrix.
 
 """
-function mahalanobis( x :: Array{Float64,2}, μ :: Vector{Float64}, Σ :: Array{Float64,2}; inverted = false)
-    
+function mahalanobis(
+    x::Array{Float64,2},
+    μ::Vector{Float64},
+    Σ::Array{Float64,2};
+    inverted = false,
+)
+
     if inverted
         [sqmahalanobis(r, μ, Σ) for r in eachrow(x)]
     else
         invΣ = inv(Σ)
         [sqmahalanobis(r, μ, invΣ) for r in eachrow(x)]
     end
-        
-end
 
+end

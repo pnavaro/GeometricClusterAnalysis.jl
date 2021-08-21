@@ -22,7 +22,7 @@ en ajoutant "inverted = true".
 
 """
 function colorize(points, k, signal, centers, Σ)
-    
+
     n_points = length(points)
     n_centers = length(centers)
 
@@ -34,22 +34,23 @@ function colorize(points, k, signal, centers, Σ)
     idxs = zeros(Int, n_points)
 
     # Step 1 : Update μ and weights
-    for i in 1:n_centers
+    for i = 1:n_centers
 
-        nearest_neighbors!( dists, idxs, k, points, centers[i], Σ[i])
+        nearest_neighbors!(dists, idxs, k, points, centers[i], Σ[i])
 
         μ[i] .= mean(view(points, idxs[1:k]))
 
-        weights[i] = mean([sqmahalanobis(points[j], μ[i], Σ[i]) for j in idxs[1:k]]) + log(det(Σ[i]))
+        weights[i] =
+            mean([sqmahalanobis(points[j], μ[i], Σ[i]) for j in idxs[1:k]]) + log(det(Σ[i]))
 
     end
 
     # Step 2 : Update colors
 
-    for j in 1:n_points
+    for j = 1:n_points
         cost = Inf
         best_index = 1
-        for i in 1:n_centers
+        for i = 1:n_centers
             newcost = sqmahalanobis(points[j], μ[i], Σ[i]) + weights[i]
             if newcost <= cost
                 cost = newcost
@@ -62,13 +63,12 @@ function colorize(points, k, signal, centers, Σ)
 
     # Step 3 : Trimming and Update cost
     sortperm!(idxs, dists, rev = true)
-    if signal < n_points 
+    if signal < n_points
         for i in idxs[1:(n_points-signal)]
             colors[i] = 0
         end
     end
 
     return colors, μ, weights
-    
-end
 
+end

@@ -1,5 +1,4 @@
 .Rproj.user/
 Manifest.toml
 *.swp
-Manifest.toml
-.ipynb_checkpoints/kPLM_pour_Pierre_Navaro-checkpoint.R
+.ipynb_checkpoints

@@ -3,13 +3,15 @@ kplm <- function(P,k,c,sig,iter_max = 10,nstart = 1,f_Sigma){
   # Initialisation
   N = nrow(P)
   d = ncol(P)
-  if(k>N || k<=1){return("The number of nearest neighbours, k, should be in {2,...,N}.")}
-  if(c>N || c<=0){return("The number of clusters, c, should be in {1,2,...,N}.")}
+  if(k>N){return("The number of nearest neighbours, k, should be in {2,...,N}.")}
+  if(c>N){return("The number of clusters, c, should be in {1,2,...,N}.")}
   opt = list(    cost = Inf,
                  centers = matrix(data=0,nrow=c,ncol=d),
                  Sigma = rep(list(diag(1,d)),c),
                  color = rep(0,N),
-                 kept_centers = rep(TRUE,c)
+                 kept_centers = rep(TRUE,c),
+                 means = matrix(data=0,nrow=c,ncol=d), 
+                 weights = rep(0,c)
   )
 
   # BEGIN FOR
@@ -17,7 +19,8 @@ kplm <- function(P,k,c,sig,iter_max = 10,nstart = 1,f_Sigma){
     old = list(  centers = matrix(data=Inf,nrow=c,ncol=d),
                  Sigma = rep(list(diag(1,d)),c)
     )
-    first_centers_ind = sample(1:N,c,replace = FALSE)
+    first_centers_ind = 1:c #sample(1:N,c,replace = FALSE)
+
     new = list(  cost = Inf,
                  centers = matrix(P[first_centers_ind,],c,d),
                  Sigma = rep(list(diag(1,d)),c),
@@ -36,15 +39,17 @@ kplm <- function(P,k,c,sig,iter_max = 10,nstart = 1,f_Sigma){
       old$centers = new$centers
       old$Sigma = new$Sigma
 
+
       # Step 1 : Update means ans weights
 
       for(i in 1:c){
         nn = sort(mahalanobis(P,old$centers[i,],old$Sigma[[i]]),index.return=TRUE)
-        nn$x = nn$x[1:k]
         nn$ix = nn$ix[1:k]
         new$means[i,] = colMeans(matrix(P[nn$ix,],k,d))
         new$weights[i] = mean(mahalanobis(P[nn$ix,],new$means[i,],old$Sigma[[i]])) + log(det(old$Sigma[[i]]))
       }
+
+      
 
       # Step 2 : Update color
 
@@ -64,6 +69,8 @@ kplm <- function(P,k,c,sig,iter_max = 10,nstart = 1,f_Sigma){
         new$color[j] = best_ind
         distance_min[j] = cost
       }
+      new$cost = cost
+
 
       # Step 3 : Trimming and Update cost
 
@@ -74,32 +81,27 @@ kplm <- function(P,k,c,sig,iter_max = 10,nstart = 1,f_Sigma){
       ds = distance_sort$x[(N-sig+1):N]
       new$cost = mean(ds)
 
+
       # Step 4 : Update centers
 
       for(i in 1:c){
-        nb_points_cloud = sum(new$color==i)
-        if(nb_points_cloud>1){
-          new$centers[i,] = colMeans(matrix(P[new$color==i,],nb_points_cloud,d))
-          nn = sort(mahalanobis(P,new$centers[i,],old$Sigma[[i]]),index.return=TRUE)
-          nn$x = nn$x[1:k]
+        cloud = which(new$color==i)
+        nb_points_cloud = length(cloud)
+        if(nb_points_cloud>0){
+          new$centers[i,] = colMeans(matrix(P[cloud,],nb_points_cloud,d))
+          dists = mahalanobis(P,new$centers[i,],old$Sigma[[i]])
+          nn = sort(dists,index.return=TRUE)
           nn$ix = nn$ix[1:k]
           new$means[i,] = colMeans(matrix(P[nn$ix,],k,d))
-          new$Sigma[[i]]= ((new$means[i,]-new$centers[i,]) %*% t(new$means[i,]-new$centers[i,])) + ((k-1)/k)*cov(P[nn$ix,]) + ((nb_points_cloud-1)/nb_points_cloud)*cov(P[new$color==i,])
+          new$Sigma[[i]]= ((new$means[i,]-new$centers[i,]) %*% t(new$means[i,]-new$centers[i,])) + ((k-1)/k)*cov(P[nn$ix,]) + ((nb_points_cloud-1)/nb_points_cloud)*cov(P[cloud,])
           new$Sigma[[i]] = f_Sigma(new$Sigma[[i]])
-        }# Probleme si k=1 a cause de la covariance egale a NA car division par 0...
-        else{
-          if(nb_points_cloud==1){
-            new$centers[i,] = matrix(P[new$color==i,],1,d)
-            nn = sort(mahalanobis(P,new$centers[i,],old$Sigma[[i]]),index.return=TRUE)
-            nn$x = nn$x[1:k]
-            nn$ix = nn$ix[1:k]
-            new$means[i,] = colMeans(matrix(P[nn$ix,],k,d))
-            new$Sigma[[i]] = ((new$means[i,]-new$centers[i,]) %*% t(new$means[i,]-new$centers[i,])) + ((k-1)/k)*cov(P[nn$ix,]) #+0 (car un seul element dans C)
-            new$Sigma[[i]] = f_Sigma(new$Sigma[[i]])
           }
-          else{new$kept_centers[i]=FALSE}
+        else{
+         new$kept_centers[i]=FALSE
         }
       }
+
+
 
       # Step 5 : Condition for loop
 
@@ -120,7 +122,11 @@ kplm <- function(P,k,c,sig,iter_max = 10,nstart = 1,f_Sigma){
       opt$Sigma = new$Sigma
       opt$color = new$color
       opt$kept_centers = new$kept_centers
+      opt$weights = new$weights
+      opt$means = new$means
     }
+
+
   }
   # END FOR
 
@@ -129,10 +135,9 @@ kplm <- function(P,k,c,sig,iter_max = 10,nstart = 1,f_Sigma){
   centers = matrix(data = 0, nrow = nb_kept_centers, ncol = d)
   Sigma = list()
   color_old = rep(0,N)
-  color = rep(0,N)
   index_center = 1
   for(i in 1:c){
-    if (sum(opt$color==i)!=0){
+    if (opt$kept_centers[i]){
       centers[index_center,] = opt$centers[i,]
       Sigma[[index_center]] = opt$Sigma[[i]]
       color_old[opt$color==i] = index_center

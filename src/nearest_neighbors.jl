@@ -12,7 +12,7 @@ Returns nearest neighbors using the squared Mahalanobis distance
 - inverted : If true, Σ is supposed to contain the inverse of the covariance matrix.
 
 """
-function nearest_neighbors!(dists, idxs, k, points, μ, Σ; inverted = false)
+function nearest_neighbors!(dists :: Vector{Float64}, idxs :: Vector{Int64}, k :: Int, points :: Vector{Vector{Float64}}, μ :: Vector{Float64}, Σ :: Matrix{Float64}; inverted = false)
 
     if inverted
         for (i, x) in enumerate(points)
@@ -25,6 +25,6 @@ function nearest_neighbors!(dists, idxs, k, points, μ, Σ; inverted = false)
         end
     end
 
-    sortperm!(idxs, dists)
+    idxs .= sortperm(dists)
 
 end

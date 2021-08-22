@@ -18,38 +18,36 @@ k = 3
 c = 2 
 signal = N 
 
-sample = generate_infinity_symbol_noise(N, Nnoise, sigma, d)
-points = sample$points
+sample <- generate_infinity_symbol_noise(N, Nnoise, sigma, d)
+points <- sample$points
 
-centers <- matrix(data=0,nrow=c,ncol=d)
+centers_indices <- sample(1:N, c, replace = FALSE)
+centers <- matrix(points[centers_indices,],c,d)
 Sigma <- rep(list(diag(1,d)),c)
 
 results <- colorize(points, k, signal, centers, Sigma )
 """
     points_array = @rget points
-    @show points_array, size(points_array)
 
 	points = collect.(eachrow(points_array))
 
-    @show n_points = trunc(Int, rcopy(R" N + Nnoise"))
-    @show k = @rget k :: Int
-    @show n_centers = @rget c  :: Int
-    @show signal = @rget signal :: Int
-    @show dimension = @rget d :: Int
+    n_points = trunc(Int, rcopy(R" N + Nnoise"))
+    k = @rget k :: Int
+    n_centers = @rget c  :: Int
+    signal = @rget signal :: Int
+    dimension = @rget d :: Int
 
-    centers = [zeros(dimension) for i = 1:n_centers]
+    first_centers = @rget centers_indices
+
+    centers = [points[i] for i in first_centers]
     Σ = [diagm(ones(dimension)) for i = 1:n_centers]
 
     colors, μ, weights = colorize(points, k, signal, centers, Σ)
 
     results = @rget results
 
-    @show results
-
     @test vcat(μ'...) ≈ results[:means]
     @test weights ≈ results[:weights]
     @test colors ≈ results[:color]
-
-    @test true
 
 end

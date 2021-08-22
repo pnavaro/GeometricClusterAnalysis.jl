@@ -1,28 +1,58 @@
-@testset " Simple version -- Aucune contrainte sur les matrices de covariance." begin
+using KPLMCenters
+using Random
+using RCall
+using Test
+
+@testset " No constraint " begin
 
     rng = MersenneTwister(1234)
 
-    signal = 500 # Nombre de points que l'on considère comme du signal 
-    noise = 50
+    signal = 100 
+    noise = 10
     σ = 0.05
     dimension = 3
     noise_min = -7
     noise_max = 7
 
     # Soit au total N+Nnoise points
-    points = infinity_symbol(rng, 500, 50, 0.05, 3, -7, 7)
+    points = infinity_symbol(rng, signal, noise, σ, dimension, noise_min, noise_max)
 
-    k = 20    # Nombre de plus proches voisins
-    c = 10    # Nombre de centres ou d'ellipsoides
-
-    function f_Σ(Σ) end
-
+    k = 10   # Nombre de plus proches voisins
+    c = 6    # Nombre de centres ou d'ellipsoides
     iter_max = 10
     nstart = 1
+
+    P = vcat(points'...)
+
+    @rput P
+    @rput k
+    @rput c
+    @rput signal
+    @rput iter_max
+    @rput nstart
+
+    R"""
+    source("colorize.r")
+    source("kplm.r")
+    f_Sigma <- function(Sigma){return(Sigma)}
+    LL <- kplm(P, k, c, signal, iter_max, nstart, f_Sigma)
+    """
+
+    results = @rget LL
+
+    function f_Σ(Σ) end # aucune contrainte sur la matrice de covariance
 
     centers, μ, weights, colors, Σ, cost =
         kplm(rng, points, k, c, signal, iter_max, nstart, f_Σ)
 
-    @test true
+    for (i,σ) in enumerate(Σ)
+        @test σ ≈ results[:Sigma][i]
+    end
+
+    @test vcat(centers'...) ≈ results[:centers]
+    @test vcat(μ'...) ≈ results[:means]
+    @test weights ≈ results[:weights]
+    @test colors ≈ trunc.(Int, results[:color])
+    @test cost ≈ results[:cost]
 
 end

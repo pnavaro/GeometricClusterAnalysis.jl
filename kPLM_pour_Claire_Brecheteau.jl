@@ -1,4 +1,18 @@
 # -*- coding: utf-8 -*-
+# ---
+# jupyter:
+#   jupytext:
+#     text_representation:
+#       extension: .jl
+#       format_name: light
+#       format_version: '1.5'
+#       jupytext_version: 1.11.4
+#   kernelspec:
+#     display_name: Julia 1.6.1
+#     language: julia
+#     name: julia-1.6
+# ---
+
 using Clustering
 using LinearAlgebra
 using Plots
@@ -19,8 +33,8 @@ colors = vcat(ones(Int, 500), zeros(Int, 50))
 s = colors .> 0
 scatter(getindex.(points[s],1), getindex.(points[s],2), marker_z=colors,
         color=:lightrainbow, legend=false)
-xlims!(-5,5)
-ylims!(-5,5)
+xlims!(-7,7)
+ylims!(-7,7)
 
 # +
 using Clustering
@@ -32,8 +46,8 @@ s = colors .> 0
 
 scatter(points_array[1,s], points_array[2,s], marker_z=result.assignments,
         color=:lightrainbow, legend=false)
-xlims!(-5,5)
-ylims!(-5,5)
+xlims!(-7,7)
+ylims!(-7,7)
 # -
 
 # MAIN 1 : Simple version -- Aucune contrainte sur les matrices de covariance.
@@ -44,13 +58,14 @@ c = 10
 signal = 500
 iter_max = 10
 nstart = 1
+function f_Σ(Σ) end
 centers, μ, weights, colors, Σ, cost = kplm( rng, points, k, c, 
     signal, iter_max, nstart, f_Σ)
 
 s = colors .> 0
 scatter(getindex.(points[s],1), getindex.(points[s],2), marker_z=colors, color=:lightrainbow )
-xlims!(-5,5)
-ylims!(-5,5)
+xlims!(-7,7)
+ylims!(-7,7)
 # -
 
 # MAIN 2 : Constraint det = 1 -- les matrices sont contraintes à avoir leur déterminant égal à 1.
@@ -66,8 +81,8 @@ centers, μ, weights, colors, Σ, cost = kplm( rng, points, k, c, signal, iter_m
 
 s = colors .> 0
 scatter(getindex.(points[s],1), getindex.(points[s],2), marker_z=colors, color=:lightrainbow )
-xlims!(-5,5)
-ylims!(-5,5)
+xlims!(-7,7)
+ylims!(-7,7)
 # -
 
 # MAIN 3 : Constraint dim d -- Les matrices sont contraintes à avoir d-d_prim 
@@ -110,8 +125,8 @@ centers, μ, weights, colors, Σ, cost = kplm( rng, points, k, c,
 
 s = colors .> 0
 scatter(getindex.(points[s],1), getindex.(points[s],2), marker_z=colors, color=:lightrainbow )
-xlims!(-5,5)
-ylims!(-5,5)
+xlims!(-7,7)
+ylims!(-7,7)
 # -
 
 

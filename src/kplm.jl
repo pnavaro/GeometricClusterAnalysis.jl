@@ -33,9 +33,9 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
         centers_old = [fill(Inf, dimension) for i = 1:n_centers]
         Σ_old = [diagm(ones(dimension)) for i = 1:n_centers]
-        first_centers = shuffle(rng, 1:n_points)[1:n_centers]
+        first_centers = 1:n_centers
 
-        centers = points[first_centers]
+        centers = deepcopy(points[first_centers])
         Σ = [diagm(ones(dimension)) for i = 1:n_centers]
         colors = zeros(Int, n_points)
         kept_centers = trues(n_centers)
@@ -51,32 +51,36 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
             nstep += 1
 
-            for i = 1:n_centers
+            for i in 1:n_centers
                 centers_old[i] .= centers[i]
                 Σ_old[i] .= Σ[i]
             end
+ 
+            n_centers = length(centers)
 
             # Step 1 : Update means and weights
 
             for i = 1:n_centers
 
-                nearest_neighbors!(dists, idxs, k, points, centers_old[i], Σ_old[i])
+                nearest_neighbors!(dists, idxs, k, points, centers[i], Σ[i])
 
                 μ[i] .= mean(view(points, idxs[1:k]))
 
                 weights[i] =
-                    mean([sqmahalanobis(points[j], μ[i], Σ_old[i]) for j in idxs[1:k]]) + log(det(Σ_old[i]))
+                    mean([sqmahalanobis(points[j], μ[i], inv(Σ[i])) for j in idxs[1:k]]) + log(det(Σ[i]))
 
             end
 
             # Step 2 : Update color
+
+            fill!(dists, 0.0)
 
             for j = 1:n_points
                 cost = Inf
                 best_ind = 1
                 for i = 1:n_centers
                     if kept_centers[i]
-                        newcost = sqmahalanobis(points[j], μ[i], Σ_old[i]) + weights[i]
+                        newcost = sqmahalanobis(points[j], μ[i], inv(Σ[i])) + weights[i]
                         if newcost <= cost
                             cost = newcost
                             best_ind = i
@@ -99,49 +103,31 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
             cost = mean(view(dists, idxs[(n_points-signal+1):n_points]))
 
+
             # Step 4 : Update centers
 
             for i = 1:n_centers
 
-                nb_points_cloud = sum(colors .== i)
+                cloud = findall(colors .== i)
+                cloud_size = length(cloud)
 
-                if nb_points_cloud > 1
+                if cloud_size > 0
 
-                    centers[i] .= mean(points[colors.==i])
+                    centers[i] .= mean(points[cloud])
 
-                    nearest_neighbors!(dists, idxs, k, points, centers[i], Σ_old[i])
+                    nearest_neighbors!(dists, idxs, k, points, centers[i], Σ[i])
 
                     μ[i] .= mean(view(points, idxs[1:k]))
 
                     Σ[i] .= (μ[i] .- centers[i]) * (μ[i] .- centers[i])'
                     Σ[i] .+= (k - 1) / k .* cov(points[idxs[1:k]])
-                    Σ[i] .+=
-                        (nb_points_cloud - 1) / nb_points_cloud .* cov(points[colors.==i])
+                    Σ[i] .+= (cloud_size - 1) / cloud_size .* cov(points[cloud])
 
                     f_Σ!(Σ[i])
 
-                    # Probleme si k=1 a cause de la covariance egale a NA car division par 0...
-
                 else
 
-                    if nb_points_cloud == 1
-
-                        centers[i] = points[findfirst(colors .== i)]
-
-                        nearest_neighbors!(dists, idxs, k, points, centers[i], Σ_old[i])
-
-                        μ[i] .= mean(view(points, idxs[1:k]))
-
-                        Σ[i] .= (μ[i] .- centers[i]) * (μ[i] .- centers[i])'
-                        Σ[i] .+= (k - 1) / k .* cov(points[idxs[1:k]])
-
-                        f_Σ!(Σ[i])
-
-                    else
-
-                        kept_centers[i] = false
-
-                    end
+                    kept_centers[i] = false
 
                 end
 
@@ -149,13 +135,13 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
             # Step 5 : Condition for loop
 
-            stop_Σ = true # reste true tant que old_sigma et sigma sont egaux
+            stop_Σ = true # reste true tant que Σ_old et Σ sont egaux
 
             for i = 1:n_centers
 
                 if kept_centers[i]
 
-                    stop_Σ *= all(Σ[i] .== Σ_old[i])
+                    stop_Σ = stop_Σ && all(Σ[i] .== Σ_old[i])
 
                 end
 
@@ -163,7 +149,7 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
             continu_Σ = !stop_Σ # Faux si tous les Σ sont egaux aux Σ_old
 
-        end # END WHILE
+        end 
 
         if cost < cost_opt
             cost_opt = cost
@@ -183,7 +169,7 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
     for i = 1:n_centers
 
-        if sum(colors_opt .== i) > 0
+        if kept_centers_opt[i]
 
             push!(centers, centers_opt[i])
             push!(Σ, Σ_opt[i])

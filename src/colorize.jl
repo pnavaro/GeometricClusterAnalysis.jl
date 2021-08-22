@@ -41,7 +41,7 @@ function colorize(points, k, signal, centers, Σ)
         μ[i] .= mean(view(points, idxs[1:k]))
 
         weights[i] =
-            mean([sqmahalanobis(points[j], μ[i], Σ[i]) for j in idxs[1:k]]) + log(det(Σ[i]))
+            mean([sqmahalanobis(points[j], μ[i], inv(Σ[i])) for j in idxs[1:k]]) + log(det(Σ[i]))
 
     end
 
@@ -51,7 +51,7 @@ function colorize(points, k, signal, centers, Σ)
         cost = Inf
         best_index = 1
         for i = 1:n_centers
-            newcost = sqmahalanobis(points[j], μ[i], Σ[i]) + weights[i]
+            newcost = sqmahalanobis(points[j], μ[i], inv(Σ[i])) + weights[i]
             if newcost <= cost
                 cost = newcost
                 best_index = i

@@ -1,5 +1,6 @@
 using LinearAlgebra
 import Statistics: cov
+import Base.Threads: @sync, @spawn, nthreads, threadid
 
 export kplm
 
@@ -26,8 +27,10 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
     # Some arrays for nearest neighbors computation
 
-    dists = zeros(Float64, n_points)
-    idxs = zeros(Int, n_points)
+    ntid = nthreads()
+    chunks = Iterators.partition(1:n_centers, n_centers÷ntid)
+    dists = [zeros(Float64, n_points) for _ in 1:ntid]
+    idxs = [zeros(Int, n_points) for _ in 1:ntid]
 
     for n_times = 1:nstart
 
@@ -60,75 +63,83 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
             # Step 1 : Update means and weights
 
-            for i = 1:n_centers
+            @sync for chunk in chunks
+                @spawn begin 
+                    tid = threadid()
+                    for i in chunk
+                        nearest_neighbors!(dists[tid], idxs[tid], k, points, centers[i], Σ[i])
 
-                nearest_neighbors!(dists, idxs, k, points, centers[i], Σ[i])
+                        μ[i] .= mean(view(points, idxs[tid][1:k]))
 
-                μ[i] .= mean(view(points, idxs[1:k]))
+                        weights[i] =
+                            mean(sqmahalanobis(points[j], μ[i], inv(Σ[i])) for j in idxs[tid][1:k]) + log(det(Σ[i]))
 
-                weights[i] =
-                    mean([sqmahalanobis(points[j], μ[i], inv(Σ[i])) for j in idxs[1:k]]) + log(det(Σ[i]))
-
+                    end
+                end
             end
 
             # Step 2 : Update color
 
-            fill!(dists, 0.0)
+            fill!(dists[1], 0.0)
 
             for j = 1:n_points
                 cost = Inf
                 best_ind = 1
-                for i = 1:n_centers
-                    if kept_centers[i]
-                        newcost = sqmahalanobis(points[j], μ[i], inv(Σ[i])) + weights[i]
-                        if newcost <= cost
-                            cost = newcost
-                            best_ind = i
-                        end
+                for i in findall(kept_centers)
+                    newcost = sqmahalanobis(points[j], μ[i], inv(Σ[i])) + weights[i]
+                    if newcost <= cost
+                        cost = newcost
+                        best_ind = i
                     end
                 end
                 colors[j] = best_ind
-                dists[j] = cost
+                dists[1][j] = cost
             end
 
             # Step 3 : Trimming and Update cost
 
-            sortperm!(idxs, dists, rev = true)
+            sortperm!(idxs[1], dists[1], rev = true)
 
             if signal < n_points
-                for i in idxs[1:(n_points-signal)]
+                for i in idxs[1][1:(n_points-signal)]
                     colors[i] = 0
                 end
             end
 
-            cost = mean(view(dists, idxs[(n_points-signal+1):n_points]))
+            cost = mean(view(dists[1], idxs[1][(n_points-signal+1):n_points]))
 
 
             # Step 4 : Update centers
 
-            for i = 1:n_centers
+			@sync for chunk in chunks
+               	@spawn begin 
 
-                cloud = findall(colors .== i)
-                cloud_size = length(cloud)
+                    tid = threadid()
+                    for i in chunk
 
-                if cloud_size > 0
+                        cloud = findall(colors .== i)
+                        cloud_size = length(cloud)
 
-                    centers[i] .= mean(points[cloud])
+                        if cloud_size > 0
 
-                    nearest_neighbors!(dists, idxs, k, points, centers[i], Σ[i])
+                            centers[i] .= mean(points[cloud])
 
-                    μ[i] .= mean(view(points, idxs[1:k]))
+                            nearest_neighbors!(dists[tid], idxs[tid], k, points, centers[i], Σ[i])
 
-                    Σ[i] .= (μ[i] .- centers[i]) * (μ[i] .- centers[i])'
-                    Σ[i] .+= (k - 1) / k .* cov(points[idxs[1:k]])
-                    Σ[i] .+= (cloud_size - 1) / cloud_size .* cov(points[cloud])
+                            μ[i] .= mean(view(points, idxs[tid][1:k]))
 
-                    f_Σ!(Σ[i])
+                            Σ[i] .= (μ[i] .- centers[i]) * (μ[i] .- centers[i])'
+                            Σ[i] .+= (k - 1) / k .* cov(points[idxs[tid][1:k]])
+                            Σ[i] .+= (cloud_size - 1) / cloud_size .* cov(points[cloud])
 
-                else
+                            f_Σ!(Σ[i])
 
-                    kept_centers[i] = false
+                        else
 
+                            kept_centers[i] = false
+
+                        end
+                    end
                 end
 
             end

@@ -7,8 +7,8 @@ using Test
 
     rng = MersenneTwister(1234)
 
-    signal = 100 
-    noise = 10
+    signal = 500 
+    noise = 50
     σ = 0.05
     dimension = 3
     noise_min = -7
@@ -42,7 +42,7 @@ using Test
 
     function f_Σ(Σ) end # aucune contrainte sur la matrice de covariance
 
-    centers, μ, weights, colors, Σ, cost =
+    @time centers, μ, weights, colors, Σ, cost =
         kplm(rng, points, k, c, signal, iter_max, nstart, f_Σ)
 
     for (i,σ) in enumerate(Σ)

@@ -45,7 +45,7 @@ using Test
 
     results = @rget LL
 
-    centers, μ, weights, colors, Σ, cost =
+    @time centers, μ, weights, colors, Σ, cost =
         kplm(rng, points, k, c, signal, iter_max, nstart, f_Σ_det1)
 
     for (i,σ) in enumerate(Σ)

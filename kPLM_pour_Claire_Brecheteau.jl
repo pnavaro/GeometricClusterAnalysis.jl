@@ -6,7 +6,7 @@
 #       extension: .jl
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.11.4
+#       jupytext_version: 1.8.2
 #   kernelspec:
 #     display_name: Julia 1.6.1
 #     language: julia
@@ -30,9 +30,8 @@ rng = MersenneTwister(1234)
 
 points = infinity_symbol(rng, 500, 50, 0.05, 3, -7, 7)
 colors = vcat(ones(Int, 500), zeros(Int, 50))
-s = colors .> 0
-scatter(getindex.(points[s],1), getindex.(points[s],2), marker_z=colors,
-        color=:lightrainbow, legend=false)
+scatter(getindex.(points,1), getindex.(points,2), marker_z=colors,
+        color=:lightrainbow, legend=false, aspect_ratio=:equal)
 xlims!(-7,7)
 ylims!(-7,7)
 
@@ -45,10 +44,13 @@ result = kmeans(points_array, 10); # run K-means for the 10 clusters
 s = colors .> 0
 
 scatter(points_array[1,s], points_array[2,s], marker_z=result.assignments,
-        color=:lightrainbow, legend=false)
+        color=:lightrainbow, legend=false, aspect_ratio=:equal)
 xlims!(-7,7)
 ylims!(-7,7)
+savefig("kmeans.png")
 # -
+
+# ![](kmeans.png)
 
 # MAIN 1 : Simple version -- Aucune contrainte sur les matrices de covariance.
 
@@ -63,10 +65,14 @@ centers, μ, weights, colors, Σ, cost = kplm( rng, points, k, c,
     signal, iter_max, nstart, f_Σ)
 
 s = colors .> 0
-scatter(getindex.(points[s],1), getindex.(points[s],2), marker_z=colors, color=:lightrainbow )
+scatter(getindex.(points[s],1), getindex.(points[s],2), 
+    marker_z=colors, color=:lightrainbow, aspect_ratio=:equal )
 xlims!(-7,7)
 ylims!(-7,7)
+savefig("main1.png")
 # -
+
+# ![](main1.png)
 
 # MAIN 2 : Constraint det = 1 -- les matrices sont contraintes à avoir leur déterminant égal à 1.
 
@@ -80,10 +86,14 @@ centers, μ, weights, colors, Σ, cost = kplm( rng, points, k, c, signal, iter_m
     nstart, f_Σ_det1)
 
 s = colors .> 0
-scatter(getindex.(points[s],1), getindex.(points[s],2), marker_z=colors, color=:lightrainbow )
+scatter(getindex.(points[s],1), getindex.(points[s],2), marker_z=colors, 
+    color=:lightrainbow,  aspect_ratio=:equal )
 xlims!(-7,7)
 ylims!(-7,7)
+savefig("main2.png")
 # -
+
+# ![](main2.png)
 
 # MAIN 3 : Constraint dim d -- Les matrices sont contraintes à avoir d-d_prim 
 # valeurs propres égales (les plus petites)
@@ -91,26 +101,30 @@ ylims!(-7,7)
 # d_prim plus grandes valeurs propres sont contraintes à être supérieures à lambdamin.
 
 # +
-function aux_dim_d(Σ, s2min, s2max, lambdamin, d_prim)
+function aux_dim_d(Σ, s2min, s2max, λmin, d_prim)
 
-  eig = eigen(Σ)
-  vect_propres = eig.vectors
-  val_propres = eig.values
-  new_val_propres = eig.values
-  d = length(val_propres)
-  for i in 1:d_prim
-      new_val_propres[i] = (val_propres[i]-lambdamin)*(val_propres[i]>=lambdamin) + lambdamin
-  end
-  if d_prim<d
-    S = mean(val_propres[(d_prim+1):d])
-    s2 = (S - s2min - s2max)*(s2min<S)*(S<s2max) + (-s2max)*(S<=s2min) + (-s2min)*(S>=s2max) + s2min + s2max
-    new_val_propres[(d_prim+1):d] .= s2
-  end
+    eig = eigen(Σ)
+    v = eig.vectors
+    λ = eig.values
 
-  vect_propres * Diagonal(new_val_propres) * transpose(vect_propres)
+    new_λ = copy(λ)
+
+    d = length(λ)
+    for i = 1:d_prim
+        new_λ[i] = (λ[i] - λmin) * (λ[i] >= λmin) + λmin
+    end
+    if d_prim < d
+        S = mean(λ[1:(end-d_prim)])
+        s2 =
+            (S - s2min - s2max) * (s2min < S) * (S < s2max) +
+            (-s2max) * (S <= s2min) + (-s2min) * (S >= s2max) + s2min + s2max
+        new_λ[1:(end-d_prim)] .= s2
+    end
+
+    return v * Diagonal(new_λ) * transpose(v)
 
 end
-
+# +
 d_prim = 1
 lambdamin = 0.1
 s2min = 0.01
@@ -124,9 +138,13 @@ centers, μ, weights, colors, Σ, cost = kplm( rng, points, k, c,
     signal, iter_max, nstart, f_Σ_dim_d)
 
 s = colors .> 0
-scatter(getindex.(points[s],1), getindex.(points[s],2), marker_z=colors, color=:lightrainbow )
+scatter(getindex.(points[s],1), getindex.(points[s],2), 
+    marker_z=colors, color=:lightrainbow , aspect_ratio=:equal)
 xlims!(-7,7)
 ylims!(-7,7)
+savefig("main3.png")
 # -
+# ![](main3.png)
+
 
 

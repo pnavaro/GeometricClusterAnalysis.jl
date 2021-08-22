@@ -71,8 +71,8 @@ using Test
 
     @test aux_dim_d(Q, s2min, s2max, lambdamin, d_prim) ≈ rcopy(R"aux_dim_d(Q, s2min, s2max, lambdamin, d_prim)")
 
-    signal = 100
-    noise = 10
+    signal = 500
+    noise = 50
     σ = 0.05
     dimension = 3
     noise_min = -7
@@ -117,7 +117,7 @@ using Test
 
     results = @rget LL
 
-    centers, μ, weights, colors, Σ, cost =
+    @time centers, μ, weights, colors, Σ, cost =
         kplm(rng, points, k, c, signal, iter_max, nstart, f_Σ_dim_d)
 
     for (i,σ) in enumerate(Σ)

@@ -1,6 +1,6 @@
 using LinearAlgebra
 import Statistics: cov
-import Base.Threads: @sync, @spawn, nthreads, threadid
+import Base.Threads: @threads, @sync, @spawn, nthreads, threadid
 
 export kplm
 
@@ -31,6 +31,9 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
     chunks = Iterators.partition(1:n_centers, n_centers÷ntid)
     dists = [zeros(Float64, n_points) for _ in 1:ntid]
     idxs = [zeros(Int, n_points) for _ in 1:ntid]
+
+    dist_min = zeros(n_points)
+    idxs_min = zeros(Int, n_points)
 
     for n_times = 1:nstart
 
@@ -80,33 +83,18 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
             # Step 2 : Update color
 
-            fill!(dists[1], 0.0)
-
-            for j = 1:n_points
-                cost = Inf
-                best_ind = 1
-                for i in findall(kept_centers)
-                    newcost = sqmahalanobis(points[j], μ[i], inv(Σ[i])) + weights[i]
-                    if newcost <= cost
-                        cost = newcost
-                        best_ind = i
-                    end
-                end
-                colors[j] = best_ind
-                dists[1][j] = cost
+            @threads for j = 1:n_points
+                costs = [sqmahalanobis(points[j], μ[i], inv(Σ[i])) + weights[i] for i in findall(kept_centers)]
+                dist_min[j], colors[j] = findmin(costs)
             end
 
             # Step 3 : Trimming and Update cost
 
-            sortperm!(idxs[1], dists[1], rev = true)
+            sortperm!(idxs_min, dist_min, rev = true)
 
-            if signal < n_points
-                for i in idxs[1][1:(n_points-signal)]
-                    colors[i] = 0
-                end
-            end
+            colors[idxs_min[1:(n_points-signal)]] .= 0
 
-            cost = mean(view(dists[1], idxs[1][(n_points-signal+1):n_points]))
+            cost = mean(view(dist_min, idxs_min[(n_points-signal+1):end]))
 
 
             # Step 4 : Update centers

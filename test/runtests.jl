@@ -52,5 +52,5 @@ x = @rget x
 
 include("test_colorize.jl")
 include("main1.jl")
-include("main2.jl")
-include("main3.jl")
+#include("main2.jl")
+#include("main3.jl")

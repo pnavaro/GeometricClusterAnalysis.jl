@@ -23,7 +23,6 @@ using Test
     nstart = 1
 
     P = collect(points')
-    @show size(P)
 
     @rput P
     @rput k

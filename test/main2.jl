@@ -27,7 +27,7 @@ using Test
 
     iter_max, nstart = 10, 1
 
-    P = vcat(points'...)
+    P = collect(points')
 
     @rput P
     @rput k

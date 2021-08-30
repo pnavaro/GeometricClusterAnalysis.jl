@@ -8,8 +8,7 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
     # Initialisation
 
-    n_points = length(points)
-    dimension = length(first(points))
+    dimension, n_points =points
 
     if !(1 < k <= n_points)
         @error "The number of nearest neighbours, k, should be in {2,...,N}."
@@ -20,7 +19,7 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
     end
 
     cost_opt = Inf
-    centers_opt = [zeros(dimension) for i = 1:n_centers]
+    centers_opt = zeros(dimension,n_centers)
     Σ_opt = [diagm(ones(dimension)) for i = 1:n_centers]
     colors_opt = zeros(Int, n_points)
     kept_centers_opt = trues(n_centers)
@@ -34,6 +33,7 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
     dist_min = zeros(n_points)
     idxs_min = zeros(Int, n_points)
+    colors = zeros(Int, n_points)
 
     for n_times = 1:nstart
 
@@ -41,12 +41,12 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
         Σ_old = [diagm(ones(dimension)) for i = 1:n_centers]
         first_centers = 1:n_centers
 
-        centers = deepcopy(points[first_centers])
+        centers = [ points[:,i] for i in first_centers]
         Σ = [diagm(ones(dimension)) for i = 1:n_centers]
-        colors = zeros(Int, n_points)
         kept_centers = trues(n_centers)
         μ = [zeros(dimension) for i = 1:n_centers]
         weights = zeros(n_centers)
+        fill!(colors, 0)
 
         nstep = 0
 
@@ -58,7 +58,7 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
             nstep += 1
 
             for i in 1:n_centers
-                centers_old[i] .= centers[i]
+                centers_old[i] .= centers[:,i]
                 Σ_old[i] .= Σ[i]
             end
  
@@ -75,7 +75,7 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
                         μ[i] .= mean(view(points, idxs[tid][1:k]))
 
                         weights[i] =
-                            mean(sqmahalanobis(points[j], μ[i], inv(Σ[i])) for j in idxs[tid][1:k]) + log(det(Σ[i]))
+                            mean(sqmahalanobis(points[:,j], μ[i], inv(Σ[i])) for j in idxs[tid][1:k]) + log(det(Σ[i]))
 
                     end
                 end
@@ -84,7 +84,7 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
             # Step 2 : Update color
 
             @threads for j = 1:n_points
-                costs = [sqmahalanobis(points[j], μ[i], inv(Σ[i])) + weights[i] for i in findall(kept_centers)]
+                costs = [sqmahalanobis(points[:,j], μ[i], inv(Σ[i])) + weights[i] for i in findall(kept_centers)]
                 dist_min[j], colors[j] = findmin(costs)
             end
 
@@ -92,10 +92,9 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
             sortperm!(idxs_min, dist_min, rev = true)
 
-            colors[idxs_min[1:(n_points-signal)]] .= 0
+            @views colors[idxs_min[1:(n_points-signal)]] .= 0
 
-            cost = mean(view(dist_min, idxs_min[(n_points-signal+1):end]))
-
+            @views cost = mean(view(dist_min, idxs_min[(n_points-signal+1):end]))
 
             # Step 4 : Update centers
 
@@ -110,15 +109,15 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
                         if cloud_size > 0
 
-                            centers[i] .= mean(points[cloud])
+                            centers[i] .= mean(points[:,cloud])
 
                             nearest_neighbors!(dists[tid], idxs[tid], k, points, centers[i], Σ[i])
 
-                            μ[i] .= mean(view(points, idxs[tid][1:k]))
+                            μ[i] .= mean(view(points, :, idxs[tid][1:k]))
 
                             Σ[i] .= (μ[i] .- centers[i]) * (μ[i] .- centers[i])'
-                            Σ[i] .+= (k - 1) / k .* cov(points[idxs[tid][1:k]])
-                            Σ[i] .+= (cloud_size - 1) / cloud_size .* cov(points[cloud])
+                            Σ[i] .+= (k - 1) / k .* cov(points[:, idxs[tid][1:k]])
+                            Σ[i] .+= (cloud_size - 1) / cloud_size .* cov(points[:,cloud])
 
                             f_Σ!(Σ[i])
 

@@ -29,7 +29,9 @@ results <- colorize(points, k, signal, centers, Sigma )
 """
     points_array = @rget points
 
-	points = collect.(eachrow(points_array))
+	points = collect(transpose(points_array))
+
+    @show size(points)
 
     n_points = trunc(Int, rcopy(R" N + Nnoise"))
     k = @rget k :: Int
@@ -39,7 +41,7 @@ results <- colorize(points, k, signal, centers, Sigma )
 
     first_centers = @rget centers_indices
 
-    centers = [points[i] for i in first_centers]
+    centers = [points[:,i] for i in first_centers]
     Σ = [diagm(ones(dimension)) for i = 1:n_centers]
 
     colors, μ, weights = colorize(points, k, signal, centers, Σ)

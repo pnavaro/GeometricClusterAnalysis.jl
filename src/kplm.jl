@@ -70,13 +70,13 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
                     tid = threadid()
                     for i in chunk
 
-                        invΣ = inv(Σ[i])
-                        metric = SqMahalanobis(invΣ)
+                        local invΣ = inv(Σ[i])
+                        local metric = SqMahalanobis(invΣ)
                         pairwise!( dists[tid], metric, centers[i][:,:], points, dims=2)
 
                         idxs[tid] .= sortperm(vec(dists[tid]))[1:k]
 
-                        μ[i] .= vec(mean(points[:, idxs[tid]], dims=2))
+                        μ[i] .= vec(mean(view(points,:, idxs[tid]), dims=2))
 
                         weights[i] =
                             mean(sqmahalanobis(points[:,j], μ[i], inv(Σ[i])) for j in idxs[tid]) + log(det(Σ[i]))
@@ -116,7 +116,7 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
                         if cloud_size > 0
 
-                            centers[i] .= vec(mean(points[:,cloud], dims=2))
+                            centers[i] .= vec(mean(view(points,:,cloud), dims=2))
 
                             invΣ = inv(Σ[i])
                             metric = SqMahalanobis(invΣ)
@@ -186,7 +186,10 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
         end
     end
 
-    colors, μ, weights = colorize(points, k, signal, centers, Σ)
+    μ = deepcopy(centers)
+    weights = zeros(length(centers))
+
+    colorize!(colors, μ, weights, points, k, signal, centers, Σ)
 
     return centers, μ, weights, colors, Σ, cost_opt
 

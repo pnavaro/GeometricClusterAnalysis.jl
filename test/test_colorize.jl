@@ -1,6 +1,6 @@
 @testset "Colorize" begin
 
-import KPLMCenters: colorize
+import KPLMCenters: colorize!
 using LinearAlgebra
 
 
@@ -42,7 +42,10 @@ results <- colorize(points, k, signal, centers, Sigma )
     centers = [points[:,i] for i in first_centers]
     Σ = [diagm(ones(dimension)) for i = 1:n_centers]
 
-    colors, μ, weights = colorize(points, k, signal, centers, Σ)
+    colors = zeros(Int, n_points)
+    μ = deepcopy(centers)
+    weights = zeros(n_centers)
+    colorize!(colors, μ, weights, points, k, signal, centers, Σ)
 
     results = @rget results
 

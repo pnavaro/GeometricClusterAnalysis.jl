@@ -33,7 +33,7 @@ function f_Σ_dim_d(Σ)
         new_λ[i] = (λ[i] - λmin) * (λ[i] >= λmin) + λmin
     end
     if d_prim < d
-        @views S = mean(λ[1:(end-d_prim)])
+        S = mean(view(λ,1:(d-d_prim)))
         s2 =
             (S - s2min - s2max) * (s2min < S) * (S < s2max) +
             (-s2max) * (S <= s2min) + (-s2min) * (S >= s2max) + s2min + s2max
@@ -53,7 +53,7 @@ k = 20
 centers, μ, weights, colors, Σ, cost = kplm( rng, points, k, c, 
     signal, iter_max, nstart, f_Σ_dim_d);
 
-c = 20
+c = 100
 
 @time centers, μ, weights, colors, Σ, cost = kplm( rng, points, k, c, 
     signal, iter_max, nstart, f_Σ_dim_d);

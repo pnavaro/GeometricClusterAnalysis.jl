@@ -31,8 +31,6 @@ results <- colorize(points, k, signal, centers, Sigma )
 
 	points = collect(transpose(points_array))
 
-    @show size(points)
-
     n_points = trunc(Int, rcopy(R" N + Nnoise"))
     k = @rget k :: Int
     n_centers = @rget c  :: Int

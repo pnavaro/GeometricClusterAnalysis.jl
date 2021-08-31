@@ -12,9 +12,7 @@ noise_min = -7
 noise_max = 7
 σ = 0.05
 
-
 points = infinity_symbol(rng, signal, noise, σ, dimension, noise_min, noise_max)
-
 
 
 const d_prim = 1
@@ -53,9 +51,11 @@ c = 10
 k = 20
 
 centers, μ, weights, colors, Σ, cost = kplm( rng, points, k, c, 
-    signal, iter_max, nstart, f_Σ_dim_d)
+    signal, iter_max, nstart, f_Σ_dim_d);
 
 c = 20
 
 @time centers, μ, weights, colors, Σ, cost = kplm( rng, points, k, c, 
-    signal, iter_max, nstart, f_Σ_dim_d)
+    signal, iter_max, nstart, f_Σ_dim_d);
+
+nothing

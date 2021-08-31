@@ -1,6 +1,7 @@
 using LinearAlgebra
 import Statistics: cov
 import Base.Threads: @threads, @sync, @spawn, nthreads, threadid
+import Distances:  SqMahalanobis, pairwise!
 
 export kplm
 
@@ -28,7 +29,7 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
     ntid = nthreads()
     chunks = Iterators.partition(1:n_centers, n_centers÷ntid)
-    dists = [zeros(Float64, n_points) for _ in 1:ntid]
+    dists = [zeros(Float64, 1, n_points) for _ in 1:ntid]
     idxs = [zeros(Int, k) for _ in 1:ntid]
 
     dist_min = zeros(n_points)
@@ -70,12 +71,10 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
                     for i in chunk
 
                         invΣ = inv(Σ[i])
+                        metric = SqMahalanobis(invΣ)
+                        pairwise!( dists[tid], metric, centers[i][:,:], points, dims=2)
 
-                        for (j, x) in enumerate(eachcol(points))
-                            dists[tid][j] = sqmahalanobis(x, centers[i], invΣ)
-                        end
-
-                        idxs[tid] .= sortperm(dists[tid])[1:k]
+                        idxs[tid] .= sortperm(vec(dists[tid]))[1:k]
 
                         μ[i] .= vec(mean(points[:, idxs[tid]], dims=2))
 
@@ -120,12 +119,10 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
                             centers[i] .= vec(mean(points[:,cloud], dims=2))
 
                             invΣ = inv(Σ[i])
+                            metric = SqMahalanobis(invΣ)
+                            pairwise!( dists[tid], metric, centers[i][:,:], points, dims=2)
 
-                            for (j, x) in enumerate(eachcol(points))
-                                dists[tid][j] = sqmahalanobis(x, centers[i], invΣ)
-                            end
-
-                            idxs[tid] .= sortperm(dists[tid])[1:k]
+                            idxs[tid] .= sortperm(vec(dists[tid]))[1:k]
 
                             μ[i] .= vec(mean(points[:, idxs[tid]], dims=2))
 

@@ -2,8 +2,11 @@ using LinearAlgebra
 import Statistics: cov
 import Base.Threads: @threads, @sync, @spawn, nthreads, threadid
 import Distances:  SqMahalanobis, pairwise!
+using TimerOutputs
 
 export kplm
+
+const to = TimerOutput()
 
 function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
@@ -65,13 +68,15 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
  
             # Step 1 : Update means and weights
 
+            @timeit to "step 1" begin
+
             @sync for chunk in chunks
                 @spawn begin 
                     tid = threadid()
                     for i in chunk
 
-                        local invΣ = inv(Σ[i])
-                        local metric = SqMahalanobis(invΣ)
+                        invΣ = inv(Σ[i])
+                        metric = SqMahalanobis(invΣ)
                         pairwise!( dists[tid], metric, centers[i][:,:], points, dims=2)
 
                         idxs[tid] .= sortperm(vec(dists[tid]))[1:k]
@@ -84,17 +89,34 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
                     end
                 end
             end
+
+            end
             
 
             # Step 2 : Update color
 
+
+            @timeit to "step 2" begin
+
+            kcenters = findall(kept_centers)
+            invΣs = [inv(Σ[i]) for i in kcenters]
+            nkcenters = length(kcenters)
+
+            fill!(dist_min, Inf)
             for j = 1:n_points
-                costs = [sqmahalanobis(points[:,j], μ[i], inv(Σ[i])) + weights[i] for i in findall(kept_centers)]
-                dist_min[j], colors[j] = findmin(costs)
+                costs = [sqmahalanobis(points[:,j], μ[i], invΣs[i]) + weights[i] for i in kcenters]
+                for (i, c) in zip(kcenters, costs)
+                   if dist_min[j] > c
+                       dist_min[j] = c
+                       colors[j] = i
+                   end
+                end
             end
 
+            end
 
             # Step 3 : Trimming and Update cost
+            @timeit to "step 3" begin
 
             sortperm!(idxs_min, dist_min, rev = true)
 
@@ -102,8 +124,11 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
             @views cost = mean(view(dist_min, idxs_min[(n_points-signal+1):end]))
 
+            end
 
             # Step 4 : Update centers
+
+            @timeit to "step 4" begin
 
 			@sync for chunk in chunks
                	@spawn begin 
@@ -142,7 +167,11 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
             end
 
+            end
+
             # Step 5 : Condition for loop
+
+            @timeit to "step 5" begin
 
             stop_Σ = true # reste true tant que Σ_old et Σ sont egaux
 
@@ -155,6 +184,9 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
                 end
 
             end
+
+            end
+
 
             continu_Σ = !stop_Σ # Faux si tous les Σ sont egaux aux Σ_old
 
@@ -171,6 +203,10 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
         end
 
     end
+
+    println()
+    show(to)
+    println()
 
     # Return centers and colors for non-empty clusters
     centers = Vector{Float64}[]

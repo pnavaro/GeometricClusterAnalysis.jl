@@ -100,16 +100,21 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
             kcenters = findall(kept_centers)
             invΣs = [inv(Σ[i]) for i in kcenters]
-            nkcenters = length(kcenters)
+            n_kcenters = length(kcenters)
+
+            costs = zeros(1, n_points)
 
             fill!(dist_min, Inf)
-            for j = 1:n_points
-                costs = [sqmahalanobis(points[:,j], μ[i], invΣs[i]) + weights[i] for i in kcenters]
-                for (i, c) in zip(kcenters, costs)
-                   if dist_min[j] > c
-                       dist_min[j] = c
-                       colors[j] = i
-                   end
+            for (i,c) in enumerate(kcenters)
+                metric = SqMahalanobis(invΣs[c])
+                pairwise!(costs, metric, μ[c][:,:], points, dims=2) 
+                costs .+= weights[c] 
+                for j = 1:n_points
+                    cost_min = costs[1,j]
+                    if dist_min[j] > cost_min
+                       dist_min[j] = cost_min
+                       colors[j] = c
+                    end
                 end
             end
 

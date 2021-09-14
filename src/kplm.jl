@@ -1,6 +1,7 @@
 using LinearAlgebra
 import Statistics: cov
 import Base.Threads: @threads, @sync, @spawn, nthreads, threadid
+import Distances:  SqMahalanobis, pairwise!
 
 export kplm
 
@@ -8,8 +9,7 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
     # Initialisation
 
-    n_points = length(points)
-    dimension = length(first(points))
+    dimension, n_points = size(points)
 
     if !(1 < k <= n_points)
         @error "The number of nearest neighbours, k, should be in {2,...,N}."
@@ -20,7 +20,7 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
     end
 
     cost_opt = Inf
-    centers_opt = [zeros(dimension) for i = 1:n_centers]
+    centers_opt = [zeros(dimension) for i in 1:n_centers]
     Σ_opt = [diagm(ones(dimension)) for i = 1:n_centers]
     colors_opt = zeros(Int, n_points)
     kept_centers_opt = trues(n_centers)
@@ -29,11 +29,13 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
     ntid = nthreads()
     chunks = Iterators.partition(1:n_centers, n_centers÷ntid)
-    dists = [zeros(Float64, n_points) for _ in 1:ntid]
-    idxs = [zeros(Int, n_points) for _ in 1:ntid]
+    dists = [zeros(Float64, 1, n_points) for _ in 1:ntid]
+    idxs = [zeros(Int, k) for _ in 1:ntid]
 
+    costs = zeros(1, n_points)
     dist_min = zeros(n_points)
     idxs_min = zeros(Int, n_points)
+    colors = zeros(Int, n_points)
 
     for n_times = 1:nstart
 
@@ -41,12 +43,12 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
         Σ_old = [diagm(ones(dimension)) for i = 1:n_centers]
         first_centers = 1:n_centers
 
-        centers = deepcopy(points[first_centers])
+        centers = [ points[:,i] for i in first_centers]
         Σ = [diagm(ones(dimension)) for i = 1:n_centers]
-        colors = zeros(Int, n_points)
         kept_centers = trues(n_centers)
         μ = [zeros(dimension) for i = 1:n_centers]
         weights = zeros(n_centers)
+        fill!(colors, 0)
 
         nstep = 0
 
@@ -62,20 +64,23 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
                 Σ_old[i] .= Σ[i]
             end
  
-            n_centers = length(centers)
-
             # Step 1 : Update means and weights
 
             @sync for chunk in chunks
                 @spawn begin 
                     tid = threadid()
                     for i in chunk
-                        nearest_neighbors!(dists[tid], idxs[tid], k, points, centers[i], Σ[i])
 
-                        μ[i] .= mean(view(points, idxs[tid][1:k]))
+                        invΣ = inv(Σ[i])
+                        metric = SqMahalanobis(invΣ)
+                        pairwise!( dists[tid], metric, centers[i][:,:], points, dims=2)
+
+                        idxs[tid] .= sortperm(vec(dists[tid]))[1:k]
+
+                        μ[i] .= vec(mean(view(points,:, idxs[tid]), dims=2))
 
                         weights[i] =
-                            mean(sqmahalanobis(points[j], μ[i], inv(Σ[i])) for j in idxs[tid][1:k]) + log(det(Σ[i]))
+                            mean(sqmahalanobis(points[:,j], μ[i], inv(Σ[i])) for j in idxs[tid]) + log(det(Σ[i]))
 
                     end
                 end
@@ -83,23 +88,14 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
             # Step 2 : Update color
 
-            #kcenters = findall(kept_centers)
-            #for j = 1:n_points
-            #    costs = [sqmahalanobis(points[j], μ[i], inv(Σ[i])) + weights[i] for i in kcenters]
-            #    dist_min[j], colors[j] = findmin(costs)
-            #end
-
-            costs = zeros(n_points)
             fill!(dist_min, Inf)
             for i in 1:n_centers
                 if kept_centers[i]
-                    invΣ = inv(Σ[i])
-                    for j = 1:n_points
-                        costs[j] = sqmahalanobis(points[j], μ[i], invΣ) 
-                    end
+                    metric = SqMahalanobis(inv(Σ[i]))
+                    pairwise!(costs, metric, μ[i][:,:], points, dims=2) 
                     costs .+= weights[i] 
                     for j = 1:n_points
-                        cost_min = costs[j]
+                        cost_min = costs[1,j]
                         if dist_min[j] > cost_min
                            dist_min[j] = cost_min
                            colors[j] = i
@@ -113,10 +109,9 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
             sortperm!(idxs_min, dist_min, rev = true)
 
-            colors[idxs_min[1:(n_points-signal)]] .= 0
+            @views colors[idxs_min[1:(n_points-signal)]] .= 0
 
-            cost = mean(view(dist_min, idxs_min[(n_points-signal+1):end]))
-
+            @views cost = mean(view(dist_min, idxs_min[(n_points-signal+1):end]))
 
             # Step 4 : Update centers
 
@@ -131,15 +126,19 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
                         if cloud_size > 0
 
-                            centers[i] .= mean(points[cloud])
+                            centers[i] .= vec(mean(view(points,:,cloud), dims=2))
 
-                            nearest_neighbors!(dists[tid], idxs[tid], k, points, centers[i], Σ[i])
+                            invΣ = inv(Σ[i])
+                            metric = SqMahalanobis(invΣ)
+                            pairwise!( dists[tid], metric, centers[i][:,:], points, dims=2)
 
-                            μ[i] .= mean(view(points, idxs[tid][1:k]))
+                            idxs[tid] .= sortperm(vec(dists[tid]))[1:k]
+
+                            μ[i] .= vec(mean(points[:, idxs[tid]], dims=2))
 
                             Σ[i] .= (μ[i] .- centers[i]) * (μ[i] .- centers[i])'
-                            Σ[i] .+= (k - 1) / k .* cov(points[idxs[tid][1:k]])
-                            Σ[i] .+= (cloud_size - 1) / cloud_size .* cov(points[cloud])
+                            Σ[i] .+= (k - 1) / k .* cov(points[:, idxs[tid]]')
+                            Σ[i] .+= (cloud_size - 1) / cloud_size .* cov(points[:,cloud]')
 
                             f_Σ!(Σ[i])
 
@@ -197,7 +196,10 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
         end
     end
 
-    colors, μ, weights = colorize(points, k, signal, centers, Σ)
+    μ = deepcopy(centers)
+    weights = zeros(length(centers))
+
+    colorize!(colors, μ, weights, points, k, signal, centers, Σ)
 
     return centers, μ, weights, colors, Σ, cost_opt
 

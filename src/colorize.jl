@@ -21,27 +21,30 @@ en ajoutant "inverted = true".
 
 
 """
-function colorize(points, k, signal, centers, Σ)
+function colorize!( colors, μ, weights, points, k, signal, centers, Σ)
 
-    n_points = length(points)
+    dimension, n_points = size(points)
     n_centers = length(centers)
-
-    μ = deepcopy(centers)
-    colors = zeros(Int, n_points)
-    weights = zeros(n_centers)
 
     dists = zeros(Float64, n_points)
     idxs = zeros(Int, n_points)
 
     # Step 1 : Update μ and weights
+
     for i = 1:n_centers
 
-        nearest_neighbors!(dists, idxs, k, points, centers[i], Σ[i])
+        invΣ = inv(Σ[i])
 
-        μ[i] .= mean(view(points, idxs[1:k]))
+        for (j, x) in enumerate(eachcol(points))
+            dists[j] = sqmahalanobis(x, centers[i], invΣ)
+        end
+        
+        idxs .= sortperm(dists)
+
+        μ[i] .= vec(mean(points[:, idxs[1:k]], dims=2))
 
         weights[i] =
-            mean(sqmahalanobis(points[j], μ[i], inv(Σ[i])) for j in idxs[1:k]) + log(det(Σ[i]))
+            mean(sqmahalanobis(points[:,j], μ[i], invΣ) for j in idxs[1:k]) + log(det(Σ[i]))
 
     end
 
@@ -51,7 +54,7 @@ function colorize(points, k, signal, centers, Σ)
         cost = Inf
         best_index = 1
         for i = 1:n_centers
-            newcost = sqmahalanobis(points[j], μ[i], inv(Σ[i])) + weights[i]
+            newcost = sqmahalanobis(points[:,j], μ[i], inv(Σ[i])) + weights[i]
             if newcost <= cost
                 cost = newcost
                 best_index = i
@@ -62,6 +65,7 @@ function colorize(points, k, signal, centers, Σ)
     end
 
     # Step 3 : Trimming and Update cost
+
     sortperm!(idxs, dists, rev = true)
     if signal < n_points
         for i in idxs[1:(n_points-signal)]
@@ -69,6 +73,5 @@ function colorize(points, k, signal, centers, Σ)
         end
     end
 
-    return colors, μ, weights
 
 end

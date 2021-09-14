@@ -83,6 +83,6 @@ function infinity_symbol(rng, n_points, n_noise, σ, dimension, noise_min, noise
         end
     end
 
-    return points
+    return hcat(points...)
 
 end

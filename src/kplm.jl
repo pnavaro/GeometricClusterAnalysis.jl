@@ -88,7 +88,7 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
             # Step 2 : Update color
 
-            @threads for j = 1:n_points
+            for j = 1:n_points
                 costs = [sqmahalanobis(points[:,j], μ[i], inv(Σ[i])) + weights[i] for i in findall(kept_centers)]
                 dist_min[j], colors[j] = findmin(costs)
             end

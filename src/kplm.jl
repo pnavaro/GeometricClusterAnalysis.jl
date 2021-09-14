@@ -83,11 +83,31 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
             # Step 2 : Update color
 
-            kcenters = findall(kept_centers)
-            for j = 1:n_points
-                costs = [sqmahalanobis(points[j], μ[i], inv(Σ[i])) + weights[i] for i in kcenters]
-                dist_min[j], colors[j] = findmin(costs)
+            #kcenters = findall(kept_centers)
+            #for j = 1:n_points
+            #    costs = [sqmahalanobis(points[j], μ[i], inv(Σ[i])) + weights[i] for i in kcenters]
+            #    dist_min[j], colors[j] = findmin(costs)
+            #end
+
+            costs = zeros(n_points)
+            fill!(dist_min, Inf)
+            for i in 1:n_centers
+                if kept_centers[i]
+                    invΣ = inv(Σ[i])
+                    for j = 1:n_points
+                        costs[j] = sqmahalanobis(points[j], μ[i], invΣ) 
+                    end
+                    costs .+= weights[i] 
+                    for j = 1:n_points
+                        cost_min = costs[j]
+                        if dist_min[j] > cost_min
+                           dist_min[j] = cost_min
+                           colors[j] = i
+                        end
+                    end
+                end
             end
+
 
             # Step 3 : Trimming and Update cost
 

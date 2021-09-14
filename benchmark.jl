@@ -58,4 +58,9 @@ c = 100
 @time centers, μ, weights, colors, Σ, cost = kplm( rng, points, k, c, 
     signal, iter_max, nstart, f_Σ_dim_d);
 
+c = 200
+
+@time centers, μ, weights, colors, Σ, cost = kplm( rng, points, k, c, 
+    signal, iter_max, nstart, f_Σ_dim_d);
+
 nothing

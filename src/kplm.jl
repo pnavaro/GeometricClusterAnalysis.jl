@@ -20,8 +20,8 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
     end
 
     cost_opt = Inf
-    centers_opt = [zeros(dimension) for i in 1:n_centers]
-    Σ_opt = [diagm(ones(dimension)) for i = 1:n_centers]
+    centers_opt = [zeros(dimension) for i ∈ 1:n_centers]
+    Σ_opt = [diagm(ones(dimension)) for i ∈ 1:n_centers]
     colors_opt = zeros(Int, n_points)
     kept_centers_opt = trues(n_centers)
 

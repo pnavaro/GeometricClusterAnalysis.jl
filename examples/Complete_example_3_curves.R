@@ -1,13 +1,14 @@
 # Complete illustration of the method for the Example with 3 curves
 
-source("scripts/Sample_generation/Sample_3curves.R")
-source("scripts/auxiliary_functions/versions_kPLM.R")
-source("scripts/auxiliary_functions/hierarchical_clustering_complexes.R")
-source("scripts/Plot/plot_pointclouds_centers.R")
+library(here)
+source(here("examples", "Sample_3curves.R"))
+source(here("R", "versions_kPLM.R"))
+source(here("R", "hierarchical_clustering_complexes.R"))
+source(here("examples", "plot_pointclouds_centers.R"))
 
 library("ggplot2")
 
-path = "results/3_curves" # Figures will be saved in this file
+path = here("examples") # Figures will be saved in this file
 
 
 N = 500 # number of signal points

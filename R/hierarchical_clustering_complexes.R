@@ -1,5 +1,6 @@
-source("ellipsoids_intersection.R")
-source("fonctions_puissances.R")
+library(here)
+source(here("R", "ellipsoids_intersection.R"))
+source(here("R", "fonctions_puissances.R"))
 
 
 # Auxiliary function - Important !!!

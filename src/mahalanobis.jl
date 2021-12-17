@@ -26,7 +26,7 @@ function mahalanobis(
     if inverted
         [sqmahalanobis(r, μ, Σ) for r in eachrow(x)]
     else
-        invΣ = inv(Σ)
+        invΣ = Hermitian(inv(Σ))
         [sqmahalanobis(r, μ, invΣ) for r in eachrow(x)]
     end
 

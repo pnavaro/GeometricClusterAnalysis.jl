@@ -1,4 +1,7 @@
-import Distances: mahalanobis, sqmahalanobis
+function sqmahalanobis(a::AbstractVector, b::AbstractVector, Q::AbstractMatrix) 
+    z = a - b
+    return z'Q * z
+end
 
 """ 
     mahalanobis( x, μ, Σ; inverted = false)

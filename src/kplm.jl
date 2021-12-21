@@ -1,9 +1,20 @@
 using LinearAlgebra
 import Statistics: cov
 import Base.Threads: @threads, @sync, @spawn, nthreads, threadid
-import Distances:  SqMahalanobis, pairwise!
 
 export kplm
+
+
+function compute_dists!(dists, center, points, Σ)
+
+    invΣ = inv(Σ)
+    n_points = size(points)[2]
+
+    for j in 1:n_points
+        dists[j] = sqmahalanobis(points[:,j], center, invΣ)
+    end
+    
+end
 
 function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
@@ -29,7 +40,7 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
     ntid = nthreads()
     chunks = Iterators.partition(1:n_centers, n_centers÷ntid)
-    dists = [zeros(Float64, 1, n_points) for _ in 1:ntid]
+    dists = [zeros(Float64, n_points) for _ in 1:ntid]
     idxs = [zeros(Int, k) for _ in 1:ntid]
 
     costs = zeros(1, n_points)
@@ -71,11 +82,9 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
                     tid = threadid()
                     for i in chunk
 
-                        invΣ = inv(Σ[i])
-                        metric = SqMahalanobis(invΣ)
-                        pairwise!( dists[tid], metric, centers[i][:,:], points, dims=2)
+                        compute_dists!( dists[tid], centers[i], points, Σ[i])
 
-                        idxs[tid] .= sortperm(vec(dists[tid]))[1:k]
+                        idxs[tid] .= sortperm(dists[tid])[1:k]
 
                         μ[i] .= vec(mean(view(points,:, idxs[tid]), dims=2))
 
@@ -91,8 +100,7 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
             fill!(dist_min, Inf)
             for i in 1:n_centers
                 if kept_centers[i]
-                    metric = SqMahalanobis(inv(Σ[i]))
-                    pairwise!(costs, metric, μ[i][:,:], points, dims=2) 
+                    compute_dists!(costs, μ[i], points, Σ[i]) 
                     costs .+= weights[i] 
                     for j = 1:n_points
                         cost_min = costs[1,j]
@@ -128,11 +136,9 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
                             centers[i] .= vec(mean(view(points,:,cloud), dims=2))
 
-                            invΣ = inv(Σ[i])
-                            metric = SqMahalanobis(invΣ)
-                            pairwise!( dists[tid], metric, centers[i][:,:], points, dims=2)
+                            compute_dists!( dists[tid], centers[i], points, Σ[i])
 
-                            idxs[tid] .= sortperm(vec(dists[tid]))[1:k]
+                            idxs[tid] .= sortperm(dists[tid])[1:k]
 
                             μ[i] .= vec(mean(points[:, idxs[tid]], dims=2))
 

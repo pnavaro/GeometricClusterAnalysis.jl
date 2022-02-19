@@ -6,7 +6,7 @@
 # Algorithm based on the sublevel sets of the power function of the paper "Efficient and Robust persistent homology for measures"
 # Mickael Buchet, Frederic Chazal, Steve Oudot, Donald R Sheehy
 
-libraray(here)
+library(here)
 source(here("R", "hierarchical_clustering_complexes.R"))
 
 library("FNN")

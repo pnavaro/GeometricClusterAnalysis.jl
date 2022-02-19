@@ -1,7 +1,8 @@
 # Check that Intersection_radius is the relevant intersection radius, for two ellipsoids.
 
-source("scripts/auxiliary_functions/ellipsoids_intersection.R")
-source("scripts/Plot/plot_pointclouds_centers.R")
+library(here)
+source(here("R","ellipsoids_intersection.R"))
+source(here("R","plot_pointclouds_centers.R"))
 
 
 # Two ellipses grow and r is the merging radius

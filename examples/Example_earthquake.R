@@ -1,18 +1,19 @@
-source("scripts/auxiliary_functions/functions_for_evaluating_methods.R")
+library(here)
+source(here("R","functions_for_evaluating_methods.R"))
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #                                   Earthquake
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-source("scripts/auxiliary_functions/hierarchical_clustering_complexes.R")
-source("scripts/auxiliary_functions/versions_kPLM.R")
-source("scripts/Plot/plot_pointclouds_centers.R")
+source(here("R","hierarchical_clustering_complexes.R"))
+source(here("R","versions_kPLM.R"))
+source(here("R","plot_pointclouds_centers.R"))
 
 
-dataset = read.table("data/1970_2010_lat70_long170_10.txt")
+dataset = read.table(here("data","1970_2010_lat70_long170_10.txt"))
 
 
-path = "results/Earthquake_illustration/"
+path = here("results","Earthquake_illustration")
 
 df = data.frame(x = dataset[,1],y = dataset[,2])
 ggplot(df,aes(x = x, y = y),color="black")+geom_point(shape = 16,size = 0.001)

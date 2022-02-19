@@ -1,9 +1,10 @@
 # Check that build_matrice_hauteur returns the proper connection radii.
+libraray(here)
 
-source("scripts/auxiliary_functions/hierarchical_clustering_complexes.R")
-source("scripts/auxiliary_functions/versions_kPLM.R")
-source("scripts/Sample_generation/Sample_3curves.R")
-source("scripts/Plot/plot_pointclouds_centers.R")
+source(here("R","hierarchical_clustering_complexes.R")
+source(here("R","versions_kPLM.R")
+source(here("R","Sample_3curves.R")
+source(here("R","plot_pointclouds_centers.R")
 
 sample = generate_3curves_noise(N = 100,Nnoise = 0,sigma = 0.05,dim = 2)
 P = sample$points

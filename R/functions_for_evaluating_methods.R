@@ -4,10 +4,11 @@
 
 # For each method, the function that returns the proper clustering.
 
-source("DTM_filtration.R")
-source("Tomato.R")
-source("version_kPDTM.R")
-source("versions_kPLM.R")
+library(here)
+source(here("R","DTM_filtration.R"))
+source(here("R","Tomato.R"))
+source(here("R","version_kPDTM.R"))
+source(here("R","versions_kPLM.R"))
 
 # Auxiliary function
 

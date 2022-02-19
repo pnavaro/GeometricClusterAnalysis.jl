@@ -3,3 +3,4 @@ Manifest.toml
 *.swp
 .ipynb_checkpoints/
 Rplots.pdf
+results

@@ -2,11 +2,12 @@
 # plot_pointset_centers_ellipsoids_dim2(P,color,centers,weights,Sigma,alpha)
 # returns the alpha-sublevel set of the function.
 
-source("scripts/auxiliary_functions/versions_kPLM.R")
-source("scripts/auxiliary_functions/version_kPDTM.R")
-source("scripts/auxiliary_functions/fonctions_puissances.R")
-source("scripts/Sample_generation/Sample_3curves.R")
-source("scripts/Plot/plot_pointclouds_centers.R")
+library(here)
+source(here("R","versions_kPLM.R"))
+source(here("R","version_kPDTM.R"))
+source(here("R","fonctions_puissances.R"))
+source(here("R","Sample_3curves.R"))
+source(here("R","plot_pointclouds_centers.R"))
 
 
 sample = generate_3curves_noise(N = 100,Nnoise = 10,sigma = 0.05,dim = 2)

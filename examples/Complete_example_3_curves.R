@@ -1,10 +1,10 @@
 # Complete illustration of the method for the Example with 3 curves
 
 library(here)
-source(here("examples", "Sample_3curves.R"))
+source(here("R", "Sample_3curves.R"))
 source(here("R", "versions_kPLM.R"))
 source(here("R", "hierarchical_clustering_complexes.R"))
-source(here("examples", "plot_pointclouds_centers.R"))
+source(here("R", "plot_pointclouds_centers.R"))
 
 library("ggplot2")
 

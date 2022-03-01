@@ -15,7 +15,9 @@ using Test
     noise_max = 7
 
     # Soit au total N+Nnoise points
-    points = infinity_symbol(rng, signal, noise, σ, dimension, noise_min, noise_max)
+    data = infinity_symbol(rng, signal, noise, σ, dimension, noise_min, noise_max)
+
+    points = data.points
 
     k = 10   # Nombre de plus proches voisins
     c = 6    # Nombre de centres ou d'ellipsoides

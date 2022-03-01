@@ -4,6 +4,37 @@ import Base.Threads: @threads, @sync, @spawn, nthreads, threadid
 
 export kplm
 
+"""
+    struct KplmResult{T<:AbstractFloat}
+        K::Int
+        centroids::Vector{Vector{T}}
+        cluster::Vector{Int}
+        costs::T
+        iter::Int
+    end
+Object resulting from kplm algorithm that contains the number of clusters, centroids, clusters prediction, 
+total-variance-within-cluster and number of iterations until convergence.
+"""
+struct KplmResult{T<:AbstractFloat}
+    K::Int
+    centroids::Vector{Vector{T}}
+    cluster::Vector{Int}
+    withinss::T
+    iter::Int
+end
+
+function Base.print(io::IO, model::KplmResult{T}) where {T<:AbstractFloat}
+    p = ["     $(v)\n" for v in model.centroids]
+
+    print(IOContext(io, :limit => true), "KplmResult{$T}:
+ K = $(model.K)
+ centroids = [\n", p..., " ]
+ cluster = ", model.cluster, "
+ within-cluster sum of squares = $(model.withinss)
+ iterations = $(model.iter)")
+end
+
+Base.show(io::IO, model::KplmResult) = print(io, model)
 
 function compute_dists!(dists, center, points, Σ)
 

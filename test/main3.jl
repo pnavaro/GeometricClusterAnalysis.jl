@@ -80,7 +80,9 @@ using Test
 
     rng = MersenneTwister(1234)
 
-    points = infinity_symbol(rng, signal, noise, σ, dimension, noise_min, noise_max)
+    data = infinity_symbol(rng, signal, noise, σ, dimension, noise_min, noise_max)
+
+    points = data.points
 
     k = 10 
     c = 5 

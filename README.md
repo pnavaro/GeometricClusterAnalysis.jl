@@ -13,12 +13,11 @@ Methods for data clustering using geometric methods.
 Pkg.add("GeometricClusterAnalysis")
 ```
 
-## Features
-
-### Clustering Algorithms
+## Clustering Algorithms
 
 - K-plm
 - K-pdtm
+- ToMaTo
 
 [docs-latest-img]: https://img.shields.io/badge/docs-latest-blue.svg
 [docs-latest-url]: http://pnavaro.github.io/GeometricClusterAnalysis.jl/dev/

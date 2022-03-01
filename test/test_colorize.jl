@@ -1,6 +1,6 @@
 @testset "Colorize" begin
 
-import KPLMCenters: colorize!
+import GeometricClusterAnalysis: colorize!
 using LinearAlgebra
 
 

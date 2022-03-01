@@ -2,7 +2,7 @@ using RCall
 using Test
 using LinearAlgebra
 using Statistics
-import KPLMCenters: sqmahalanobis
+import GeometricClusterAnalysis: sqmahalanobis
 
 @testset "Nearest Neighbors with Mahalanobis distance" begin
 

@@ -3,9 +3,9 @@ using RCall
 using Statistics
 using Test
 
-import KPLMCenters: mahalanobis
+import GeometricClusterAnalysis: mahalanobis
 
-using KPLMCenters
+using GeometricClusterAnalysis
 
 # Traductions de quelques fonctions R en Julia pour plus de lisibilité
 
@@ -52,6 +52,4 @@ x = @rget x
 
 include("test_nearest_neighbors.jl")
 include("test_colorize.jl")
-include("main1.jl")
-include("main2.jl")
-include("main3.jl")
+include("test_kplm.jl")

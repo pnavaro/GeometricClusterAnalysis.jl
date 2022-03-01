@@ -5,33 +5,29 @@ import Base.Threads: @threads, @sync, @spawn, nthreads, threadid
 export kplm
 
 """
-    struct KplmResult{T<:AbstractFloat}
-        K::Int
-        centroids::Vector{Vector{T}}
-        cluster::Vector{Int}
-        costs::T
-        iter::Int
-    end
-Object resulting from kplm algorithm that contains the number of clusters, centroids, clusters prediction, 
-total-variance-within-cluster and number of iterations until convergence.
+    KplmResult
+
+Object resulting from kplm algorithm that contains the number of clusters, 
+centroids, means, weights, covariance matrices, costs
 """
 struct KplmResult{T<:AbstractFloat}
-    K::Int
-    centroids::Vector{Vector{T}}
-    cluster::Vector{Int}
-    withinss::T
-    iter::Int
+    k::Int
+    centers::Vector{Vector{T}}
+	μ::Vector{Vector{T}}
+	weights::Vector{T}
+    colors::Vector{Int}
+	Σ::Vector{Matrix{T}}
+	cost::T
 end
 
 function Base.print(io::IO, model::KplmResult{T}) where {T<:AbstractFloat}
-    p = ["     $(v)\n" for v in model.centroids]
+    p = ["     $(v)\n" for v in model.centers]
 
     print(IOContext(io, :limit => true), "KplmResult{$T}:
- K = $(model.K)
- centroids = [\n", p..., " ]
- cluster = ", model.cluster, "
- within-cluster sum of squares = $(model.withinss)
- iterations = $(model.iter)")
+ k = $(model.k)
+ centers = [\n", p..., " ]
+ colors = ", model.colors, "
+ cost = $(model.cost)")
 end
 
 Base.show(io::IO, model::KplmResult) = print(io, model)
@@ -238,6 +234,6 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
     colorize!(colors, μ, weights, points, k, signal, centers, Σ)
 
-    return centers, μ, weights, colors, Σ, cost_opt
+	return KplmResult(k, centers, μ, weights, colors, Σ, cost_opt)
 
 end

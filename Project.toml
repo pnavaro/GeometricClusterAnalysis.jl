@@ -1,4 +1,4 @@
-name = "KPLMCenters"
+name = "GeometricClusterAnalysis"
 uuid = "64b1d041-1d63-40a7-860a-6ef68a11184b"
 authors = ["Pierre Navaro <pierre.navaro@math.cnrs.fr>"]
 version = "0.1.0"

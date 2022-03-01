@@ -10,7 +10,7 @@ Methods for data clustering using geometric methods.
 ## Installation
 
 ```julia
-Pkg.add("GeometricClusterAnalysis.jl")
+Pkg.add("GeometricClusterAnalysis")
 ```
 
 ## Features

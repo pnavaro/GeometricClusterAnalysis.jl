@@ -1,8 +1,8 @@
-# KPLMCenters.jl
+# GeometricClusterAnalysis.jl
 
-Documentation for KPLMCenters.jl
+Documentation for GeometricClusterAnalysis.jl
 
 ```@autodocs
-Modules = [KPLMCenters]
+Modules = [GeometricClusterAnalysis]
 Order   = [:type, :function]
 ```

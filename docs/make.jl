@@ -1,10 +1,10 @@
 using Documenter
-using KPLMCenters
+using GeometricClusterAnalysis
 
 makedocs(
     sitename = "KPLMCenters",
     format = Documenter.HTML(),
-    modules = [KPLMCenters]
+    modules = [GeometricClusterAnalysis]
 )
 
 # Documenter can also automatically deploy documentation to gh-pages.

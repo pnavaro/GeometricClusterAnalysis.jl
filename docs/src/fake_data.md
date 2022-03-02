@@ -27,8 +27,8 @@ signal = 500
 noise = 50
 σ = 0.05
 dimension = 3
-noise_min = -7
-noise_max = 7
+noise_min = -5
+noise_max = 5
 
 dataset = infinity_symbol(rng, signal, noise, σ, dimension, noise_min, noise_max)
 

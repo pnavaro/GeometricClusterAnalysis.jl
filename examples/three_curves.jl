@@ -27,22 +27,24 @@ rng = MersenneTwister(1234)
 
 data = noisy_three_curves( rng, nsignal, nnoise, sigma, dim)
 
+
 function f_Σ!(Σ) end
 
-dist_func = kplm(rng, data.points, k, c, signal, iter_max, nstart, f_Σ!)
+dist_func = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
+
+centers = vcat(dist_func.centers'...)
+@rput centers
+means = vcat(dist_func.μ'...)
+@rput means
+weights = dist_func.weights
+@rput weights
+Sigma = dist_func.Σ
+@rput Sigma
+
 
 R"""
 library("ggplot2")
 library("ggforce")
-
-path = "."
-
-#list(centers =  centers,means = recolor$means,weights = recolor$weights,color_old = color_old,color= recolor$color,Sigma = Sigma, cost = opt$cost))
-
-
-
-# Auxiliary functions
-
 
 dic_lambda <- function(x,y,eigval,c,omega){
   f_moy = sum((eigval-((x+y)/2)^2)/(eigval+((x+y)/2))^2*eigval*c^2)
@@ -67,9 +69,15 @@ lambda_solution <- function(omega,eigval,c){
   return((x+y)/2)
 }
 
-
-# MAIN function
-
+r_solution <- function(omega_1,omega_2,eigval,c){ # C'est le r^2 si les omega sont positifs...
+  if(sum(c^2)<=omega_2-omega_1){
+    return (omega_2)
+  }
+  else{
+    lambda = lambda_solution(omega_2-omega_1,eigval,c)
+    return(omega_2+sum(((lambda*c)/(lambda+eigval))^2*eigval))
+  }
+}
 
 intersection_radius <- function(Sigma_1,Sigma_2,c_1,c_2,omega_1,omega_2){
   if(!(all.equal(t(Sigma_1),Sigma_1)==TRUE) || !(all.equal(t(Sigma_2),Sigma_2)==TRUE)){
@@ -107,15 +115,53 @@ intersection_radius <- function(Sigma_1,Sigma_2,c_1,c_2,omega_1,omega_2){
   return(r_sq)
 }
 
-r_solution <- function(omega_1,omega_2,eigval,c){ # C'est le r^2 si les omega sont positifs...
-  if(sum(c^2)<=omega_2-omega_1){
-    return (omega_2)
+# Distance matrix for the graph filtration
+
+build_matrice_hauteur <- function(means,weights,cov_matrices,indexed_by_r2 = TRUE){
+  # means: matrix of size cxd
+  # weights: vector of size c
+  # cov_matrices: list of c symmetric matrices of size dxd
+  # indexed_by_r2 = TRUE always work ; indexed_by_r2 = FALSE requires elements of weigts to be non-negative.
+  # indexed_by_r2 = FALSE for the sub-level set of the square-root of non-negative power functions : the k-PDTM or the k-PLM (when determinant of matrices are forced to be 1)
+  c = nrow(means)
+  if(c!=length(weights)){return("The number of rows of means should be equal to the length of weights")}
+  matrice_hauteur = matrix(data = Inf,c,c)
+  if(c==1){
+    if(indexed_by_r2 == TRUE){
+      return(c(weights[1]))
+    }
+    else{ # Indexed by r -- only for non-negative functions (k-PDTM and k-PLM with det = 1)
+      return(c(sqrt(weights[1])))
+    }
+  }
+  for (i in 1:c){
+    matrice_hauteur[i,i] = weights[i]
+  }
+  for(i in 2:c){
+    for(j in 1:(i-1)){
+      matrice_hauteur[i,j] = intersection_radius(cov_matrices[[i]],cov_matrices[[j]],means[i,],means[j,],weights[i],weights[j])
+    } 
+  }
+  if(indexed_by_r2 == TRUE){
+    return(matrice_hauteur)
   }
   else{
-    lambda = lambda_solution(omega_2-omega_1,eigval,c)
-    return(omega_2+sum(((lambda*c)/(lambda+eigval))^2*eigval))
+    return(sqrt(matrice_hauteur))
   }
 }
+
+matrice_hauteur = build_matrice_hauteur(means,weights,Sigma,indexed_by_r2 = TRUE)
+"""
+
+@rget matrice_hauteur
+
+#=
+
+path = "."
+
+#list(centers =  centers,means = recolor$means,weights = recolor$weights,color_old = color_old,color= recolor$color,Sigma = Sigma, cost = opt$cost))
+
+
 
 # Function to compute the value of a power function f associated to c means, weights and matrices (in the list Sigma)
 # without removing bad means (i.e. means associated with the largest weights)
@@ -275,38 +321,6 @@ hierarchical_clustering_lem <- function(matrice_hauteur,Stop = Inf,Seuil = Inf,s
   return(list(color = couleurs,Couleurs = Couleurs,Temps_step = Temps_step,Naissance = Naissance,Mort = Mort,Indices_depart = Indices_depart))
 }
 
-build_matrice_hauteur <- function(means,weights,cov_matrices,indexed_by_r2 = TRUE){
-  # means: matrix of size cxd
-  # weights: vector of size c
-  # cov_matrices: list of c symmetric matrices of size dxd
-  # indexed_by_r2 = TRUE always work ; indexed_by_r2 = FALSE requires elements of weigts to be non-negative.
-  # indexed_by_r2 = FALSE for the sub-level set of the square-root of non-negative power functions : the k-PDTM or the k-PLM (when determinant of matrices are forced to be 1)
-  c = nrow(means)
-  if(c!=length(weights)){return("The number of rows of means should be equal to the length of weights")}
-  matrice_hauteur = matrix(data = Inf,c,c)
-  if(c==1){
-    if(indexed_by_r2 == TRUE){
-      return(c(weights[1]))
-    }
-    else{ # Indexed by r -- only for non-negative functions (k-PDTM and k-PLM with det = 1)
-      return(c(sqrt(weights[1])))
-    }
-  }
-  for (i in 1:c){
-    matrice_hauteur[i,i] = weights[i]
-  }
-  for(i in 2:c){
-    for(j in 1:(i-1)){
-      matrice_hauteur[i,j] = intersection_radius(cov_matrices[[i]],cov_matrices[[j]],means[i,],means[j,],weights[i],weights[j])
-    } 
-  }
-  if(indexed_by_r2 == TRUE){
-    return(matrice_hauteur)
-  }
-  else{
-    return(sqrt(matrice_hauteur))
-  }
-}
 
 
 
@@ -323,6 +337,8 @@ return_color<- function(centre,couleurs,Indices_depart){
 
 # MAIN functions (to be used in different scripts)
 
+
+sig = 520 # Number of points to consider as signal
 
 recolorize <- function(P,sig,means,weights,Sigma){
   N = nrow(P)
@@ -394,24 +410,6 @@ plot_birth_death <- function(hierarchical_clustering,lim_min = 0,lim_max = 1,fil
 }
 
 
-plot_pointset <- function(P,color,coord = c(1,2),save_plot = FALSE,filename,path){
-  # plot in 2d the points given by the lines of P
-  # for the x-axis : the coord[1]-th coordinate of a point in P
-  # for the y-axis : the coord[2]-th coordinate of a point in P
-  # the figure is saved as path/filename when save_plot = TRUE
-  # Example : 
-      # P = matrix(runif(1000),500,2)
-      # color = rep(1,500)
-      # plot_pointset(P,color,coord = c(1,2),save_plot = TRUE,"uniform.pdf","results")
-  df = data.frame(x = P[,coord[1]],y = P[,coord[2]],color = color)
-  df$color = as.factor(df$color)
-  gp = ggplot(df,aes(x = x, y = y,color = color))+geom_point()
-  if(save_plot){
-    ggsave(plot = gp, path = path,filename = filename)
-  }
-  print(gp)
-}
-
 plot_pointset_centers_ellipsoids_dim2 <- function(P,color,centers,weights,Sigma,alpha,color_is_numeric = TRUE,fill = FALSE){
   # P a matrix with 2 columns.
   # ----- > Its lines are points to be plotted.
@@ -461,11 +459,6 @@ plot_pointset_centers_ellipsoids_dim2 <- function(P,color,centers,weights,Sigma,
 }
 
 
-sig = 520 # Number of points to consider as signal
-
-# Distance matrix for the graph filtration
-
-matrice_hauteur = build_matrice_hauteur(means,weights,Sigma,indexed_by_r2 = TRUE)
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -686,5 +679,6 @@ function build_matrix(result; indexed_by_r2 = true)
       return sqrt.(mh) 
   end
 end
+ =#
 
-mh = build_matrix(result, indexed_by_r2 = true)
+scatter(data, c=cgrad(:matter, 5, categorical = true))

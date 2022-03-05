@@ -16,7 +16,7 @@ rng = MersenneTwister(1234)
 
 dataset = noisy_three_curves( rng, nsignal, nnoise, sigma, dim)
 
-plot(dataset)
+plot(dataset, palette = :rainbow)
 ```
 
 ## Infinity symbol

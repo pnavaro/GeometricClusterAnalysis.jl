@@ -1,6 +1,6 @@
 # GeometricClusterAnalysis.jl
 
-Methods for data clustering using geometric methods.
+Julia implementation of data clustering using geometric methods.
 
 [![Build Status](https://github.com/pnavaro/GeometricClusterAnalysis.jl/workflows/CI/badge.svg)](https://github.com/pnavaro/GeometricClusterAnalysis.jl/actions?query=workflow%3ACI+branch%3Amaster)
 [![codecov](https://codecov.io/gh/pnavaro/GeometricClusterAnalysis.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/pnavaro/GeometricClusterAnalysis.jl)

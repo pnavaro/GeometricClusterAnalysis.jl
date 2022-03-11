@@ -23,6 +23,7 @@ end
     c := data.colors
     seriestype := :scatter
     legend := false
+    palette --> :rainbow
     ()
 
 end

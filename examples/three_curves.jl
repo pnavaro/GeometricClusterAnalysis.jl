@@ -195,8 +195,8 @@ function intersection_radius(Σ₁, Σ₂, μ₁, μ₂, ω₁, ω₂)
 
     if ω₁ > ω₂
         ω₁, ω₂ = ω₂, ω₁
-        swap!(Σ₁, Σ₂)
-        swap!(μ₁, μ₂)
+        Σ₁, Σ₂ = Σ₂, Σ₁
+        μ₁, μ₂ = μ₂, μ₁
     end
 
     eig_1 = eigen(Σ₁)
@@ -220,23 +220,6 @@ function intersection_radius(Σ₁, Σ₂, μ₁, μ₂, ω₁, ω₂)
 end
 
 R"""
-i <- 1
-j <- 2
-
-print(intersection_radius(Sigma[[i]],Sigma[[j]], means[i,],means[j,], weights[i],weights[j]))
-
-"""
-
-
-i, j = 1, 2
-intersection_radius(dist_func.Σ[i],dist_func.Σ[j],
-                    dist_func.μ[i],dist_func.μ[j],
-                    dist_func.weights[i],weights[j])
-
-#=
-
-
-R"""
 # Distance matrix for the graph filtration
 
 build_matrice_hauteur <- function(means,weights,cov_matrices,indexed_by_r2 = TRUE){
@@ -249,7 +232,7 @@ build_matrice_hauteur <- function(means,weights,cov_matrices,indexed_by_r2 = TRU
   if(c!=length(weights)){return("The number of rows of means should be equal to the length of weights")}
   matrice_hauteur = matrix(data = Inf,c,c)
   if(c==1){
-    if(indexed_by_r2 == TRUE){
+    if(indexed_by_r2){
       return(c(weights[1]))
     }
     else{ # Indexed by r -- only for non-negative functions (k-PDTM and k-PLM with det = 1)
@@ -262,16 +245,21 @@ build_matrice_hauteur <- function(means,weights,cov_matrices,indexed_by_r2 = TRU
   for(i in 2:c){
     for(j in 1:(i-1)){
       matrice_hauteur[i,j] = intersection_radius(cov_matrices[[i]],cov_matrices[[j]],means[i,],means[j,],weights[i],weights[j])
+      print(matrice_hauteur[i,j])
     } 
   }
-  if(indexed_by_r2 == TRUE){
+  if(indexed_by_r2){
     return(matrice_hauteur)
   }
   else{
     return(sqrt(matrice_hauteur))
   }
 }
+
+matrice_hauteur = build_matrice_hauteur(means,weights,Sigma,indexed_by_r2 = TRUE)
+
 """
+
 
 
 """
@@ -285,33 +273,30 @@ Distance matrix for the graph filtration
 """
 function build_matrix(result; indexed_by_r2 = true)
 
-    c = length(result.μ)
-
-    @assert c == length(result.weights)
+    c = length(result.weights)
 
     mh = zeros(c, c)
+    fill!(mh, Inf)
 
     if c == 1
         if indexed_by_r2
-            return [first(weights)]
+            return [first(result.weights)]
         else # Indexed by r -- only for non-negative functions (k-PDTM and k-PLM with det = 1)
-            return [sqrt(first(weights))]
+            return [sqrt(first(result.weights))]
         end
     end
 
     for i = 1:c
-        mh[i, i] = weights[i]
+        mh[i, i] = result.weights[i]
     end
 
-    for i = 2:c, j = 1:(i-1)
-        mh[i, j] = intersection_radius(
-            result.Σ[i],
-            result.Σ[j],
-            result.μ[i],
-            means[j,],
-            weights[i],
-            weights[j],
-        )
+    for i = 2:c 
+        for j = 1:(i-1)
+            mh[i, j] = intersection_radius(
+                result.Σ[i], result.Σ[j],
+                result.μ[i], result.μ[j],
+                weights[i], weights[j])
+        end
     end
 
     if indexed_by_r2
@@ -321,14 +306,14 @@ function build_matrix(result; indexed_by_r2 = true)
     end
 end
 
-#mh = build_matrix(dist_func)
+mh = build_matrix(dist_func)
+
+@test matrice_hauteur ≈ mh
 
 
-R"""
-matrice_hauteur = build_matrice_hauteur(means,weights,Sigma,indexed_by_r2 = TRUE)
-"""
+#==
 
-@rget matrice_hauteur
+
 
 #@test matrice_hauteur ≈ mh
 

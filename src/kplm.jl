@@ -79,7 +79,7 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
         centers_old = [fill(Inf, dimension) for i = 1:n_centers]
         Σ_old = [diagm(ones(dimension)) for i = 1:n_centers]
-        first_centers = 1:n_centers
+        first_centers = 1:n_centers # randperm(rng, n_centers)
 
         centers = [ points[:,i] for i in first_centers]
         Σ = [diagm(ones(dimension)) for i = 1:n_centers]
@@ -121,6 +121,9 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
                     end
                 end
             end
+
+            println(μ)
+            return
 
             # Step 2 : Update color
 

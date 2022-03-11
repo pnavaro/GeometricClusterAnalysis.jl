@@ -184,53 +184,6 @@ color = dist_func.colors
 
 R"""
 
-# Function to compute the value of a power function f associated to c means, weights and matrices (in the list Sigma)
-# without removing bad means (i.e. means associated with the largest weights)
-
-# And
-
-# Function to remove bad means (i.e. return the indices of the good means)
-
-
-# MAIN (Function to compute the value of a power function)
-
-value_of_power_function <- function(Grid,means,weights,Sigma){
-  res = rep(0,nrow(Grid))
-  for(i in 1:nrow(Grid)){
-    best = Inf
-    for(j in 1:nrow(means)){
-      best = min(best, t(Grid[i,] - means[j,])%*%solve(Sigma[[j]])%*%(Grid[i,] - means[j,])+weights[j])
-    }
-    res[i] = best
-  }
-  return(res)
-}
-
-
-# MAIN (function to remove means)... to be used in other scripts.
-
-
-remove_bad_means <- function(means,weights,nb_means_removed){
-  # means : matrix of size cxd
-  # weights : vector of size c
-  # nb_means_removed : integer in 0..(c-1)
-  # Remove nb_means_removed means, associated to the largest weights. 
-  # index (resp. bad_index) contains the former indices of the means kept (resp. removed)
-  w = sort(weights, index.return = TRUE)
-  nb_means_kept = length(weights) - nb_means_removed
-  indx = w$ix[1:nb_means_kept]
-  if(nb_means_removed>0){
-    bad_index = w$ix[(nb_means_kept+1):length(weights)]
-  }else{
-    bad_index = c()
-  }
-  return(list(index=indx,bad_index = bad_index, means=means[indx,],weights = weights[indx]))
-}
-
-
-# Auxiliary function - Important !!!
-
-
 hierarchical_clustering_lem <- function(matrice_hauteur,Stop = Inf,Seuil = Inf,store_all_colors = FALSE,store_all_step_time = FALSE){
   # matrice_hauteur : (r_{i,j})_{i,j} r_{i,j} : time r when components i and j merge
   # r_{i,i} : birth time of component i.
@@ -343,8 +296,6 @@ hierarchical_clustering_lem <- function(matrice_hauteur,Stop = Inf,Seuil = Inf,s
 }
 
 
-
-
 return_color<- function(centre,couleurs,Indices_depart){
   # centre : vector of integers such that centre[i] is the label of the center associated to the i-th point
   # couleurs[1] : label of the center that is born first, i.e. for the Indice_depart[1]-th center
@@ -358,52 +309,146 @@ return_color<- function(centre,couleurs,Indices_depart){
 
 # MAIN functions (to be used in different scripts)
 
+# Starting the hierarchical clustering algorithm
 
-sig = 520 # Number of points to consider as signal
+hc = hierarchical_clustering_lem(mh, Inf, Inf, FALSE, FALSE)
 
-recolorize <- function(P,sig,means,weights,Sigma){
-  N = nrow(P)
-  distance_min = rep(0,N)
-  color = rep(0,nrow(P))
-  for(j in 1:N){
-    cost = Inf
-    best_ind = 1
-    for(i in 1:nrow(means)){
-      newcost = mahalanobis(P[j,],means[i,],Sigma[[i]])+weights[i]
-      if(newcost<=cost){
-        cost = newcost
-        best_ind = i
-      }
-    }
-    color[j] = best_ind
-    distance_min[j] = cost
-  }
-  distance_sort = sort(distance_min,decreasing = TRUE,index.return=TRUE)
-  if(sig<N){
-    color[distance_sort$ix[1:(N-sig)]]=0
-  }
-  return(list(color = color,cost=distance_min))
-}
-
-
-second_passage_hc <- function(color,matrice_hauteur,Stop=Inf,Seuil = Inf,indexed_by_r2 = TRUE,store_all_colors = FALSE,store_all_step_time = FALSE){
-  # Starting the hierarchical clustering algorithm
-  hc = hierarchical_clustering_lem(matrice_hauteur,Stop = Stop,Seuil = Seuil,store_all_colors,store_all_step_time)
-  # Transforming colors # Problem : color contains less than sig signal points...
-  color = return_color(color,hc$color,hc$Indices_depart)
-  return(list(color = color,hierarchical_clustering = hc))
-}
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-# First passage for the clustering Algorithm
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-fp_hc = second_passage_hc(color,mh,Stop=Inf,Seuil = Inf)
+color = return_color(color,hc$color,hc$Indices_depart)
 
 """
+
+struct HClust
+
+  couleurs :: Vector{Int}
+  Couleurs :: Vector{Vector{Int}}
+  Temps_step :: Vector{Matrix{Float64}}
+  Naissance :: Vector{Float64}
+  Mort :: Vector{Float64}
+  Indices_depart :: Vector{Int}
+
+end
+
+"""
+- matrice_hauteur : ``(r_{i,j})_{i,j} r_{i,j}`` : time ``r`` when components ``i`` and ``j`` merge
+- ``r_{i,i}`` : birth time of component ``i``.
+- c : number of components
+- Stop : components whose lifetime is larger than Stop never die
+- Seuil : centers born after Seuil are removed
+- It is possible to select Stop and Seuil after running the algorithm with Stop = Inf and Seuil = Inf
+- For this, we look at the persistence diagram of the components : (x-axis Birth ; y-axis Death)
+- store_all_colors = TRUE : in the list Couleurs, we store all configurations of colors, for every step.
+- Thresholding
+"""
+function hierarchical_clustering_lem(matrice_hauteur; Stop = Inf, Seuil = Inf, 
+                        store_all_colors = false, store_all_step_time = false)
+
+  # Matrice_hauteur is modified such that diagonal elements are non-decreasing
+
+  ix = sortperm(diag(matrice_hauteur))
+  x = view(diag(matrice_hauteur), ix)
+
+  c = sum(x .<= Seuil)
+
+  if c == 0
+      return [], [], [], []
+  elseif c == 1
+      return [1], x[1], [Inf], ix[1]
+  end
+
+  Indices_depart = ix[1:c] # Initial indices of the centers born at time mh_sort$x
+
+  Naissance = x[1:c]
+  Mort = fill(Inf,c) 
+  couleurs = zeros(c)
+  Couleurs = nothing
+  Temps_step = nothing
+  if store_all_colors
+    Couleurs = Vector{Int}[] # list of the different vectors of couleurs for the different loops of the algorithm
+  end
+  step = 1
+  matrice_dist = fill(Inf, c, c) # The new matrice_hauteur
+
+  for i in 1:c
+    matrice_dist[i,i] = Naissance[i]
+  end
+
+  for i in 2:c 
+    for j in 1:(i-1)
+      matrice_dist[i,j] = min(matrice_hauteur[Indices_depart[i],Indices_depart[j]],
+                              matrice_hauteur[Indices_depart[j],Indices_depart[i]])
+    end # i>j : component i appears after component j, they dont merge before i appears
+  end
+
+  # Initialization :
+
+  continu = true
+  indice = 1 # Only components with index not larger than indice are considered
+
+  indice_hauteur = Tuple(argmin(matrice_dist[1:indice,:]))
+  ihj = (indice_hauteur .- 1) .÷ c .+ 1
+  ihi = indice_hauteur .- (ihj .- 1) .* c
+  temps_step = matrice_dist[ihi,ihj] # Next time when something appends (a component get born or two components merge)
+  if store_all_step_time
+    Temps_step = Float64[]
+  end
+
+  # ihi >= ihj since the matrix is triangular inferior with infinity value above the diagonal
+
+  while(continu)
+
+    if temps_step == matrice_dist[ihi,ihi] # Component ihi birth
+      couleurs[ihi] = ihi
+      matrice_dist[ihi,ihi] = Inf # No need to get born any more
+      indice = indice + 1
+    else   # Components of the same color as ihi and of the same color as ihj merge
+      coli0 = couleurs[ihi]
+      colj0 = couleurs[ihj]
+      coli = max(coli0,colj0)
+      colj = min(coli0,colj0)
+      if temps_step - Naissance[coli] <= Stop # coli and colj merge
+        for i in 1:min(indice,c) # NB ihi<=indice, so couleurs[ihi] = couleurs[ihj]
+          if couleurs[i] == coli
+            couleurs[i] = colj
+            for j in 1:min(indice,c)
+              if couleurs[j] == colj
+                matrice_dist[i,j] = Inf
+                matrice_dist[j,i] = Inf # Already of the same color. No need to be merged later
+              end
+            end
+          end
+        end
+        Mort[coli] = temps_step
+      else # Component coli dont die, since lives longer than Stop.
+        for i in 1:min(indice,c) # NB ihi<=indice, so couleurs[ihi] = couleurs[ihj]
+          if couleurs[i] == coli
+            for j in 1:min(indice,c)
+              if couleurs[j] == colj
+                matrice_dist[i,j] = Inf
+                matrice_dist[j,i] = Inf # We will always have temps_step - Naissance[coli] > Stop, so they will never merge...
+              end
+            end
+          end
+        end
+      end
+    end
+
+    indice_hauteur = argmin(matrice_dist[1:min(indice,c),])
+    ihj = (indice_hauteur-1) ÷ min(indice,c) + 1
+    ihi = indice_hauteur - (ihj-1) * min(indice,c)
+    temps_step = matrice_dist[ihi,ihj]
+    continu = (temps_step != Inf)
+    step = step + 1
+
+    store_all_colors && push!(Couleurs, couleurs)
+    store_all_step_time && push!(Temps_step, temps_step)
+    
+  end
+
+  HClust( couleurs, Couleurs, Temps_step, Naissance, Mort, Indices_depart)
+
+end
+
+hc = hierarchical_clustering_lem(mh)
 
 #===
 

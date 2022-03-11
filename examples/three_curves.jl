@@ -46,36 +46,8 @@ dist_func = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
 
 P = collect(data.points')
 
-@show size(P)
 @rput P
 
-
-centers = vcat(dist_func.centers'...)
-@rput centers
-means = vcat(dist_func.μ'...)
-@rput means
-weights = dist_func.weights
-@rput weights
-Sigma = dist_func.Σ
-@rput Sigma
-
-
-R"""
-
-dic_lambda <- function(x,y,eigval,c,omega){
-  h <- (x+y)/2
-  f_moy = sum((eigval-h^2) / (eigval+h)^2 * eigval * c^2)
-  err = abs(f_moy - omega)
-  if(f_moy>omega){
-    x = (x+y)/2
-    return(list(x = x, y = y, err = err))
-  }
-  else{
-    y = (x+y)/2
-    return(list(x = x, y = y, err = err))
-  }
-}
-"""
 
 function dic_lambda(x, y, eigval, c, omega)
     h = (x + y) / 2
@@ -88,19 +60,6 @@ function dic_lambda(x, y, eigval, c, omega)
     end
     return x, y, err
 end
-
-
-R"""
-lambda_solution <- function(omega,eigval,c){
-  res = list(x = 0, y = 2*max(sqrt(eigval)), err = Inf)
-  while(res$err>=0.001){
-    x = res$x
-    y = res$y
-    res = dic_lambda(x,y,eigval,c,omega)
-  }
-  return((x+y)/2)
-}
-"""
 
 function lambda_solution(omega, eigval, c)
 
@@ -116,72 +75,12 @@ function lambda_solution(omega, eigval, c)
     return (x + y) / 2
 end
 
-
-R"""
-r_solution <- function(omega_1,omega_2,eigval,c){ # C'est le r^2 si les omega sont positifs...
-  if(sum(c^2)<=omega_2-omega_1){
-    return (omega_2)
-  }
-  else{
-    lambda = lambda_solution(omega_2-omega_1,eigval,c)
-    return(omega_2+sum(((lambda*c)/(lambda+eigval))^2*eigval))
-  }
-}
-"""
-
 function r_solution(ω₁, ω₂, eigval, c) # C'est le r^2 si les omega sont positifs...
     if sum(c .^ 2) <= ω₂ - ω₁
         return ω₂
     else
         λ = lambda_solution(ω₂ - ω₁, eigval, c)
         return ω₂ .+ sum(((λ .* c) ./ (λ .+ eigval)).^2 .* eigval)
-    end
-end
-
-
-R"""
-intersection_radius <- function(Sigma_1,Sigma_2,c_1,c_2,omega_1,omega_2){
-  if(!(all.equal(t(Sigma_1),Sigma_1)==TRUE) || !(all.equal(t(Sigma_2),Sigma_2)==TRUE)){
-    return("Sigma_1 and Sigma_2 should be symmetrical matrices")
-  }
-  if(nrow(Sigma_1)!=length(c_1) || nrow(Sigma_2)!=length(c_2) || length(c_1)!=length(c_2)){
-    return("c_1 and c_2 should have the same length, this length should be the number of row of Sigma_1 and of Sigma_2")
-  }
-  c_1 = matrix(c_1,nrow = length(c_1),ncol = 1)
-  c_2 = matrix(c_2,nrow = length(c_2),ncol = 1)
-  if(omega_1>omega_2){
-    omega_aux = omega_1
-    omega_1 = omega_2
-    omega_2 = omega_aux
-    Sigma_aux = Sigma_1
-    Sigma_1 = Sigma_2
-    Sigma_2 = Sigma_aux
-    c_aux = c_1
-    c_1 = c_2
-    c_2 = c_aux # Now, omega_1\leq omega_2
-  }
-  eig_1 = eigen(Sigma_1)
-  P_1 = eig_1$vectors
-  sq_D_1 = diag(sqrt(eig_1$values))
-  inv_sq_D_1 = diag(sqrt(eig_1$values)^(-1))
-  eig_2 = eigen(Sigma_2)
-  P_2 = eig_2$vectors
-  inv_D_2 = diag(eig_2$values^(-1))
-  tilde_Sigma = sq_D_1%*%t(P_1)%*%P_2%*%inv_D_2%*%t(P_2)%*%P_1%*%sq_D_1
-  tilde_eig = eigen(tilde_Sigma)
-  tilde_eigval = tilde_eig$values
-  tilde_P = tilde_eig$vectors
-  tilde_c = t(tilde_P)%*%inv_sq_D_1%*%t(P_1)%*%(c_2-c_1)
-  r_sq = r_solution(omega_1,omega_2,tilde_eigval,tilde_c)
-  return(r_sq)
-}
-
-
-"""
-
-function swap!(a, b)
-    for i in eachindex(a, b)
-        @inbounds a[i], b[i] = b[i], a[i]
     end
 end
 
@@ -218,49 +117,6 @@ function intersection_radius(Σ₁, Σ₂, μ₁, μ₂, ω₁, ω₂)
     return r_solution(ω₁, ω₂, tilde_eigval, tilde_c)
 
 end
-
-R"""
-# Distance matrix for the graph filtration
-
-build_matrice_hauteur <- function(means,weights,cov_matrices,indexed_by_r2 = TRUE){
-  # means: matrix of size cxd
-  # weights: vector of size c
-  # cov_matrices: list of c symmetric matrices of size dxd
-  # indexed_by_r2 = TRUE always work ; indexed_by_r2 = FALSE requires elements of weigts to be non-negative.
-  # indexed_by_r2 = FALSE for the sub-level set of the square-root of non-negative power functions : the k-PDTM or the k-PLM (when determinant of matrices are forced to be 1)
-  c = nrow(means)
-  if(c!=length(weights)){return("The number of rows of means should be equal to the length of weights")}
-  matrice_hauteur = matrix(data = Inf,c,c)
-  if(c==1){
-    if(indexed_by_r2){
-      return(c(weights[1]))
-    }
-    else{ # Indexed by r -- only for non-negative functions (k-PDTM and k-PLM with det = 1)
-      return(c(sqrt(weights[1])))
-    }
-  }
-  for (i in 1:c){
-    matrice_hauteur[i,i] = weights[i]
-  }
-  for(i in 2:c){
-    for(j in 1:(i-1)){
-      matrice_hauteur[i,j] = intersection_radius(cov_matrices[[i]],cov_matrices[[j]],means[i,],means[j,],weights[i],weights[j])
-      print(matrice_hauteur[i,j])
-    } 
-  }
-  if(indexed_by_r2){
-    return(matrice_hauteur)
-  }
-  else{
-    return(sqrt(matrice_hauteur))
-  }
-}
-
-matrice_hauteur = build_matrice_hauteur(means,weights,Sigma,indexed_by_r2 = TRUE)
-
-"""
-
-
 
 """
     build_matrix(result; indexed_by_r2 = true)
@@ -308,20 +164,25 @@ end
 
 mh = build_matrix(dist_func)
 
-@test matrice_hauteur ≈ mh
+@rput mh
 
+# R"""
+# library(here)
+# source(here("test","colorize.r"))
+# source(here("test","kplm.r"))
+# f_Sigma <- function(Sigma){return(Sigma)}
+# results <- kplm(P, k, c, nsignal, iter_max, nstart, f_Sigma)
+# """
+# 
+# @rget results
+# 
+# @test dist_func.colors ≈ trunc.(Int, results[:color])
 
-#==
+color = dist_func.colors
 
+@rput color
 
-
-#@test matrice_hauteur ≈ mh
-
-path = "."
-
-#list(centers =  centers,means = recolor$means,weights = recolor$weights,color_old = color_old,color= recolor$color,Sigma = Sigma, cost = opt$cost))
-
-
+R"""
 
 # Function to compute the value of a power function f associated to c means, weights and matrices (in the list Sigma)
 # without removing bad means (i.e. means associated with the largest weights)
@@ -525,13 +386,26 @@ recolorize <- function(P,sig,means,weights,Sigma){
 }
 
 
-second_passage_hc <- function(dist_func,matrice_hauteur,Stop=Inf,Seuil = Inf,indexed_by_r2 = TRUE,store_all_colors = FALSE,store_all_step_time = FALSE){
+second_passage_hc <- function(color,matrice_hauteur,Stop=Inf,Seuil = Inf,indexed_by_r2 = TRUE,store_all_colors = FALSE,store_all_step_time = FALSE){
   # Starting the hierarchical clustering algorithm
   hc = hierarchical_clustering_lem(matrice_hauteur,Stop = Stop,Seuil = Seuil,store_all_colors,store_all_step_time)
   # Transforming colors # Problem : color contains less than sig signal points...
-  color = return_color(dist_func$color,hc$color,hc$Indices_depart)
+  color = return_color(color,hc$color,hc$Indices_depart)
   return(list(color = color,hierarchical_clustering = hc))
 }
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+# First passage for the clustering Algorithm
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+fp_hc = second_passage_hc(color,mh,Stop=Inf,Seuil = Inf)
+
+"""
+
+#===
 
 color_points_from_centers <- function(P,k,sig,dist_func,hc,plot = FALSE){
   Col = hc$color
@@ -620,15 +494,6 @@ plot_pointset_centers_ellipsoids_dim2 <- function(P,color,centers,weights,Sigma,
 
 
 
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-# First passage for the clustering Algorithm
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-fp_hc = second_passage_hc(dist_func,matrice_hauteur,Stop=Inf,Seuil = Inf)
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

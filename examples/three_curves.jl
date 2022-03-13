@@ -151,7 +151,7 @@ function build_matrix(result; indexed_by_r2 = true)
             mh[i, j] = intersection_radius(
                 result.Σ[i], result.Σ[j],
                 result.μ[i], result.μ[j],
-                weights[i], weights[j])
+                result.weights[i], result.weights[j])
         end
     end
 
@@ -359,9 +359,9 @@ function hierarchical_clustering_lem(matrice_hauteur; Stop = Inf, Seuil = Inf,
 
   Naissance = x[1:c]
   Mort = fill(Inf,c) 
-  couleurs = zeros(c)
-  Couleurs = nothing
-  Temps_step = nothing
+  couleurs = zeros(Int, c)
+  Couleurs = [couleurs]
+  Temps_step = [0.0]
   if store_all_colors
     Couleurs = Vector{Int}[] # list of the different vectors of couleurs for the different loops of the algorithm
   end
@@ -384,9 +384,9 @@ function hierarchical_clustering_lem(matrice_hauteur; Stop = Inf, Seuil = Inf,
   continu = true
   indice = 1 # Only components with index not larger than indice are considered
 
-  indice_hauteur = Tuple(argmin(matrice_dist[1:indice,:]))
-  ihj = (indice_hauteur .- 1) .÷ c .+ 1
-  ihi = indice_hauteur .- (ihj .- 1) .* c
+  @show indice_hauteur = argmin(matrice_dist[1,:])[1]
+  @show ihj = (indice_hauteur .- 1) .÷ c .+ 1
+  @show ihi = indice_hauteur .- (ihj .- 1) .* c
   temps_step = matrice_dist[ihi,ihj] # Next time when something appends (a component get born or two components merge)
   if store_all_step_time
     Temps_step = Float64[]

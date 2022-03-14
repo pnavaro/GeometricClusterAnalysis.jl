@@ -9,5 +9,6 @@ include("infinity_symbol.jl")
 include("mahalanobis.jl")
 include("colorize.jl")
 include("kplm.jl")
+include("hclust.jl")
 
 end

@@ -51,7 +51,7 @@ P = collect(data.points')
 
 function dic_lambda(x, y, eigval, c, omega)
     h = (x + y) / 2
-    f_moy = sum((eigval .- h^2) ./ (eigval .+ h).^2 .* eigval .* c.^2)
+    f_moy = sum((eigval .- h^2) ./ (eigval .+ h) .^ 2 .* eigval .* c .^ 2)
     err = abs(f_moy - omega)
     if f_moy > omega
         x = (x + y) / 2
@@ -80,7 +80,7 @@ function r_solution(ω₁, ω₂, eigval, c) # C'est le r^2 si les omega sont po
         return ω₂
     else
         λ = lambda_solution(ω₂ - ω₁, eigval, c)
-        return ω₂ .+ sum(((λ .* c) ./ (λ .+ eigval)).^2 .* eigval)
+        return ω₂ .+ sum(((λ .* c) ./ (λ .+ eigval)) .^ 2 .* eigval)
     end
 end
 
@@ -146,12 +146,16 @@ function build_matrix(result; indexed_by_r2 = true)
         mh[i, i] = result.weights[i]
     end
 
-    for i = 2:c 
+    for i = 2:c
         for j = 1:(i-1)
             mh[i, j] = intersection_radius(
-                result.Σ[i], result.Σ[j],
-                result.μ[i], result.μ[j],
-                result.weights[i], result.weights[j])
+                result.Σ[i],
+                result.Σ[j],
+                result.μ[i],
+                result.μ[j],
+                result.weights[i],
+                result.weights[j],
+            )
         end
     end
 
@@ -279,9 +283,11 @@ hierarchical_clustering_lem <- function(matrice_hauteur,Stop = Inf,Seuil = Inf,s
         }
       }
     }
+    print(matrice_dist[1:min(indice,c),])
     indice_hauteur = which.min(matrice_dist[1:min(indice,c),])
     ihj = (indice_hauteur-1) %/% min(indice,c) + 1
     ihi = indice_hauteur - (ihj-1) * min(indice,c)
+    print(indice_hauteur)
     temps_step = matrice_dist[ihi,ihj]
     continu = (temps_step != Inf)
     step = step + 1
@@ -311,22 +317,12 @@ return_color<- function(centre,couleurs,Indices_depart){
 
 # Starting the hierarchical clustering algorithm
 
-hc = hierarchical_clustering_lem(mh, Inf, Inf, FALSE, FALSE)
+rhc = hierarchical_clustering_lem(mh, Inf, Inf, FALSE, FALSE)
 
 color = return_color(color,hc$color,hc$Indices_depart)
 
 """
 
-struct HClust
-
-  couleurs :: Vector{Int}
-  Couleurs :: Vector{Vector{Int}}
-  Temps_step :: Vector{Matrix{Float64}}
-  Naissance :: Vector{Float64}
-  Mort :: Vector{Float64}
-  Indices_depart :: Vector{Int}
-
-end
 
 """
 - matrice_hauteur : ``(r_{i,j})_{i,j} r_{i,j}`` : time ``r`` when components ``i`` and ``j`` merge
@@ -339,116 +335,134 @@ end
 - store_all_colors = TRUE : in the list Couleurs, we store all configurations of colors, for every step.
 - Thresholding
 """
-function hierarchical_clustering_lem(matrice_hauteur; Stop = Inf, Seuil = Inf, 
-                        store_all_colors = false, store_all_step_time = false)
+function hierarchical_clustering_lem(
+    matrice_hauteur;
+    Stop = Inf,
+    Seuil = Inf,
+    store_all_colors = false,
+    store_all_step_time = false,
+)
 
-  # Matrice_hauteur is modified such that diagonal elements are non-decreasing
+    # Matrice_hauteur is modified such that diagonal elements are non-decreasing
 
-  ix = sortperm(diag(matrice_hauteur))
-  x = view(diag(matrice_hauteur), ix)
+    ix = sortperm(diag(matrice_hauteur))
+    x = sort(diag(matrice_hauteur))
 
-  c = sum(x .<= Seuil)
+    c = sum(x .<= Seuil)
 
-  if c == 0
-      return [], [], [], []
-  elseif c == 1
-      return [1], x[1], [Inf], ix[1]
-  end
-
-  Indices_depart = ix[1:c] # Initial indices of the centers born at time mh_sort$x
-
-  Naissance = x[1:c]
-  Mort = fill(Inf,c) 
-  couleurs = zeros(Int, c)
-  Couleurs = [couleurs]
-  Temps_step = [0.0]
-  if store_all_colors
-    Couleurs = Vector{Int}[] # list of the different vectors of couleurs for the different loops of the algorithm
-  end
-  step = 1
-  matrice_dist = fill(Inf, c, c) # The new matrice_hauteur
-
-  for i in 1:c
-    matrice_dist[i,i] = Naissance[i]
-  end
-
-  for i in 2:c 
-    for j in 1:(i-1)
-      matrice_dist[i,j] = min(matrice_hauteur[Indices_depart[i],Indices_depart[j]],
-                              matrice_hauteur[Indices_depart[j],Indices_depart[i]])
-    end # i>j : component i appears after component j, they dont merge before i appears
-  end
-
-  # Initialization :
-
-  continu = true
-  indice = 1 # Only components with index not larger than indice are considered
-
-  @show indice_hauteur = argmin(matrice_dist[1,:])[1]
-  @show ihj = (indice_hauteur .- 1) .÷ c .+ 1
-  @show ihi = indice_hauteur .- (ihj .- 1) .* c
-  temps_step = matrice_dist[ihi,ihj] # Next time when something appends (a component get born or two components merge)
-  if store_all_step_time
-    Temps_step = Float64[]
-  end
-
-  # ihi >= ihj since the matrix is triangular inferior with infinity value above the diagonal
-
-  while(continu)
-
-    if temps_step == matrice_dist[ihi,ihi] # Component ihi birth
-      couleurs[ihi] = ihi
-      matrice_dist[ihi,ihi] = Inf # No need to get born any more
-      indice = indice + 1
-    else   # Components of the same color as ihi and of the same color as ihj merge
-      coli0 = couleurs[ihi]
-      colj0 = couleurs[ihj]
-      coli = max(coli0,colj0)
-      colj = min(coli0,colj0)
-      if temps_step - Naissance[coli] <= Stop # coli and colj merge
-        for i in 1:min(indice,c) # NB ihi<=indice, so couleurs[ihi] = couleurs[ihj]
-          if couleurs[i] == coli
-            couleurs[i] = colj
-            for j in 1:min(indice,c)
-              if couleurs[j] == colj
-                matrice_dist[i,j] = Inf
-                matrice_dist[j,i] = Inf # Already of the same color. No need to be merged later
-              end
-            end
-          end
-        end
-        Mort[coli] = temps_step
-      else # Component coli dont die, since lives longer than Stop.
-        for i in 1:min(indice,c) # NB ihi<=indice, so couleurs[ihi] = couleurs[ihj]
-          if couleurs[i] == coli
-            for j in 1:min(indice,c)
-              if couleurs[j] == colj
-                matrice_dist[i,j] = Inf
-                matrice_dist[j,i] = Inf # We will always have temps_step - Naissance[coli] > Stop, so they will never merge...
-              end
-            end
-          end
-        end
-      end
+    if c == 0
+        return [], [], [], []
+    elseif c == 1
+        return [1], x[1], [Inf], ix[1]
     end
 
-    indice_hauteur = argmin(matrice_dist[1:min(indice,c),])
-    ihj = (indice_hauteur-1) ÷ min(indice,c) + 1
-    ihi = indice_hauteur - (ihj-1) * min(indice,c)
-    temps_step = matrice_dist[ihi,ihj]
-    continu = (temps_step != Inf)
-    step = step + 1
+    Indices_depart = ix[1:c] # Initial indices of the centers born at time mh_sort$x
 
-    store_all_colors && push!(Couleurs, couleurs)
-    store_all_step_time && push!(Temps_step, temps_step)
-    
-  end
+    Naissance = x[1:c]
+    Mort = fill(Inf, c)
+    couleurs = zeros(Int, c)
+    Couleurs = [couleurs]
+    Temps_step = [0.0]
+    if store_all_colors
+        Couleurs = Vector{Int}[] # list of the different vectors of couleurs for the different loops of the algorithm
+    end
+    step = 1
+    matrice_dist = fill(Inf, c, c) # The new matrice_hauteur
 
-  HClust( couleurs, Couleurs, Temps_step, Naissance, Mort, Indices_depart)
+    for i = 1:c
+        matrice_dist[i, i] = Naissance[i]
+    end
+
+    for i = 2:c
+        for j = 1:(i-1)
+            matrice_dist[i, j] = min(
+                matrice_hauteur[Indices_depart[i], Indices_depart[j]],
+                matrice_hauteur[Indices_depart[j], Indices_depart[i]],
+            )
+        end # i>j : component i appears after component j, they dont merge before i appears
+    end
+
+    # Initialization :
+
+    continu = true
+    indice = 1 # Only components with index not larger than indice are considered
+
+    indice_hauteur = argmin(vec(matrice_dist[1, :]))
+    ihj = (indice_hauteur .- 1) .÷ c .+ 1
+    ihi = indice_hauteur .- (ihj .- 1) .* c
+    temps_step = matrice_dist[ihi, ihj] # Next time when something appends (a component get born or two components merge)
+    if store_all_step_time
+        Temps_step = Float64[]
+    end
+
+    # ihi >= ihj since the matrix is triangular inferior with infinity value above the diagonal
+
+    while (continu)
+
+        if temps_step == matrice_dist[ihi, ihi] # Component ihi birth
+            couleurs[ihi] = ihi
+            matrice_dist[ihi, ihi] = Inf # No need to get born any more
+            indice += 1
+        else   # Components of the same color as ihi and of the same color as ihj merge
+            coli0 = couleurs[ihi]
+            colj0 = couleurs[ihj]
+            coli = max(coli0, colj0)
+            colj = min(coli0, colj0)
+            if temps_step - Naissance[coli] <= Stop # coli and colj merge
+                for i = 1:min(indice, c) # NB ihi<=indice, so couleurs[ihi] = couleurs[ihj]
+                    if couleurs[i] == coli
+                        couleurs[i] = colj
+                        for j = 1:min(indice, c)
+                            if couleurs[j] == colj
+                                matrice_dist[i, j] = Inf
+                                matrice_dist[j, i] = Inf # Already of the same color. No need to be merged later
+                            end
+                        end
+                    end
+                end
+                Mort[coli] = temps_step
+            else # Component coli dont die, since lives longer than Stop.
+                for i = 1:min(indice, c) # NB ihi<=indice, so couleurs[ihi] = couleurs[ihj]
+                    if couleurs[i] == coli
+                        for j = 1:min(indice, c)
+                            if couleurs[j] == colj
+                                matrice_dist[i, j] = Inf
+                                matrice_dist[j, i] = Inf # We will always have temps_step - Naissance[coli] > Stop, so they will never merge...
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        @show indice
+        @show matrice_dist[1:min(indice, c),:]
+        @show indice_hauteur = argmin(vec(matrice_dist[1:min(indice, c),:]))
+        ihj = (indice_hauteur - 1) ÷ min(indice, c) + 1
+        ihi = indice_hauteur - (ihj - 1) * min(indice, c)
+        temps_step = matrice_dist[ihi, ihj]
+        continu = (temps_step != Inf)
+        step = step + 1
+
+        store_all_colors && push!(Couleurs, couleurs)
+        store_all_step_time && push!(Temps_step, temps_step)
+
+    end
+
+    HClust(couleurs, Couleurs, Temps_step, Naissance, Mort, Indices_depart)
 
 end
 
 hc = hierarchical_clustering_lem(mh)
+
+display(hc)
+
+@rget rhc
+
+@test rhc[:Naissance] ≈ hc.Naissance
+@test rhc[:Indices_depart] ≈ hc.Indices_depart
+@test rhc[:Mort] ≈ hc.Mort
+
 
 #===
 

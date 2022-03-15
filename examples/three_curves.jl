@@ -3,6 +3,7 @@ using LinearAlgebra
 using Plots
 using Random
 using RCall
+using Statistics
 using Test
 
 R"""
@@ -14,13 +15,13 @@ library("ggforce")
 nrow(A::AbstractMatrix) = size(A)[1]
 ncol(A::AbstractMatrix) = size(A)[2]
 
-nsignal = 100   # number of signal points
-nnoise = 20     # number of outliers
+nsignal = 500   # number of signal points
+nnoise = 200     # number of outliers
 dim = 2         # dimension of the data
 sigma = 0.02    # standard deviation for the additive noise
 nb_clusters = 3 # number of clusters
 k = 10           # number of nearest neighbors
-c = 5          # number of ellipsoids
+c = 50          # number of ellipsoids
 iter_max = 100  # maximum number of iterations of the algorithm kPLM
 nstart = 10     # number of initializations of the algorithm kPLM
 
@@ -283,11 +284,9 @@ hierarchical_clustering_lem <- function(matrice_hauteur,Stop = Inf,Seuil = Inf,s
         }
       }
     }
-    print(matrice_dist[1:min(indice,c),])
     indice_hauteur = which.min(matrice_dist[1:min(indice,c),])
     ihj = (indice_hauteur-1) %/% min(indice,c) + 1
     ihi = indice_hauteur - (ihj-1) * min(indice,c)
-    print(indice_hauteur)
     temps_step = matrice_dist[ihi,ihj]
     continu = (temps_step != Inf)
     step = step + 1
@@ -319,7 +318,7 @@ return_color<- function(centre,couleurs,Indices_depart){
 
 rhc = hierarchical_clustering_lem(mh, Inf, Inf, FALSE, FALSE)
 
-color = return_color(color,hc$color,hc$Indices_depart)
+color = return_color(color,rhc$color,rhc$Indices_depart)
 
 """
 
@@ -361,11 +360,8 @@ function hierarchical_clustering_lem(
     Naissance = x[1:c]
     Mort = fill(Inf, c)
     couleurs = zeros(Int, c)
-    Couleurs = [couleurs]
-    Temps_step = [0.0]
-    if store_all_colors
-        Couleurs = Vector{Int}[] # list of the different vectors of couleurs for the different loops of the algorithm
-    end
+    Temps_step = Float64[]
+    Couleurs = Vector{Int}[] # list of the different vectors of couleurs for the different loops of the algorithm
     step = 1
     matrice_dist = fill(Inf, c, c) # The new matrice_hauteur
 
@@ -435,9 +431,7 @@ function hierarchical_clustering_lem(
             end
         end
 
-        @show indice
-        @show matrice_dist[1:min(indice, c),:]
-        @show indice_hauteur = argmin(vec(matrice_dist[1:min(indice, c),:]))
+        indice_hauteur = argmin(vec(matrice_dist[1:min(indice, c),:]))
         ihj = (indice_hauteur - 1) ÷ min(indice, c) + 1
         ihi = indice_hauteur - (ihj - 1) * min(indice, c)
         temps_step = matrice_dist[ihi, ihj]
@@ -453,18 +447,111 @@ function hierarchical_clustering_lem(
 
 end
 
+"""
+- centre : vector of integers such that centre[i] is the label of the center associated to the i-th point
+- couleurs[1] : label of the center that is born first, i.e. for the Indice_depart[1]-th center
+"""
+function return_color(centre, couleurs, Indices_depart)
+  color = zeros(Int, length(centre))
+  for i in eachindex(Indices_depart)
+    color[centre .== Indices_depart[i]] .= couleurs[i]
+  end
+  return color
+end
+
 hc = hierarchical_clustering_lem(mh)
 
 display(hc)
 
 @rget rhc
 
+display(rhc)
+
+@test Int.(rhc[:color]) ≈ hc.couleurs
 @test rhc[:Naissance] ≈ hc.Naissance
 @test rhc[:Indices_depart] ≈ hc.Indices_depart
 @test rhc[:Mort] ≈ hc.Mort
 
+@rget color
 
-#===
+@test Int.(color) ≈ return_color(color, hc.couleurs, hc.Indices_depart)
+
+
+R"""
+plot_birth_death <- function(hierarchical_clustering, lim_min = 0, lim_max = 1, filename="persistence_diagram.pdf",path="results/",plot = TRUE){
+  lim = c(lim_min,lim_max)
+  hcMort = hierarchical_clustering$Mort
+  hcMort[hcMort > lim_max] = lim_max
+  grid = seq(lim[1],lim[2],by = 0.01)
+  Birth = hierarchical_clustering$Naissance
+  Death = hcMort
+
+  print(Birth)
+  print(Death)
+  if(plot){
+    gp = ggplot() + geom_point(aes(x = Birth,y = Death),col = "black") + geom_line(aes(grid,grid))
+    print(gp)
+    ggsave(plot = gp,filename = filename,path= path)
+  }
+  return(hierarchical_clustering$Mort-hierarchical_clustering$Naissance)
+}
+
+path = "./"
+filename = "persistence_diagram_r.png"
+
+plot_birth_death(rhc, lim_min = -15, lim_max = -4, filename=filename, path=path)
+
+nb_means_removed = 5 # To choose, for the paper example : 5
+
+lengthn = length(rhc$Naissance)
+if(nb_means_removed > 0){
+  Seuil = mean(c(rhc$Naissance[lengthn - nb_means_removed], rhc$Naissance[lengthn - nb_means_removed + 1]))
+}else{
+  Seuil = Inf
+}
+
+rhc2 = hierarchical_clustering_lem(mh, Inf, Seuil, FALSE, FALSE)
+
+filename = "persistence_diagram_r2.png"
+
+bd = plot_birth_death(rhc2, lim_min = -15, lim_max = 10, filename=filename, path=path)
+"""
+
+function plot_birth_death(hc; lim_min = 0, lim_max = 1, filename = "persistence_diagram") 
+
+  hcMort = hc.Mort
+  hcMort .= min.(hcMort, lim_max)
+  birth = hc.Naissance
+  death = hcMort
+
+  print(birth)
+  print(death)
+  plot( lim_min:lim_max, lim_min:lim_max )
+  scatter!( birth, death, aspect_ratio = :equal, legend = false )
+  xlims!(lim_min-1, lim_max+1)
+  ylims!(lim_min-1, lim_max+1)
+  png(filename)
+
+  return(hc.Mort .- hc.Naissance)
+
+end
+
+plot_birth_death(hc, lim_min = -15, lim_max = -4) 
+
+nb_means_removed = 5 
+
+lengthn = length(hc.Naissance)
+if nb_means_removed > 0
+    Seuil = mean((hc.Naissance[lengthn - nb_means_removed],hc.Naissance[lengthn - nb_means_removed + 1]))
+else
+  Seuil = Inf
+end
+
+hc2 = hierarchical_clustering_lem(mh, Stop = Inf, Seuil = Seuil)
+
+bd = plot_birth_death(hc2, lim_min = -15, lim_max = 10, filename = "persistence_diagram2")
+
+R"""
 
 color_points_from_centers <- function(P,k,sig,dist_func,hc,plot = FALSE){
   Col = hc$color
@@ -486,21 +573,6 @@ color_points_from_centers <- function(P,k,sig,dist_func,hc,plot = FALSE){
   return(color_final)
 }
 
-
-plot_birth_death <- function(hierarchical_clustering,lim_min = 0,lim_max = 1,filename="persistence_diagram.pdf",path="results/",plot = TRUE){
-  lim = c(lim_min,lim_max)
-  hcMort = hierarchical_clustering$Mort
-  hcMort[hcMort > lim_max] = lim_max
-  grid = seq(lim[1],lim[2],by = 0.01)
-  Birth = hierarchical_clustering$Naissance
-  Death = hcMort
-  if(plot){
-    gp = ggplot() + geom_point(aes(x = Birth,y = Death),col = "black") + geom_line(aes(grid,grid))
-    print(gp)
-    ggsave(plot = gp,filename = filename,path= path)
-  }
-  return(hierarchical_clustering$Mort-hierarchical_clustering$Naissance)
-}
 
 
 plot_pointset_centers_ellipsoids_dim2 <- function(P,color,centers,weights,Sigma,alpha,color_is_numeric = TRUE,fill = FALSE){
@@ -551,33 +623,12 @@ plot_pointset_centers_ellipsoids_dim2 <- function(P,color,centers,weights,Sigma,
   print(gp)
 }
 
+"""
+
+#===
 
 
 
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-# Persistence diagram to select : the number of means to remove : Seuil and the number of clusters
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-filename = "persistence_diagram.pdf"
-plot_birth_death(fp_hc$hierarchical_clustering,lim_min = -15,lim_max = -4,filename=filename,path=path)
-
-nb_means_removed = 5 # To choose, for the paper example : 5
-
-lengthn = length(fp_hc$hierarchical_clustering$Naissance)
-if(nb_means_removed > 0){
-  Seuil = mean(c(fp_hc$hierarchical_clustering$Naissance[lengthn - nb_means_removed],fp_hc$hierarchical_clustering$Naissance[lengthn - nb_means_removed + 1]))
-}else{
-  Seuil = Inf
-}
-
-fp_hc2 = second_passage_hc(dist_func,matrice_hauteur,Stop=Inf,Seuil = Seuil)
-filename = "persistence_diagram2.pdf"
-
-bd = plot_birth_death(fp_hc2$hierarchical_clustering,lim_min = -15,lim_max = 10,filename=filename,path=path)
 sort_bd = sort(bd)
 lengthbd = length(bd)
 Stop = mean(c(sort_bd[lengthbd - nb_clusters],sort_bd[lengthbd - nb_clusters + 1]))

@@ -2,7 +2,7 @@ import Statistics: mean
 
 """
 
-    colorize(points, k, signal, centers, Σ)
+    colorize!( colors, μ, weights, points, k, signal, centers, Σ)
 
 Fonction auxiliaire qui, étant donnés k centres, calcule les "nouvelles 
 distances tordues" de tous les points de P, à tous les centres

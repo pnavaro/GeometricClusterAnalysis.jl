@@ -697,7 +697,7 @@ function plot_ellipsoids(points, color, centers, weights, Σ, α)
        plot!(p, ellipse( c1, c2, sqrt(β[i]*v1), sqrt(β[i]*v2), -sign(w2)*acos(w1)), c = :yellow)
   end
 
-  return p
+  png(p, "clustering")
   
 end
 

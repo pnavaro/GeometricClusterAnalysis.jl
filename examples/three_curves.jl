@@ -452,6 +452,7 @@ end
 - couleurs[1] : label of the center that is born first, i.e. for the Indice_depart[1]-th center
 """
 function return_color(centre, couleurs, Indices_depart)
+
   color = zeros(Int, length(centre))
 
   for i in eachindex(Indices_depart)
@@ -605,6 +606,7 @@ plot_pointset_centers_ellipsoids_dim2 <- function(P,color,centers,weights,Sigma,
     v[i,2] = vi[2]
   }
   beta = (alpha - weights)*(alpha - weights>=0)
+  print(length(beta))
   if(fill){
     gp = gp + geom_ellipse(aes(x0 = centers[,1], y0 = centers[,2], a = sqrt(beta*v[,1]), b = sqrt(beta*v[,2]), angle = -sign(w[,2])*acos(w[,1]),fill = as.factor(1:nrow(centers))))
   }else{
@@ -631,8 +633,6 @@ color_points_from_centers <- function(P,k,sig,centers, Sigma, means, weights, hc
   color_points[color_points==0] = c+1
   color_points = remain_indices[color_points]
   color_points[color_points==0] = c+1
-  print(length(color_points))
-  print(length(remain_indices))
   color_final = return_color(color_points,Col,remain_indices)
   if(plot){
     plot_pointset_centers_ellipsoids_dim2(P,color_final,means[remain_indices,],
@@ -645,32 +645,32 @@ sp_hc = hierarchical_clustering_lem(mh, Stop = Stop, Seuil = Seuil, FALSE, FALSE
 
 col = color_points_from_centers(P,k,nsignal,centers, Sigma, means, weights,sp_hc,plot = TRUE)
 
-filename= "clustering_kPLM.png"
-ggsave(filename = filename,path=path)
-
 """
 
-function ellipse(x0, y0, a, b, θ, color)
+function ellipse(x0, y0, a, b, θ)
 
     pts = Plots.partialcircle(0, 2π, 100, 0.1)
     xc, yc = Plots.unzip(pts)
-	xc .*= a 
+    xc .*= a 
     yc .*= b
-	x = xc .* cos(θ) .- y .* sin(θ) .+ x0
-	y = xc .* sin(θ) .+ y .* cos(θ) .+ x0
-	return Shape(x, y, c = :yellow)
+    x = xc .* cos(θ) .- yc .* sin(θ) .+ x0
+    y = xc .* sin(θ) .+ yc .* cos(θ) .+ y0
+    return Shape(x, y)
 
 end
 
 """
 P a matrix with 2 columns.
-- color_is_numeric = TRUE if color contains numerical values. (the colors of points are given by these values)
-- color_is_numeric = FALSE if color contains integers : the cluster's label. (the points are colored according to their cluster)
-This corresponds to the SUBLEVEL SET ``f^(-1)(alpha)`` of the function
+- color_is_numeric = true if color contains numerical values. (the colors of points are given by these values)
+- color_is_numeric = false if color contains integers : the cluster's label. (the points are colored according to their cluster)
+This corresponds to the SUBLEVEL SET ``f^{-1}(\\alpha)`` of the function
+
 ```math
-  f:x -> min_{i = 1..c} ( \|x-centers[i,]\|^2_{Sigma[[i]]} + weights[i] )
+  f:x \\rightarrow min_{i = 1..c} ( \\|x-centers_i\\|^2_{\\Sigma_i} + weights_i )
 ```
-with ``\|x\|^2_{Sigma} = x^T Sigma^{-1} x``, the squared Mahalanobis norm of x.
+with ``\\|x\\|^2_{\\Sigma} = x^T \\Sigma^{-1} x``, the squared Mahalanobis norm of x.
+
+
 - fill = TRUE : ellipses are filled with the proper color
 - centers : matrix of size cx2
 - alpha : a numeric
@@ -678,44 +678,31 @@ with ``\|x\|^2_{Sigma} = x^T Sigma^{-1} x``, the squared Mahalanobis norm of x.
 - Sigma : list of c 2x2-matrices
 
 The ellipses are directed by the eigenvectors of the matrices in Sigma, with :
-  - semi-major axis : sqrt(beta*v1) 
-  - semi-minor axis : sqrt(beta*v2)
+  - semi-major axis : ``\\sqrt(beta*v1)``
+  - semi-minor axis : ``\\sqrt(beta*v2)``
   - with v1 and v2 the largest and smallest eigenvalues of the matrices in Sigma
   - beta = the positive part of alpha - weights
 """
-function plot_pointset_centers_ellipsoids_dim2(points, color, centers, weights, Sigma,
-                                               alpha; color_is_numeric = true, fill = false)
-  x = points[1,:]
-  y = points[2,:]
+function plot_ellipsoids(points, color, centers, weights, Σ, α)
 
-  p = plot(; aspect_ratio = :equal)
-  scatter(p, x, y, palette = :rainbow)
+  p = plot(; aspect_ratio = :equal, legend = false)
+  scatter!(p, points[1,:], points[2,:], c = color, ms = 2)
 
-  w = zeros(nrow(centers),2)
-  v = zeros(nrow(centers),2)
+  β = (α .- weights) .* (α .- weights .>= 0)
 
-  for i in 1:nrow(centers)
-    eig = eigen(Sigma[[i]])
-    wi = eig.vector
-    vi = eig.value
-    w[i,1] = wi[1,1]
-    w[i,2] = wi[1,2]
-    v[i,1] = vi[1]
-    v[i,2] = vi[2]
+  for i in eachindex(centers) 
+       c1, c2 = centers[i]
+       v1, v2 = sort(eigvals(Σ[i]))
+       w1, w2 = eigvecs(Σ[i])[:,2]
+       plot!(p, ellipse( c1, c2, sqrt(β[i]*v1), sqrt(β[i]*v2), -sign(w2)*acos(w1)), c = :yellow)
   end
-  beta = (alpha - weights)*(alpha - weights>=0)
 
-  p = scatter(centers)
-  if fill
-	for c in centers 
-        plot!(ellipse( c[1], c[2], 
-			  sqrt(beta*v[:,1]), sqrt(beta*v[,2]), 
-			  -sign(w[,2])*acos(w[,1])))
-  end
+  return p
   
 end
 
-function color_points_from_centers(points, k, nsignal, model, hc; plot = false)
+function color_points_from_centers(points, k, nsignal, model, hc)
+
   remain_indices = hc.Indices_depart
 
   matrices = [model.Σ[i] for i in remain_indices]
@@ -725,18 +712,15 @@ function color_points_from_centers(points, k, nsignal, model, hc; plot = false)
   GeometricClusterAnalysis.colorize!(color_points, model.μ, model.weights, points, k, nsignal, 
             remain_centers, matrices)
 
+
   c = length(weights)
-  remain_indices = vcat(remain_indices,zeros(Int,c+1-length(remain_indices)))
-  @show length(color_points)
-  @show length(remain_indices)
-  color_points[color_points .== 0] .= c + 1
-  color_points .= remain_indices[color_points]
+  remain_indices_2 = vcat(remain_indices,zeros(Int,c+1-length(remain_indices)))
+  color_points[color_points .== 0] .= c+1
+  color_points .= [remain_indices_2[c] for c in color_points] 
   color_points[color_points .== 0] .= c+1
   color_final = return_color(color_points, hc.couleurs, remain_indices)
-  if plot
-    plot_pointset_centers_ellipsoids_dim2(points, color_final, model.μ[remain_indices],
-            model.weights[remain_indices], matrices, 0, color_is_numeric = false, fill = false)
-  end
+  p = plot_ellipsoids(points, color_final, model.μ[remain_indices], model.weights[remain_indices], matrices, 0 )
+  display(p)
 
   return color_final
 
@@ -744,13 +728,17 @@ end
 
 sp_hc = hierarchical_clustering_lem(mh; Stop = Stop, Seuil = Seuil)
 
-col = color_points_from_centers( data.points, k, nsignal, dist_func, sp_hc; plot = true)
+col = color_points_from_centers( data.points, k, nsignal, dist_func, sp_hc)
 
 
-#===
 
+R"""
+
+filename= "clustering_kPLM.png"
+ggsave(filename = filename,path=path)
 """
 
+#===
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

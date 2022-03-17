@@ -66,3 +66,28 @@ plot_pointset_centers_ellipsoids_dim2 <- function(P,color,centers,weights,Sigma,
   gp = gp + geom_point(aes(x=centers[,1],y=centers[,2]),color ="black",pch = 17,size = 3)
   print(gp)
 }
+
+
+plot_ellipsoids <- function(P,color,centers,weights,Sigma,alpha){
+  x = P[,1]
+  y = P[,2]
+  color = as.factor(color)
+  gp = ggplot() + geom_point(aes(x = x, y = y,color = color))
+
+  w = matrix(0,nrow(centers),2)
+  v = matrix(0,nrow(centers),2)
+  for (i in 1:nrow(centers)){
+    eig = eigen(Sigma[[i]])
+    wi = eig$vector
+    vi = eig$value
+    w[i,1] = wi[1,1]
+    w[i,2] = wi[1,2]
+    v[i,1] = vi[1]
+    v[i,2] = vi[2]
+  }
+  beta = (alpha - weights)*(alpha - weights>=0)
+  gp = gp + geom_ellipse(aes(x0 = centers[,1], y0 = centers[,2], a = sqrt(beta*v[,1]), b = sqrt(beta*v[,2]), angle = -sign(w[,2])*acos(w[,1])))
+  gp = gp + geom_point(aes(x=centers[,1],y=centers[,2]),color ="black",pch = 17,size = 3)
+  print(gp)
+}
+

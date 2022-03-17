@@ -219,6 +219,24 @@ color_points_from_centers <- function(P,k,sig,dist_func,hc,plot = FALSE){
   return(color_final)
 }
 
+color_points_from_centers_2 <- function(P,k,sig,centers, Sigma, means, weights, hc,plot = FALSE){
+  Col = hc$color
+  remain_indices = hc$Indices_depart
+  matrices = list()
+  for(i in 1:length(remain_indices)){
+    matrices[[i]] = Sigma[[remain_indices[i]]]
+  }
+
+  color_points = colorize(P,k,sig,centers[remain_indices,],matrices)$color # function from version_kPLM
+  c = length(weights)
+  remain_indices = c(remain_indices,rep(0,c+1-length(remain_indices)))
+  color_points[color_points==0] = c+1
+  color_points = remain_indices[color_points]
+  color_points[color_points==0] = c+1
+  color_final = return_color(color_points,Col,remain_indices)
+  return(color_final)
+}
+
 
 plot_birth_death <- function(hierarchical_clustering,lim_min = 0,lim_max = 1,filename="persistence_diagram.pdf",path="results/",plot = TRUE){
   lim = c(lim_min,lim_max)

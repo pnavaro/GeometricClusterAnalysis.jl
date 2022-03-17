@@ -17,6 +17,7 @@ makedocs(;
     doctest = false,
     pages = ["Documentation" => "index.md",
              "Datasets" => "fake_data.md",
+             "Three Curves" => "three_curves.md",
              "Types"    => "types.md",
              "Functions" => "functions.md"],
 )

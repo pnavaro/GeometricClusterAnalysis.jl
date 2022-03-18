@@ -1,21 +1,24 @@
 using Plots
 
+export birth_death
+
+function birth_death(hc)
+    hc.Mort .- hc.Naissance
+end
+
 export plot_birth_death
 
-function plot_birth_death(hc; lim_min = 0, lim_max = 1, filename = "persistence_diagram") 
+function plot_birth_death(hc; lim_min = 0, lim_max = 1) 
 
-  hcMort = hc.Mort
-  hcMort .= min.(hcMort, lim_max)
   birth = hc.Naissance
-  death = hcMort
+  death = min.(hc.Mort, lim_max)
 
-  plot( lim_min:lim_max, lim_min:lim_max )
-  scatter!( birth, death, aspect_ratio = :equal, legend = false )
-  xlims!(lim_min-1, lim_max+1)
-  ylims!(lim_min-1, lim_max+1)
-  png(filename)
+  p = plot( lim_min:lim_max, lim_min:lim_max )
+  scatter!(p,  birth, death, aspect_ratio = :equal, legend = false )
+  xlims!(p, lim_min-1, lim_max+1)
+  ylims!(p, lim_min-1, lim_max+1)
 
-  return(hc.Mort .- hc.Naissance)
+  p
 
 end
 

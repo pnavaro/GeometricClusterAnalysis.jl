@@ -57,7 +57,14 @@ end
 
 hc2 = hierarchical_clustering_lem(mh, Stop = Inf, Seuil = Seuil)
 
-bd = plot_birth_death(hc2, lim_min = -15, lim_max = 10, filename = "persistence_diagram2")
+p = plot_birth_death(hc2, lim_min = -15, lim_max = 10)
+
+p
+```
+
+```@example three-curves
+
+bd = birth_death(hc2)
 
 sort!(bd)
 lengthbd = length(bd)

@@ -1,4 +1,61 @@
 using Plots
+using RecipesBase
+
+@userplot Ellipsoid
+
+@recipe function f(c::Ellipsoid)
+    μ, S = _ellipsoid_args(c.args)
+
+    θ = range(0, 2π; length=100)
+    A = S * [cos.(θ)'; sin.(θ)']
+
+    @series begin
+        seriesalpha --> 0.3
+        Shape(μ[1] .+ A[1,:], μ[2] .+ A[2,:])
+    end
+end
+
+function _ellipsoid_args((μ,ω,Σ,α)::Tuple{AbstractVector{<:Real}, Real, AbstractMatrix{<:Real}, Real})
+
+	β = (α - ω) * (α - ω >= 0)
+    λ, U = eigen(Σ)
+	μ, U * diagm(.√(β .* λ))
+end
+
+export plot_ellipsoid
+
+function plot_ellipsoid(μ, Σ)
+
+  c1, c2 = μ
+  v2, v1 = eigvals(Σ)
+  w1, w2 = eigvecs(Σ)[2,:]
+
+  plot(ellipse( c1, c2, sqrt(v1), sqrt(v2), sign(w2)*acos(w1)), fillalpha = 0, c = :blue)
+
+end
+
+@recipe function f(hc::HClust) 
+
+	aspect_ratio := :equal
+
+	lim_min, lim_max = get(plotattributes, :xlims, extrema(hc.Naissance))
+
+	@series begin
+
+	    seriestype := :scatter
+        hc.Naissance, min.(hc.Mort, lim_max)
+
+	end
+
+	primary := false
+	legend --> :none
+	title := "persistence diagram"
+    xlabel := "birth"
+    ylabel := "death"
+
+	(lim_min-1):(lim_max+1), (lim_min-1):(lim_max+1)
+
+end
 
 export birth_death
 

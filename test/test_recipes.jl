@@ -1,5 +1,6 @@
 using GeometricClusterAnalysis
 using Random
+using Statistics
 using Plots
 
 nsignal = 500   # number of signal points
@@ -36,14 +37,17 @@ end
 
 hc2 = hierarchical_clustering_lem(mh, Stop = Inf, Seuil = Seuil)
 
-bd = birthdeath(hc2, lim_min = -15, lim_max = 10, filename = "persistence_diagram2")
+plot(hc2, xlims = (-15,10))
+#
+#bd = birthdeath(hc2, lim_min = -15, lim_max = 10, filename = "persistence_diagram2")
+#
+#sort!(bd)
+#lengthbd = length(bd)
+#Stop = mean((bd[lengthbd - nb_clusters],bd[lengthbd - nb_clusters + 1]))
+#
+#color_final = color_points_from_centers( data.points, k, nsignal, dist_func, sp_hc)
+#
+#remain_indices = sp_hc.Indices_depart
 
-sort!(bd)
-lengthbd = length(bd)
-Stop = mean((bd[lengthbd - nb_clusters],bd[lengthbd - nb_clusters + 1]))
+#p = ellipsoids(data, remain_indices, color_final, dist_func, 0 )
 
-color_final = color_points_from_centers( data.points, k, nsignal, dist_func, sp_hc)
-
-remain_indices = sp_hc.Indices_depart
-
-#p = covellipses(data, remain_indices, color_final, dist_func, 0 )

@@ -1,10 +1,11 @@
-source("scripts/auxiliary_functions/functions_for_evaluating_methods.R")
+library(here)
+source(here("R","functions_for_evaluating_methods.R"))
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #                                   Real fleas dataset
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-path =  "results/Fleas/"
+path =  "./"
   
 
 # Dataset :

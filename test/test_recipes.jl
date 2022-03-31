@@ -45,7 +45,7 @@ sort!(bd)
 lengthbd = length(bd)
 Stop = mean((bd[lengthbd - nb_clusters],bd[lengthbd - nb_clusters + 1]))
 
-sp_hc = hierarchical_clustering_lem(mh; Stop = Stop, Seuil = threshold)
+sp_hc = hierarchical_clustering_lem(mh; Stop = Stop, Seuil = Seuil)
 
 color_final = color_points_from_centers( data.points, k, nsignal, dist_func, sp_hc)
 

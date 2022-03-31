@@ -57,9 +57,7 @@ end
 
 hc2 = hierarchical_clustering_lem(mh, Stop = Inf, Seuil = Seuil)
 
-p = plot_birth_death(hc2, lim_min = -15, lim_max = 10)
-
-p
+plot(hc2, xlims = (-15, 10))
 ```
 
 ```@example three-curves
@@ -76,7 +74,5 @@ color_final = color_points_from_centers( data.points, k, nsignal, dist_func, sp_
 
 remain_indices = sp_hc.Indices_depart
 
-p = plot_ellipsoids(data, remain_indices, color_final, dist_func, 0 )
-
-p
+ellipsoids(data.points, remain_indices, color_final, dist_func, 0 )
 ```

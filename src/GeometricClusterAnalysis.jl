@@ -11,5 +11,6 @@ include("colorize.jl")
 include("kplm.jl")
 include("hclust.jl")
 include("plots.jl")
+include("validate.jl")
 
 end

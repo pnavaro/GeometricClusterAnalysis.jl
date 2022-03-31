@@ -43,8 +43,9 @@ end
 
 hc2 = hierarchical_clustering_lem(mh, Stop = Inf, Seuil = threshold)
 
-bd = plot_birth_death(hc2, lim_min = -15, lim_max = 10, filename = "persistence_diagram2")
-
+plot(hc2, xlims = (-15, 10))
+png("persistence_diagram2")
+bd = birth_death(hc2)
 sort!(bd)
 lengthbd = length(bd)
 Stop = mean((bd[lengthbd - nb_clusters],bd[lengthbd - nb_clusters + 1]))
@@ -52,6 +53,9 @@ Stop = mean((bd[lengthbd - nb_clusters],bd[lengthbd - nb_clusters + 1]))
 sp_hc = hierarchical_clustering_lem(mh; Stop = Stop, Seuil = threshold)
 
 color_final = color_points_from_centers( data.points, k, nsignal, dist_func, sp_hc)
+
+ellipsoids(data.points, remain_indices, color_final, dist_func, 0.0 )
+png("ellipsoids")
 
 function mutualinfo(a, b, normed::Bool)
     n = length(a)

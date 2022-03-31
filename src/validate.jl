@@ -1,4 +1,6 @@
-import StatsBase: counts
+import StatsBase: counts, entropy
+
+export mutualinfo
 
 function mutualinfo(a, b, normed::Bool)
     n = length(a)

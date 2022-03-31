@@ -1,38 +1,5 @@
 using RecipesBase
 
-@userplot Ellipsoid
-
-@recipe function f(c::Ellipsoid)
-    μ, S = _ellipsoid_args(c.args)
-
-    θ = range(0, 2π; length=100)
-    A = S * [cos.(θ)'; sin.(θ)']
-
-    @series begin
-        seriesalpha --> 0.3
-        Shape(μ[1] .+ A[1,:], μ[2] .+ A[2,:])
-    end
-end
-
-function _ellipsoid_args((μ,ω,Σ,α)::Tuple{AbstractVector{<:Real}, Real, AbstractMatrix{<:Real}, Real})
-
-	β = (α - ω) * (α - ω >= 0)
-    λ, U = eigen(Σ)
-	μ, U * diagm(.√(β .* λ))
-end
-
-export plot_ellipsoid
-
-function plot_ellipsoid(μ, Σ)
-
-  c1, c2 = μ
-  v2, v1 = eigvals(Σ)
-  w1, w2 = eigvecs(Σ)[2,:]
-
-  plot(ellipse( c1, c2, sqrt(v1), sqrt(v2), sign(w2)*acos(w1)), fillalpha = 0, c = :blue)
-
-end
-
 @recipe function f(hc::HClust) 
 
 	aspect_ratio := :equal
@@ -62,19 +29,18 @@ function birth_death(hc)
     hc.Mort .- hc.Naissance
 end
 
-function ellipse(x0, y0, a, b, θ)
+#function ellipse(x0, y0, a, b, θ)
+#
+#    pts = Plots.partialcircle(0, 2π, 100, 1.0)
+#    xc, yc = Plots.unzip(pts)
+#    xc .*= a 
+#    yc .*= b
+#    x = xc .* cos(θ) .- yc .* sin(θ) .+ x0
+#    y = xc .* sin(θ) .+ yc .* cos(θ) .+ y0
+#    return Shape(x, y)
+#
+#end
 
-    pts = Plots.partialcircle(0, 2π, 100, 1.0)
-    xc, yc = Plots.unzip(pts)
-    xc .*= a 
-    yc .*= b
-    x = xc .* cos(θ) .- yc .* sin(θ) .+ x0
-    y = xc .* sin(θ) .+ yc .* cos(θ) .+ y0
-    return Shape(x, y)
-
-end
-
-export plot_ellipsoids
 
 @userplot Ellipsoids
 
@@ -111,7 +77,8 @@ export plot_ellipsoids
              primary := false
              fillcolor := i
              seriesalpha --> 0.3
-             Shape(μ[1] .+ A[1,:], μ[2] .+ A[2,:])
+             seriestype := :shape
+             μ[1] .+ A[1,:], μ[2] .+ A[2,:]
          end
     end
 

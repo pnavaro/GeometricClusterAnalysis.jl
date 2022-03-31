@@ -2,6 +2,13 @@ import StatsBase: counts, entropy
 
 export mutualinfo
 
+"""
+
+This is a copy-paste from Clustering.jl to avoid the dependency
+
+Add something in the docs...
+
+"""
 function mutualinfo(a, b, normed::Bool)
     n = length(a)
     @assert n == length(b) 

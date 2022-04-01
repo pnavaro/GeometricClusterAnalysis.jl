@@ -73,5 +73,6 @@ function colorize!( colors, μ, weights, points, k, signal, centers, Σ)
         end
     end
 
+    dists
 
 end

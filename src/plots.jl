@@ -50,7 +50,10 @@ end
 
     @series begin
         seriestype := :scatter
-        x, y
+        x := x
+		y := y
+		color := colors
+		()
     end
 
     @series begin

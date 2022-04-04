@@ -37,9 +37,13 @@ df = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
 
 mh = build_matrix(df)
 
-fp_hc = hierarchical_clustering_lem(mh; Stop=Stop, Seuil = Seuil, 
-                                        store_all_colors = true,
-                                        store_all_step_time = true)
+fp_hc = hierarchical_clustering_lem(
+    mh;
+    Stop = Stop,
+    Seuil = Seuil,
+    store_all_colors = true,
+    store_all_step_time = true,
+)
 
 Col = fp_hc.Couleurs
 Temps = fp_hc.Temps_step
@@ -51,29 +55,38 @@ matrices = [df.Σ[i] for i in remain_indices]
 remain_centers = [df.centers[i] for i in remain_indices]
 color_points = zeros(Int, size(data.points)[2])
 
-val = GeometricClusterAnalysis.colorize!(color_points, df.μ, df.weights, data.points, k, nsignal, 
-            remain_centers, matrices)
+val = GeometricClusterAnalysis.colorize!(
+    color_points,
+    df.μ,
+    df.weights,
+    data.points,
+    k,
+    nsignal,
+    remain_centers,
+    matrices,
+)
 
 c = length(df.weights)
-remain_indices_2 = vcat(remain_indices,zeros(Int,c+1-length(remain_indices)))
-color_points[color_points .== 0] .= c+1
-color_points .= [remain_indices_2[c] for c in color_points] 
-color_points[color_points .== 0] .= c+1
+remain_indices_2 = vcat(remain_indices, zeros(Int, c + 1 - length(remain_indices)))
+color_points[color_points.==0] .= c + 1
+color_points .= [remain_indices_2[c] for c in color_points]
+color_points[color_points.==0] .= c + 1
 
 Colors = [return_color(color_points, col, remain_indices) for col in Col]
 
-for i in 1:length(Col)
-    for j in 1:size(data.points)[2]
+for i = 1:length(Col)
+    for j = 1:size(data.points)[2]
         Colors[i][j] = Colors[i][j] * (val[j] <= Temps[i])
     end
 end
 
-for i in 1:length(Colors)
+anim = @animate for i = 1:length(Colors)
     ellipsoids(data.points, remain_indices, Colors[i], df, Temps[i])
+    xlims!(-2, 4)
+    ylims!(-2, 2)
 end
 
-
-
+gif(anim, "anim.gif", fps = 10)
 
 
 #=

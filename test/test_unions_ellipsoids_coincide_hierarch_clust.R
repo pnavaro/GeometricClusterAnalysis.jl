@@ -73,5 +73,5 @@ method = function(P,k,c,sig,iter_max,nstart){
   return(Trimmed_kPDTM(P,k,c,sig,iter_max,nstart))
 }
 
-plot_all_steps(method,P,k,c,sig,iter_max,nstart,Stop = Inf,Seuil = 5)
+#plot_all_steps(method,P,k,c,sig,iter_max,nstart,Stop = Inf,Seuil = 5)
 

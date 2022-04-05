@@ -1,3 +1,4 @@
+using Printf
 using RecipesBase
 
 @recipe function f(hc::HClust) 
@@ -28,19 +29,6 @@ export birth_death
 function birth_death(hc)
     hc.Mort .- hc.Naissance
 end
-
-#function ellipse(x0, y0, a, b, θ)
-#
-#    pts = Plots.partialcircle(0, 2π, 100, 1.0)
-#    xc, yc = Plots.unzip(pts)
-#    xc .*= a 
-#    yc .*= b
-#    x = xc .* cos(θ) .- yc .* sin(θ) .+ x0
-#    y = xc .* sin(θ) .+ yc .* cos(θ) .+ y0
-#    return Shape(x, y)
-#
-#end
-
 
 @userplot Ellipsoids
 
@@ -85,6 +73,10 @@ end
          end
     end
 
+	title := @sprintf("time = %7.3f", α)
+	label := :none
+	()
+
 
 end
 
@@ -101,6 +93,19 @@ function _ellipsoids_args( (points, indices, colors, dist_func, α) :: Tuple{Mat
     weights = dist_func.weights
 
     pointsx, pointsy, centers, colors, covariances, weights, α
+
+end
+
+function _ellipsoids_args( (points, colors, μ, ω, Σ, α) :: Tuple{Matrix{Float64}, Vector{Int}, Vector{Vector{Float64}}, Vector{Float64}, Vector{Matrix{Float64}}, Real} )
+
+    for (k,c) in enumerate(sort(unique(colors)))
+      colors[ colors .== c ] .= k-1
+    end
+
+    pointsx = points[1,:]
+    pointsy = points[2,:]
+
+    pointsx, pointsy, μ, colors, Σ, ω, α
 
 end
 

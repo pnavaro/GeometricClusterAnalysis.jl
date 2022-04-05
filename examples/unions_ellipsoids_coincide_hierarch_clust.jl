@@ -42,11 +42,12 @@ f_Sigma <- function(Sigma){return(Sigma)}
 
 dist_func = LL_minimizer_multidim_trimmed_lem(P,k,c,sig,iter_max,nstart,f_Sigma)
 matrice_hauteur = build_matrice_hauteur(dist_func$means,dist_func$weights,dist_func$Sigma,indexed_by_r2 = TRUE)
-fp_hc = second_passage_hc(dist_func,matrice_hauteur,Stop=Stop,Seuil = Seuil,indexed_by_r2 = TRUE,store_all_colors = TRUE,store_all_step_time = TRUE)
-Col = fp_hc$hierarchical_clustering$Couleurs
-Temps = fp_hc$hierarchical_clustering$Temps_step
+hc = hierarchical_clustering_lem(matrice_hauteur,Stop = Stop,Seuil = Seuil,store_all_colors=TRUE,store_all_step_time=TRUE)
+
+Col = hc$Couleurs
+Temps = hc$Temps_step
 res = dist_func
-remain_indices = fp_hc$hierarchical_clustering$Indices_depart
+remain_indices = hc$Indices_depart
 matrices = list()
 length_ri = length(remain_indices)
 for(i in 1:length_ri){
@@ -70,20 +71,12 @@ for (i in 1:length(Col)){
   }
 }
 
-#for(i in 1:length(Colors)){
-#    plot_pointset_centers_ellipsoids_dim2(P,Colors[[i]],res$means[remain_indices,],res$weights[remain_indices],matrices,Temps[[i]],color_is_numeric = FALSE,fill = FALSE)
-#}
-
-print(remain_indices)
-
 """
 
 Colors = [Int.(colors) for colors in @rget Colors]
 remain_indices = Int.(@rget remain_indices)
 Temps = @rget Temps
 res = @rget res
-
-display(remain_indices)
 
 μ = [res[:means][i,:] for i in remain_indices if i > 0]
 ω = [res[:weights][i] for i in remain_indices if i > 0]

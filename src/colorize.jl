@@ -76,3 +76,60 @@ function colorize!( colors, μ, weights, points, k, signal, centers, Σ)
     dists
 
 end
+
+function colorize( points, k, signal, centers, Σ)
+
+    dimension, n_points = size(points)
+    n_centers = length(centers)
+
+	colors = zeros(Int, n_points)
+    dists = zeros(Float64, n_points)
+    idxs = zeros(Int, n_points)
+
+    # Step 1 : Update μ and weights
+
+	μ = Vector{Float64}[]
+	ω = Float64[]
+    for i = 1:n_centers
+
+        invΣ = inv(Σ[i])
+
+        for (j, x) in enumerate(eachcol(points))
+            dists[j] = sqmahalanobis(x, centers[i], invΣ)
+        end
+        
+        idxs .= sortperm(dists)
+
+		push!(μ, vec(mean(points[:, idxs[1:k]], dims=2)))
+		push!(ω, mean(sqmahalanobis(points[:,j], μ[i], invΣ) for j in idxs[1:k]) + log(det(Σ[i])))
+
+    end
+
+    # Step 2 : Update colors
+
+    for j = 1:n_points
+        cost = Inf
+        best_index = 1
+        for i = 1:n_centers
+            newcost = sqmahalanobis(points[:,j], μ[i], inv(Σ[i])) + ω[i]
+            if newcost <= cost
+                cost = newcost
+                best_index = i
+            end
+        end
+        colors[j] = best_index
+        dists[j] = cost
+    end
+
+    # Step 3 : Trimming and Update cost
+
+    sortperm!(idxs, dists, rev = true)
+    if signal < n_points
+        for i in idxs[1:(n_points-signal)]
+            colors[i] = 0
+        end
+    end
+
+    colors, μ, ω, dists
+
+end

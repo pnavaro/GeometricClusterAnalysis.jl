@@ -37,34 +37,18 @@ df = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
 
 mh = build_matrix(df)
 
-fp_hc = hierarchical_clustering_lem(
-    mh;
-    Stop = Stop,
-    Seuil = Seuil,
-    store_all_colors = true,
-    store_all_step_time = true,
-)
+hc = hierarchical_clustering_lem(mh, Stop = Stop,Seuil = Seuil,store_all_colors=true,store_all_step_time=true)
 
-Col = fp_hc.Couleurs
-Temps = fp_hc.Temps_step
+Col = hc.Couleurs
+Temps = hc.Temps_step
 
-remain_indices = fp_hc.Indices_depart
+remain_indices = hc.Indices_depart
 length_ri = length(remain_indices)
 
 matrices = [df.Σ[i] for i in remain_indices]
 remain_centers = [df.centers[i] for i in remain_indices]
-color_points = zeros(Int, size(data.points)[2])
 
-val = GeometricClusterAnalysis.colorize!(
-    color_points,
-    df.μ,
-    df.weights,
-    data.points,
-    k,
-    nsignal,
-    remain_centers,
-    matrices,
-)
+color_points, μ, ω, dists = GeometricClusterAnalysis.colorize( data.points, k, nsignal, remain_centers, matrices)
 
 c = length(df.weights)
 remain_indices_2 = vcat(remain_indices, zeros(Int, c + 1 - length(remain_indices)))
@@ -76,7 +60,7 @@ Colors = [return_color(color_points, col, remain_indices) for col in Col]
 
 for i = 1:length(Col)
     for j = 1:size(data.points)[2]
-        Colors[i][j] = Colors[i][j] * (val[j] <= Temps[i])
+        Colors[i][j] = Colors[i][j] * (dists[j] <= Temps[i])
     end
 end
 

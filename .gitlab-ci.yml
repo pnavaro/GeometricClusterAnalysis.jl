@@ -1,4 +1,5 @@
-image: julia:1.7               # image comes from Docker hub
+image: registry.plmlab.math.cnrs.fr/docker-images/julia
+
 
 before_script:
   # workaround for https://github.com/JuliaDocs/Documenter.jl/issues/686

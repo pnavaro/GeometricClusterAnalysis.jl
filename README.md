@@ -32,4 +32,4 @@ Julia packages providing other clustering methods:
  - [ClusterAnalysis.jl](https://github.com/AugustoCL/ClusterAnalysis.jl)
  - [QuickShiftClustering.jl](https://github.com/rened/QuickShiftClustering.jl)
  - [SpectralClustering.jl](https://github.com/lucianolorenti/SpectralClustering.jl)
-
+ - [ClusteringToMaTo.jl](https://github.com/pnavaro/ClusteringToMaTo.jl)

@@ -12,7 +12,7 @@ source(here("R","Sample_3curves.R"))
 source(here("R","plot_pointclouds_centers.R"))
 """
 
-nsignal = 100   # number of signal points
+nsignal = 1000   # number of signal points
 nnoise = 10     # number of outliers
 dim = 2         # dimension of the data
 sigma = 0.05    # standard deviation for the additive noise
@@ -65,7 +65,7 @@ for i = 1:length(Col)
 end
 
 anim = @animate for i = 1:length(Colors)
-    ellipsoids(data.points, remain_indices, Colors[i], df, Temps[i])
+    ellipsoids(data.points, remain_indices, Colors[i], df, Temps[i]; markersize=1)
     xlims!(-2, 4)
     ylims!(-2, 2)
 end

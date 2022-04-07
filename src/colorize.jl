@@ -1,5 +1,7 @@
 import Statistics: mean
 
+export colorize!, colorize
+
 """
 
     colorize!( colors, μ, weights, points, k, signal, centers, Σ)

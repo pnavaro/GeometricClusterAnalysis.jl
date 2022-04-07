@@ -1,16 +1,6 @@
 using GeometricClusterAnalysis
 using Plots
 using Random
-using RCall
-
-R"""
-library(here)
-source(here("R","hierarchical_clustering_complexes.R"))
-source(here("R","versions_kPLM.R")) # Also for the function colorize
-source(here("R","version_kPDTM.R"))
-source(here("R","Sample_3curves.R"))
-source(here("R","plot_pointclouds_centers.R"))
-"""
 
 nsignal = 1000   # number of signal points
 nnoise = 10     # number of outliers
@@ -48,13 +38,13 @@ length_ri = length(remain_indices)
 matrices = [df.Σ[i] for i in remain_indices]
 remain_centers = [df.centers[i] for i in remain_indices]
 
-color_points, μ, ω, dists = GeometricClusterAnalysis.colorize( data.points, k, nsignal, remain_centers, matrices)
+color_points, μ, ω, dists = colorize( data.points, k, nsignal, remain_centers, matrices)
 
-c = length(df.weights)
+c = length(ω)
 remain_indices_2 = vcat(remain_indices, zeros(Int, c + 1 - length(remain_indices)))
-color_points[color_points.==0] .= c + 1
+color_points .+= (color_points.==0) .* (c + 1)
 color_points .= [remain_indices_2[c] for c in color_points]
-color_points[color_points.==0] .= c + 1
+color_points .+= (color_points.==0) .* (c + 1)
 
 Colors = [return_color(color_points, col, remain_indices) for col in Col]
 
@@ -65,31 +55,9 @@ for i = 1:length(Col)
 end
 
 anim = @animate for i = 1:length(Colors)
-    ellipsoids(data.points, remain_indices, Colors[i], df, Temps[i]; markersize=1)
+    ellipsoids(data.points, remain_indices, Colors[i], df, Temps[i]; markersize=2)
     xlims!(-2, 4)
     ylims!(-2, 2)
 end
 
 gif(anim, "anim.gif", fps = 10)
-
-
-#=
-
-# With the k-PLM
-
-f_Sigma <- function(Sigma){return(Sigma)}
-method = function(P,k,c,sig,iter_max,nstart){
-  return(LL_minimizer_multidim_trimmed_lem(P,k,c,sig,iter_max,nstart,f_Sigma))
-}
-
-plot_all_steps(method,P,k,c,sig,iter_max,nstart,Stop = Inf,Seuil = Inf)
-
-# With the k-PDTM
-
-method = function(P,k,c,sig,iter_max,nstart){
-  return(Trimmed_kPDTM(P,k,c,sig,iter_max,nstart))
-}
-
-plot_all_steps(method,P,k,c,sig,iter_max,nstart,Stop = Inf,Seuil = 5)
-
-=#

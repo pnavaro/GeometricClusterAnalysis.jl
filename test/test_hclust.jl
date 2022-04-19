@@ -22,7 +22,7 @@ data = noisy_three_curves(rng, nsignal, nnoise, sigma, dim)
 R"""
 library(here)
 source(here("R","hierarchical_clustering_complexes.R"))
-source(here("R","versions_kPLM.R")) 
+source(here("test","colorize.R")) 
 source(here("test","kplm.R")) 
 source(here("R","plot_pointclouds_centers.R")) 
 """
@@ -55,11 +55,7 @@ df = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
 @test df.colors ≈ trunc.(Int, dist_func[:color])
 @test df.cost ≈ dist_func[:cost]
 
-@show df.weights
-
 mh = build_matrix(df)
-
-display(mh)
 
 R"""
 matrice_hauteur = build_matrice_hauteur(dist_func$means,dist_func$weights,dist_func$Sigma,indexed_by_r2 = TRUE)
@@ -67,8 +63,6 @@ matrice_hauteur = build_matrice_hauteur(dist_func$means,dist_func$weights,dist_f
 
 matrice_hauteur = @rget matrice_hauteur
 @test mh ≈ matrice_hauteur
-
-
 
 R"""
 hc = hierarchical_clustering_lem(matrice_hauteur, Stop = Inf, Seuil = Inf, 
@@ -83,16 +77,14 @@ hc = hierarchical_clustering_lem(mh, Stop = Inf, Seuil = Inf, store_all_colors =
 
 @test Int.(hc_r[:color]) ≈ hc.couleurs
 
-display(hc_r[:Couleurs])
-display(hc.Couleurs)
-
 for (col1, col2) in zip(hc_r[:Couleurs], hc.Couleurs)
     @test Int.(col1) ≈ col2 
 end
 
 Col = hc.Couleurs
-display(hc.Couleurs)
 Temps = hc.Temps_step
+
+@test Temps ≈ hc_r[:Temps_step]
 
 remain_indices = hc.Indices_depart
 length_ri = length(remain_indices)
@@ -133,26 +125,26 @@ color_points[color_points==0] = c + 1
 color_points = remain_indices[color_points]
 color_points[color_points==0] = c+1
   
-Colors = list()
-for (i in 1:length(Col)){
-  Colors[[i]] = return_color(color_points,Col[[i]],remain_indices)
-}
-val = compute_color_value$value
-for (i in 1:length(Col)){
-  for(j in 1:nrow(P)){
-    Colors[[i]][j] = Colors[[i]][j]*(val[j]<=Temps[[i]])
-  }
-}
+# Colors = list()
+# for (i in 1:length(Col)){
+#   Colors[[i]] = return_color(color_points,Col[[i]],remain_indices)
+# }
+# val = compute_color_value$value
+# for (i in 1:length(Col)){
+#   for(j in 1:nrow(P)){
+#     Colors[[i]][j] = Colors[[i]][j]*(val[j]<=Temps[[i]])
+#   }
+# }
 
 """
 
-Colors = [Int.(colors) for colors in @rget Colors]
-remain_indices = Int.(@rget remain_indices)
-Temps = @rget Temps
-res = @rget res
-
-μ = [res[:means][i,:] for i in remain_indices if i > 0]
-ω = [res[:weights][i] for i in remain_indices if i > 0]
-Σ = [m for m in @rget matrices]
+#Colors = [Int.(colors) for colors in @rget Colors]
+#remain_indices = Int.(@rget remain_indices)
+#Temps = @rget Temps
+#res = @rget res
+#
+#μ = [res[:means][i,:] for i in remain_indices if i > 0]
+#ω = [res[:weights][i] for i in remain_indices if i > 0]
+#Σ = [m for m in @rget matrices]
 
 end

@@ -172,6 +172,7 @@ function hierarchical_clustering_lem(
     couleurs = zeros(Int, c)
     Temps_step = Float64[]
     Couleurs = Vector{Int}[] # list of the different vectors of couleurs for the different loops of the algorithm
+    push!(Couleurs, copy(couleurs))
     step = 1
     matrice_dist = fill(Inf, c, c) # The new matrice_hauteur
 
@@ -193,13 +194,11 @@ function hierarchical_clustering_lem(
     continu = true
     indice = 1 # Only components with index not larger than indice are considered
 
-    indice_hauteur = argmin(vec(matrice_dist[1, :]))
-    ihj = (indice_hauteur .- 1) .÷ c .+ 1
-    ihi = indice_hauteur .- (ihj .- 1) .* c
+    indice_hauteur = argmin(matrice_dist[1:indice, :])
+    ihj = indice_hauteur[2]
+    ihi = indice_hauteur[1]
     temps_step = matrice_dist[ihi, ihj] # Next time when something appends (a component get born or two components merge)
-    if store_all_step_time
-        Temps_step = Float64[]
-    end
+    store_all_step_time && push!( Temps_step, temps_step)
 
     # ihi >= ihj since the matrix is triangular inferior with infinity value above the diagonal
 
@@ -241,14 +240,14 @@ function hierarchical_clustering_lem(
             end
         end
 
-        indice_hauteur = argmin(vec(matrice_dist[1:min(indice, c),:]))
-        ihj = (indice_hauteur - 1) ÷ min(indice, c) + 1
-        ihi = indice_hauteur - (ihj - 1) * min(indice, c)
+        indice_hauteur = argmin(matrice_dist[1:min(indice, c),:])
+        ihj = indice_hauteur[2]
+        ihi = indice_hauteur[1]
         temps_step = matrice_dist[ihi, ihj]
         continu = (temps_step != Inf)
         step = step + 1
 
-        store_all_colors && push!(Couleurs, couleurs)
+        store_all_colors && push!(Couleurs, copy(couleurs))
         store_all_step_time && push!(Temps_step, temps_step)
 
     end

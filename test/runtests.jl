@@ -53,3 +53,4 @@ x = @rget x
 include("test_nearest_neighbors.jl")
 include("test_colorize.jl")
 include("test_kplm.jl")
+include("test_hclust.jl")

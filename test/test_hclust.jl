@@ -20,11 +20,9 @@ rng = MersenneTwister(1234)
 data = noisy_three_curves(rng, nsignal, nnoise, sigma, dim)
 
 R"""
-library(here)
-source(here("R","hierarchical_clustering_complexes.R"))
-source(here("test","colorize.R")) 
-source(here("test","kplm.R")) 
-source(here("R","plot_pointclouds_centers.R")) 
+source("hierarchical_clustering_complexes.R")
+source("colorize.R") 
+source("kplm.R")
 """
 
 @rput k 

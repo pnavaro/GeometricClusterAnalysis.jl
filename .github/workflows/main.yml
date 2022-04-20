@@ -35,6 +35,8 @@ jobs:
             ${{ runner.os }}-test-
             ${{ runner.os }}-
       - uses: julia-actions/julia-buildpkg@latest
+      - name: Install R package here
+        run: Rscript -e 'install.packages("here")'
       - uses: julia-actions/julia-runtest@latest
   Documenter:
     name: Documentation

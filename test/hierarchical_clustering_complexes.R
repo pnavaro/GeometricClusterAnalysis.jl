@@ -1,5 +1,3 @@
-source("ellipsoids_intersection.R")
-source("fonctions_puissances.R")
 
 
 # Auxiliary function - Important !!!

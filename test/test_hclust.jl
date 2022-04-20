@@ -20,6 +20,8 @@ rng = MersenneTwister(1234)
 data = noisy_three_curves(rng, nsignal, nnoise, sigma, dim)
 
 R"""
+source("ellipsoids_intersection.R")
+source("fonctions_puissances.R")
 source("hierarchical_clustering_complexes.R")
 source("colorize.R") 
 source("kplm.R")

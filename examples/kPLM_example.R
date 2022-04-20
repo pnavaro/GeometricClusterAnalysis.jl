@@ -5,9 +5,9 @@
 
 set.seed(0)
 
-source("test/infinity_symbol.r")
-source("test/colorize.r")
-source("test/kplm.r")
+source("test/infinity_symbol.R")
+source("test/colorize.R")
+source("test/kplm.R")
 
 # Fonction main :
 

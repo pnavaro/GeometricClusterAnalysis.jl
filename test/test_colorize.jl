@@ -7,8 +7,8 @@ using LinearAlgebra
 R"""
 set.seed(0)
 
-source("infinity_symbol.r")
-source("colorize.r")
+source("infinity_symbol.R")
+source("colorize.R")
 
 N = 10
 Nnoise = 2

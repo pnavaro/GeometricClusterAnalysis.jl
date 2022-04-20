@@ -85,12 +85,32 @@ Temps = hc.Temps_step
 @test Temps ≈ hc_r[:Temps_step]
 
 remain_indices = hc.Indices_depart
+
+@test remain_indices ≈ Int.(hc_r[:Indices_depart])
+
 length_ri = length(remain_indices)
 
 matrices = [df.Σ[i] for i in remain_indices]
 remain_centers = [df.centers[i] for i in remain_indices]
 
-color_points, μ, ω, dists = colorize( data.points, k, nsignal, remain_centers, matrices)
+color_points, μ, ω, dists = colorize(data.points, k, nsignal, remain_centers, matrices)
+
+R"""
+res = dist_func
+remain_indices = hc$Indices_depart
+matrices = list()
+length_ri = length(remain_indices)
+for(i in 1:length_ri){
+  matrices[[i]] = dist_func$Sigma[[remain_indices[i]]]
+}
+compute_color_value = colorize(P, k, sig, dist_func$centers[remain_indices,],matrices)
+"""
+
+compute_color_value = @rget compute_color_value
+
+@test Int.(compute_color_value[:color]) ≈ color_points
+@test vcat(μ'...) ≈ compute_color_value[:means]
+@test ω ≈ compute_color_value[:weights]
 
 c = length(ω)
 remain_indices_2 = vcat(remain_indices, zeros(Int, c + 1 - length(remain_indices)))
@@ -100,49 +120,40 @@ color_points .+= (color_points.==0) .* (c + 1)
 
 Colors = [return_color(color_points, col, remain_indices) for col in Col]
 
+R"""
+color_points = compute_color_value$color
+remain_indices = c(remain_indices,rep(0,c+1-length_ri))
+color_points[color_points==0] = c + 1
+color_points = remain_indices[color_points]
+color_points[color_points==0] = c+1
+
+Col = hc$Couleurs
+Temps = hc$Temps_step
+
+  
+Colors_R = list()
+for (i in 1:length(Col)){
+   Colors_R[[i]] = return_color(color_points,Col[[i]],remain_indices)
+}
+
+val = compute_color_value$value
+for (i in 1:length(Col)){
+    for(j in 1:nrow(P)){
+        Colors_R[[i]][j] = Colors_R[[i]][j]*(val[j]<=Temps[[i]])
+    }
+}
+"""
+
+Colors_R = @rget Colors_R
+
 for i = 1:length(Col)
     for j = 1:size(data.points)[2]
         Colors[i][j] = Colors[i][j] * (dists[j] <= Temps[i])
     end
 end
 
-R"""
-Col = hc$Couleurs
-Temps = hc$Temps_step
-res = dist_func
-remain_indices = hc$Indices_depart
-matrices = list()
-length_ri = length(remain_indices)
-for(i in 1:length_ri){
-  matrices[[i]] = dist_func$Sigma[[remain_indices[i]]]
-}
-compute_color_value = colorize(P,k,sig,dist_func$centers[remain_indices,],matrices)
-color_points = compute_color_value$color
-remain_indices = c(remain_indices,rep(0,c+1-length_ri))
-color_points[color_points==0] = c + 1
-color_points = remain_indices[color_points]
-color_points[color_points==0] = c+1
-  
-# Colors = list()
-# for (i in 1:length(Col)){
-#   Colors[[i]] = return_color(color_points,Col[[i]],remain_indices)
-# }
-# val = compute_color_value$value
-# for (i in 1:length(Col)){
-#   for(j in 1:nrow(P)){
-#     Colors[[i]][j] = Colors[[i]][j]*(val[j]<=Temps[[i]])
-#   }
-# }
-
-"""
-
-#Colors = [Int.(colors) for colors in @rget Colors]
-#remain_indices = Int.(@rget remain_indices)
-#Temps = @rget Temps
-#res = @rget res
-#
-#μ = [res[:means][i,:] for i in remain_indices if i > 0]
-#ω = [res[:weights][i] for i in remain_indices if i > 0]
-#Σ = [m for m in @rget matrices]
+for colors in zip(Colors, Colors_R)
+   @test colors[1] ≈ Int.(colors[2])
+end
 
 end

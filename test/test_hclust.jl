@@ -37,12 +37,9 @@ P = collect(data.points')
 @rput P
 
 R"""
-
 f_Sigma <- function(Sigma){return(Sigma)}
-
 dist_func = kplm(P,k,c,sig,iter_max,nstart,f_Sigma)
 """
-
 dist_func = @rget dist_func
 
 function f_Σ!(Σ) end
@@ -54,6 +51,10 @@ df = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
 @test df.weights ≈ dist_func[:weights]
 @test df.colors ≈ trunc.(Int, dist_func[:color])
 @test df.cost ≈ dist_func[:cost]
+
+for (i,σ) in enumerate(df.Σ)
+    @test σ ≈ dist_func[:Sigma][i]
+end
 
 mh = build_matrix(df)
 

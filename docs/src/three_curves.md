@@ -76,3 +76,51 @@ remain_indices = sp_hc.Indices_depart
 
 ellipsoids(data.points, remain_indices, color_final, dist_func, 0 )
 ```
+
+
+```@example three-curves
+
+hc = hierarchical_clustering_lem(mh, Stop = Inf, Seuil = Inf, 
+                                 store_all_colors = true, 
+                                 store_all_step_time = true)
+
+Col = hc.Couleurs
+Temps = hc.Temps_step
+
+remain_indices = hc.Indices_depart
+length_ri = length(remain_indices)
+
+matrices = [df.Σ[i] for i in remain_indices]
+remain_centers = [df.centers[i] for i in remain_indices]
+
+color_points, μ, ω, dists = colorize( data.points, k, nsignal, remain_centers, matrices)
+
+c = length(ω)
+remain_indices_2 = vcat(remain_indices, zeros(Int, c + 1 - length(remain_indices)))
+color_points .+= (color_points.==0) .* (c + 1)
+color_points .= [remain_indices_2[c] for c in color_points]
+color_points .+= (color_points.==0) .* (c + 1)
+
+Colors = [return_color(color_points, col, remain_indices) for col in Col]
+
+for i = 1:length(Col)
+    for j = 1:size(data.points)[2]
+        Colors[i][j] = Colors[i][j] * (dists[j] <= Temps[i])
+    end
+end
+
+μ = [df.μ[i] for i in remain_indices if i > 0]
+ω = [df.weights[i] for i in remain_indices if i > 0]
+Σ = [df.Σ[i] for i in remain_indices if i > 0]
+
+ncolors = length(Colors)
+anim = @animate for i = [1:ncolors-1; Iterators.repeated(ncolors-1,30)...]
+    ellipsoids(data.points, Colors[i], μ, ω, Σ, Temps[i]; markersize=1)
+    xlims!(-2, 4)
+    ylims!(-2, 2)
+end
+
+gif(anim, "assets/three-curves.gif", fps = 10); nothing # hide
+```
+
+![](assets/three-curves.gif)

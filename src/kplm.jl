@@ -125,20 +125,20 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
             # Step 2 : Update color
 
             fill!(dist_min, Inf)
+
             for i in 1:n_centers
                 if kept_centers[i]
                     compute_dists!(costs, μ[i], points, Σ[i]) 
                     costs .+= weights[i] 
                     for j = 1:n_points
                         cost_min = costs[1,j]
-                        if dist_min[j] > cost_min
+                        if dist_min[j] >= cost_min
                            dist_min[j] = cost_min
                            colors[j] = i
                         end
                     end
                 end
             end
-
 
             # Step 3 : Trimming and Update cost
 

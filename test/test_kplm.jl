@@ -37,8 +37,6 @@ P = collect(points')
 
     @time model = kplm(rng, points, k, c, signal, iter_max, nstart, f_Σ)
 
-	print(model)
-
     for (i,σ) in enumerate(model.Σ)
         @test σ ≈ results[:Sigma][i]
     end
@@ -79,8 +77,6 @@ end
     results = @rget LL
 
     @time model = kplm(rng, points, k, c, signal, iter_max, nstart, f_Σ_det1)
-
-	print(model)
 
     for (i,σ) in enumerate(model.Σ)
         @test σ ≈ results[:Sigma][i]
@@ -192,8 +188,6 @@ end
     results = @rget LL
 
     @time model = kplm(rng, points, k, c, signal, iter_max, nstart, f_Σ_dim_d)
-
-	print(model)
 
     for (i,σ) in enumerate(model.Σ)
         @test σ ≈ results[:Sigma][i]

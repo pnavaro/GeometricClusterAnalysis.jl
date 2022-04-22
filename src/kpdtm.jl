@@ -5,18 +5,16 @@ using Random
 using Statistics
 using Test
 
-
 R"""
 library(FNN)
 library(here)
 source(here("test", "ellipsoids_intersection.R"))
 source(here("test", "fonctions_puissances.R"))
 source(here("test", "hierarchical_clustering_complexes.R"))
-"""
+source(here("test", "kpdtm.R"))
 
-R"""
 k = 10
-c = 20
+c = 10
 sig = 100
 iter_max = 0
 nstart = 1
@@ -34,60 +32,9 @@ P = collect(transpose(data.points))
 
 @rput P
 
-R"""
-colorize2 <- function(P,k,sig,centers){
-  N = nrow(P)
-  d = ncol(P)
-  c = nrow(centers)
-  color = rep(0,N)
-  # Step 1 : Update means ans weights
-  
-  mv = meanvar(P,centers,k)
-  means = mv$mean
-  weights = mv$var
-  
-  # Step 2 : Update color
-  distance_min = rep(0,N)
-  for(j in 1:N){
-    cost = Inf
-    best_ind = 1
-    for(i in 1:nrow(centers)){
-      newcost = sum((P[j,]-means[i,])^2)+weights[i]
-      if(newcost<=cost){
-        cost = newcost
-        best_ind = i
-      }
-    }
-    color[j] = best_ind
-    distance_min[j] = cost
-  }
-  
-  # Step 3 : Trimming and Update cost
-  distance_sort = sort(distance_min,decreasing = TRUE,index.return=TRUE)
-  if(sig<N){
-    color[distance_sort$ix[1:(N-sig)]]=0
-  }
-  return(list(color = color, means = means, weights = weights))
-}
-
-
-meanvar <- function(P,x,k){
-  # Not working if there is only one center or if k = 1
-  nearn = get.knnx(P,x, k=k, algorithm="kd_tree")
-  Mean = matrix(data = 0,nrow = nrow(x),ncol = ncol(x))
-  Var = vector(length = nrow(x))
-  for(i in 1:nrow(x)){
-    Mean[i,] = colMeans(P[nearn$nn.index[i,],])
-    Var[i] = mean(rowSums(t(t(P[nearn$nn.index[i,],]) - Mean[i,])^2))
-  }
-
-  return(list(mean = Mean,var = Var))
-}
-"""
-function meanvar(points :: Matrix{Float64}, centers :: Matrix{Float64}, k :: Int)
+function meanvar(points :: Matrix{Float64}, c :: Int, k :: Int)
 
   d, n = size(points)
-  d, c = size(centers)
 
   kdtree = KDTree(points)
   idxs, dists = knn(kdtree, points, k, true) 
@@ -104,25 +51,28 @@ function meanvar(points :: Matrix{Float64}, centers :: Matrix{Float64}, k :: Int
 
 end
 
-function meanvar!( μ, ω, points :: Matrix{Float64}, k :: Int)
+function meanvar!( μ, ω, points :: Matrix{Float64}, c :: Int, k :: Int)
 
   d, n = size(points)
-  c = length(μ)
 
   kdtree = KDTree(points)
   idxs, dists = knn(kdtree, points, k, true) 
 
+  fill!(ω, 0.)
+  for i in eachindex(μ)
+      fill!(μ[i], 0.0)
+  end
+  
   for i in 1:c
+      println(idxs[i])
       x̄ = vec(mean(view(points, :, idxs[i]), dims=2))
       μ[i] .= x̄
       ω[i] = sum((view(points, :, idxs[i]) .- x̄).^2) / k
   end
+  println()
 
 end
 
-R"""
-source(here("test", "kpdtm.R"))
-"""
 
 c = Int(@rget c)
 k = Int(@rget k)
@@ -131,10 +81,51 @@ nstart = Int(@rget nstart)
 points = collect(transpose(@rget P))
 nsignal = Int(@rget sig)
 
+function recolor!( μ, ω, points, k, nsignal, c)
+
+    d, n = size(points)
+
+    # Step 1 : Update means and weights
+    
+    meanvar!(μ, ω, points, c, k)
+
+    display(μ)
+    
+    # Step 2 : Update color
+
+    colors = zeros(Int, n)
+    distance_min = zeros(n)
+
+    for j in 1:n
+        cost = Inf
+        best_ind = 1
+        for i in 1:c
+            newcost = sum((points[:, j] .- μ[i]).^2) + ω[i]
+            if newcost - cost <= eps(Float64)
+                cost = newcost
+                best_ind = i
+            end
+        end
+        colors[j] = best_ind
+        distance_min[j] = cost
+    end 
+
+    # Step 3 : Trimming and Update cost
+    ix = sortperm(distance_min, rev = true)
+             
+    if nsignal < n
+        colors[ix[1:(n-nsignal)]] .= 0
+    end    
+
+    return colors
+
+end
+
 function kpdtm(points, k, c, nsignal; iter_max = 10, nstart = 1)
 
    d, n = size(points)
 
+   cost = Inf
    cost_opt = Inf
    centers_opt = [zeros(d) for i ∈ 1:c]
    colors_opt = zeros(Int, n)
@@ -146,15 +137,16 @@ function kpdtm(points, k, c, nsignal; iter_max = 10, nstart = 1)
 
    distance_min = zeros(n)
 
+
    for n_times = 1:nstart
 
        centers_old = [fill(Inf, d) for i = 1:c]
        first_centers = 1:c  # use a sample here randperm(n)[1:c]
        centers = [ points[:,i] for i in first_centers]
        fill!(kept_centers, true)
+       fill!(colors, 0)
        μ = [zeros(d) for i = 1:c]
        ω = zeros(c)
-       fill!(colors, 0)
 
        nstep = 0
 
@@ -168,7 +160,7 @@ function kpdtm(points, k, c, nsignal; iter_max = 10, nstart = 1)
  
            # Step 1 : Update means ans weights
 
-           meanvar!(μ, ω, points, k)
+           meanvar!(μ, ω, points, c, k)
            
            # Step 2 : Update color
                
@@ -206,12 +198,12 @@ function kpdtm(points, k, c, nsignal; iter_max = 10, nstart = 1)
            # Step 4 : Update centers
                
            for i in 1:c
-               cloud = findall(color_new .== i)
+               cloud = findall(colors .== i)
                nb_points_cloud = length(cloud)
                if nb_points_cloud > 1
-                   μ[i] .= vec(mean(points[:, cloud], dims=2))
+                   centers[i] .= vec(mean(points[:, cloud], dims=2))
                elseif nb_points_cloud == 1
-                   μ[i] .= points[:, cloud]
+                   centers[i] .= points[:, cloud]
                else
                    kept_centers[i] = false
                end
@@ -230,17 +222,30 @@ function kpdtm(points, k, c, nsignal; iter_max = 10, nstart = 1)
 
    centers = [centers_opt[i] for i in 1:c if kept_centers_opt[i]]
 
-   colors_new = zero(colors_opt)
+   colors_old = zero(colors_opt)
 
    k = 1
    for i in 1:c
        if kept_centers_opt[i]
-           colors_new[colors_opt .== i] .= k
+           colors_old[colors_opt .== i] .= k
            k += 1
        end
    end
 
-   return colors_opt
+   # Recompute colors with new centers
+
+   c = length(centers)
+   μ = [zeros(d) for i = 1:c]
+   ω = zeros(c)
+
+   colors = recolor!(μ, ω, points, k, nsignal, c)
+   
+   return Dict( :centers => centers, 
+                :colors  => colors, 
+                :cost => cost, 
+                :means => μ,
+                :weights => ω,
+                :color_old => colors_old )
 
 end
 
@@ -249,49 +254,25 @@ R"""
 results = Trimmed_kPDTM (P,k,c,sig,iter_max,nstart)
 """
 
-results = @rget results
+r = @rget results
+jl = kpdtm(points, k, c, nsignal; iter_max = 10, nstart = 1)
 
-colors = kpdtm(points, k, c, nsignal; iter_max = 10, nstart = 1)
+#@test vcat(jl'...) ≈ r
 
-@test colors ≈ Int.(results[:color])
+#@test vcat(jl[:centers]'...) ≈ r[:centers]
+#@test jl[:color_old] ≈ Int.(r[:color_old])
+#@test vcat(jl[:means]'...) ≈ r[:means]
 #@test cost ≈ results[:cost]
+
+#@test dist ≈ results[:dist]
+
+#@test vcat(μ'...) ≈ results[:means]
+#@test ω ≈ results[:weights]
+
+#@test colors ≈ Int.(results[:color])
 #@test vcat(centers'...) ≈ results[:centers]
 
 #=
-function colorize2(P,k,sig,centers)
-  N, d = size(P)
-  c = length(centers)
-  color = zeros(Int,N)
-
-  # Step 1 : Update means ans weights
-  
-  mv = meanvar(P,centers,k)
-  means = mv$mean
-  weights = mv$var
-  
-  # Step 2 : Update color
-  distance_min = rep(0,N)
-  for(j in 1:N){
-    cost = Inf
-    best_ind = 1
-    for(i in 1:nrow(centers)){
-      newcost = sum((P[j,]-means[i,])^2)+weights[i]
-      if(newcost<=cost){
-        cost = newcost
-        best_ind = i
-      }
-    }
-    color[j] = best_ind
-    distance_min[j] = cost
-  }
-  
-  # Step 3 : Trimming and Update cost
-  distance_sort = sort(distance_min,decreasing = TRUE,index.return=TRUE)
-  if(sig<N){
-    color[distance_sort$ix[1:(N-sig)]]=0
-  }
-  color, means, weights
-end
 
 
 # MAIN functions

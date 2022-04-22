@@ -1,3 +1,61 @@
+# Functions that return means, weights and Sigma matrices for the k-witnessed distance and the k-PDTM
+
+library("FNN")
+
+# Auxiliary functions
+
+meanvar <- function(P,x,k){
+  # Not working if there is only one center or if k = 1
+  nearn = get.knnx(P,x, k=k, algorithm="kd_tree")
+  Mean = matrix(data = 0,nrow = nrow(x),ncol = ncol(x))
+  Var = vector(length = nrow(x))
+  for(i in 1:nrow(x)){
+    print(nearn$nn.index[i,])
+    Mean[i,] = colMeans(P[nearn$nn.index[i,],])
+    Var[i] = mean(rowSums(t(t(P[nearn$nn.index[i,],]) - Mean[i,])^2))
+  }
+  print(" ")
+  return(list(mean = Mean,var = Var))
+}
+
+colorize2 <- function(P,k,sig,centers){
+  N = nrow(P)
+  d = ncol(P)
+  c = nrow(centers)
+  color = rep(0,N)
+  # Step 1 : Update means ans weights
+  
+  mv = meanvar(P,centers,k)
+  means = mv$mean
+  weights = mv$var
+  
+  # Step 2 : Update color
+  distance_min = rep(0,N)
+  for(j in 1:N){
+    cost = Inf
+    best_ind = 1
+    for(i in 1:nrow(centers)){
+      newcost = sum((P[j,]-means[i,])^2)+weights[i]
+      if(newcost<=cost){
+        cost = newcost
+        best_ind = i
+      }
+    }
+    color[j] = best_ind
+    distance_min[j] = cost
+  }
+  
+  # Step 3 : Trimming and Update cost
+  distance_sort = sort(distance_min,decreasing = TRUE,index.return=TRUE)
+  if(sig<N){
+    color[distance_sort$ix[1:(N-sig)]]=0
+  }
+  return(list(color = color, means = means, weights = weights))
+}
+
+
+# MAIN functions
+
 Trimmed_kPDTM <- function(P,k,c,sig,iter_max = 10, nstart = 1){
 
 # P echantillon de points dans R
@@ -40,6 +98,7 @@ for(n_times in 1:nstart){
 
     new$means = mv$mean
     new$weights = mv$var
+
     
     # Step 2 : Update color
     
@@ -59,6 +118,7 @@ for(n_times in 1:nstart){
       new$color[j] = best_ind
       distance_min[j] = cost
     }
+
     
     # Step 3 : Trimming and Update cost
     
@@ -78,7 +138,6 @@ for(n_times in 1:nstart){
       nb_points_cloud = sum(new$color==i)
       if(nb_points_cloud>1){
         new$centers[i,] = colMeans(matrix(P[new$color==i,],nb_points_cloud,d))
-        print(new$centers[i,])
       }
       else{
         if(nb_points_cloud==1){
@@ -88,9 +147,9 @@ for(n_times in 1:nstart){
       }
     }
 
+
   }
   # END WHILE
-  return(list(color=new$color))
   
   if(new$cost<opt$cost){
     opt$cost = new$cost
@@ -114,13 +173,21 @@ for(n_times in 1:nstart){
       index_center = index_center + 1
     }
   }
+
   recolor = colorize2(P,k,sig,centers)
+
+  print(recolor$means)
   
   Sigma = list()
   for(i in 1:nrow(centers)){
     Sigma[[i]] = diag(rep(1,d))
   }
   
- return(list(centers =  centers, color = color_old, cost = opt$cost))
- #return(list(centers =  centers,means = recolor$means,weights = recolor$weights,color_old = color_old,color= recolor$color,Sigma = Sigma, cost = opt$cost))
+ return(list(centers = centers, 
+             means = recolor$means,
+             weights = recolor$weights,
+             color_old = color_old,
+             color = recolor$color,
+             Sigma = Sigma, 
+             cost = opt$cost))
 }

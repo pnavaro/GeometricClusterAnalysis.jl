@@ -10,11 +10,9 @@ meanvar <- function(P,x,k){
   Mean = matrix(data = 0,nrow = nrow(x),ncol = ncol(x))
   Var = vector(length = nrow(x))
   for(i in 1:nrow(x)){
-    print(nearn$nn.index[i,])
     Mean[i,] = colMeans(P[nearn$nn.index[i,],])
     Var[i] = mean(rowSums(t(t(P[nearn$nn.index[i,],]) - Mean[i,])^2))
   }
-  print(" ")
   return(list(mean = Mean,var = Var))
 }
 
@@ -89,6 +87,7 @@ for(n_times in 1:nstart){
   
   # BEGIN WHILE
   while((!(all.equal(old$centers,new$centers)==TRUE))&&(Nstep<=iter_max)){
+
     Nstep = Nstep + 1
     old$centers = new$centers
     
@@ -99,7 +98,6 @@ for(n_times in 1:nstart){
     new$means = mv$mean
     new$weights = mv$var
 
-    
     # Step 2 : Update color
     
     distance_min = rep(0,N)
@@ -131,7 +129,6 @@ for(n_times in 1:nstart){
     ds = distance_sort$x[(N-sig+1):N] 
     new$cost = mean(ds)
     
-
     # Step 4 : Update centers
     
     for(i in 1:c){
@@ -146,8 +143,6 @@ for(n_times in 1:nstart){
         else{new$kept_centers[i]=FALSE}
       }
     }
-
-
   }
   # END WHILE
   
@@ -176,7 +171,6 @@ for(n_times in 1:nstart){
 
   recolor = colorize2(P,k,sig,centers)
 
-  print(recolor$means)
   
   Sigma = list()
   for(i in 1:nrow(centers)){

@@ -32,12 +32,13 @@ P = collect(transpose(data.points))
 
 @rput P
 
-function meanvar(points :: Matrix{Float64}, c :: Int, k :: Int)
+function meanvar(points :: Matrix{Float64}, centers, k :: Int)
 
   d, n = size(points)
+  c = length(centers)
 
   kdtree = KDTree(points)
-  idxs, dists = knn(kdtree, points, k, true) 
+  idxs, dists = knn(kdtree, hcat(centers...), k, true) 
 
   μ = Vector{Float64}[]
   ω = zeros(c)
@@ -51,12 +52,13 @@ function meanvar(points :: Matrix{Float64}, c :: Int, k :: Int)
 
 end
 
-function meanvar!( μ, ω, points :: Matrix{Float64}, c :: Int, k :: Int)
+function meanvar!( μ, ω, points :: Matrix{Float64}, centers, k :: Int)
 
   d, n = size(points)
+  c = length(centers)
 
   kdtree = KDTree(points)
-  idxs, dists = knn(kdtree, points, k, true) 
+  idxs, dists = knn(kdtree, hcat(centers...), k, true) 
 
   fill!(ω, 0.)
   for i in eachindex(μ)
@@ -64,7 +66,6 @@ function meanvar!( μ, ω, points :: Matrix{Float64}, c :: Int, k :: Int)
   end
   
   for i in 1:c
-      println(idxs[i])
       x̄ = vec(mean(view(points, :, idxs[i]), dims=2))
       μ[i] .= x̄
       ω[i] = sum((view(points, :, idxs[i]) .- x̄).^2) / k
@@ -81,15 +82,15 @@ nstart = Int(@rget nstart)
 points = collect(transpose(@rget P))
 nsignal = Int(@rget sig)
 
-function recolor!( μ, ω, points, k, nsignal, c)
+function recolor!( μ, ω, points, centers, k, nsignal)
 
     d, n = size(points)
+	c = length(centers)
 
     # Step 1 : Update means and weights
     
-    meanvar!(μ, ω, points, c, k)
+    meanvar!(μ, ω, points, centers, k)
 
-    display(μ)
     
     # Step 2 : Update color
 
@@ -121,7 +122,7 @@ function recolor!( μ, ω, points, k, nsignal, c)
 
 end
 
-function kpdtm(points, k, c, nsignal; iter_max = 10, nstart = 1)
+function kpdtm(points, k, c, nsignal; iter_max = 0, nstart = 1)
 
    d, n = size(points)
 
@@ -150,7 +151,7 @@ function kpdtm(points, k, c, nsignal; iter_max = 10, nstart = 1)
 
        nstep = 0
 
-       while !(all(centers_old .== centers) && (nstep <= iter_max))
+	   while !(all(centers_old .== centers)) && (nstep <= iter_max)
 
            nstep += 1
 
@@ -160,7 +161,7 @@ function kpdtm(points, k, c, nsignal; iter_max = 10, nstart = 1)
  
            # Step 1 : Update means ans weights
 
-           meanvar!(μ, ω, points, c, k)
+		   meanvar!(μ, ω, points, centers, k)
            
            # Step 2 : Update color
                
@@ -238,7 +239,7 @@ function kpdtm(points, k, c, nsignal; iter_max = 10, nstart = 1)
    μ = [zeros(d) for i = 1:c]
    ω = zeros(c)
 
-   colors = recolor!(μ, ω, points, k, nsignal, c)
+   colors = recolor!(μ, ω, points, centers, k, nsignal)
    
    return Dict( :centers => centers, 
                 :colors  => colors, 
@@ -255,37 +256,11 @@ results = Trimmed_kPDTM (P,k,c,sig,iter_max,nstart)
 """
 
 r = @rget results
-jl = kpdtm(points, k, c, nsignal; iter_max = 10, nstart = 1)
+jl = kpdtm(points, k, c, nsignal; iter_max = 0, nstart = 1)
 
-#@test vcat(jl'...) ≈ r
-
-#@test vcat(jl[:centers]'...) ≈ r[:centers]
-#@test jl[:color_old] ≈ Int.(r[:color_old])
-#@test vcat(jl[:means]'...) ≈ r[:means]
-#@test cost ≈ results[:cost]
-
-#@test dist ≈ results[:dist]
-
-#@test vcat(μ'...) ≈ results[:means]
-#@test ω ≈ results[:weights]
-
-#@test colors ≈ Int.(results[:color])
-#@test vcat(centers'...) ≈ results[:centers]
-
-#=
-
-
-# MAIN functions
-
-k_witnessed_distance <- function(P,k,c,sig,iter_max = 1,nstart = 1){
-  mv = colorize2(P,k,sig,P)
-  Sigma = list()
-  for(i in 1:nrow(P)){
-    Sigma[[i]] = diag(rep(1,ncol(P)))
-  }
-  return(list(means = mv$means,weights = mv$weights,color= mv$color,Sigma = Sigma))
-}
-
-=#
-
-
+@test vcat(jl[:centers]'...) ≈ r[:centers]
+@test jl[:colors] ≈ Int.(r[:color])
+@test jl[:color_old] ≈ Int.(r[:color_old])
+@test vcat(jl[:means]'...) ≈ r[:means]
+@test jl[:cost] ≈ results[:cost]
+@test jl[:weights] ≈ results[:weights]

@@ -39,9 +39,9 @@ plot(data)
 ```@example three-curves
 function f_Σ!(Σ) end
 
-dist_func = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
+df = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
 
-mh = build_matrix(dist_func)
+mh = build_matrix(df)
 
 hc1 = hierarchical_clustering_lem(mh)
 
@@ -70,11 +70,11 @@ Stop = mean((bd[lengthbd - nb_clusters],bd[lengthbd - nb_clusters + 1]))
 
 sp_hc = hierarchical_clustering_lem(mh; Stop = Stop, Seuil = Seuil)
 
-color_final = color_points_from_centers( data.points, k, nsignal, dist_func, sp_hc)
+color_final = color_points_from_centers( data.points, k, nsignal, df, sp_hc)
 
 remain_indices = sp_hc.Indices_depart
 
-ellipsoids(data.points, remain_indices, color_final, dist_func, 0 )
+ellipsoids(data.points, remain_indices, color_final, df, 0 )
 ```
 
 

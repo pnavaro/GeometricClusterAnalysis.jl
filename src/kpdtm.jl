@@ -10,6 +10,7 @@ struct KpdtmResult{T<:AbstractFloat}
 	μ::Vector{Vector{T}}
 	weights::Vector{T}
     colors::Vector{Int}
+	Σ::Vector{Matrix{T}}
 	cost::T
 end
 
@@ -103,7 +104,7 @@ function kpdtm(points, k, c, nsignal; iter_max = 0, nstart = 1)
    for n_times = 1:nstart
 
        centers_old = [fill(Inf, d) for i = 1:c]
-       first_centers = 1:c  # use a sample here randperm(n)[1:c]
+       first_centers = 1:c  # randperm(n)[1:c]
        centers = [ points[:,i] for i in first_centers]
        fill!(kept_centers, true)
        fill!(colors, 0)
@@ -199,7 +200,9 @@ function kpdtm(points, k, c, nsignal; iter_max = 0, nstart = 1)
    c = length(centers)
 
    μ, ω, colors = recolor(points, centers, k, nsignal)
+
+   Σ = [ diagm(ones(d)) for i in 1:c]
    
-   KpdtmResult{Float64}(k, centers, μ, ω, colors, cost)
+   KpdtmResult{Float64}(k, centers, μ, ω, colors, Σ, cost)
 
 end

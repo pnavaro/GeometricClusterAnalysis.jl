@@ -1,26 +1,21 @@
+"""
+    KpdtmResult
+
+Object resulting from kpdtm algorithm that contains the number of clusters, 
+centroids, means, weights, covariance matrices, costs
+"""
+struct KpdtmResult{T<:AbstractFloat}
+    k::Int
+    centers::Vector{Vector{T}}
+	μ::Vector{Vector{T}}
+	weights::Vector{T}
+    colors::Vector{Int}
+	cost::T
+end
+
 export kpdtm
 
 using NearestNeighbors
-
-function meanvar(points :: Matrix{Float64}, centers, k :: Int)
-
-  d, n = size(points)
-  c = length(centers)
-
-  kdtree = KDTree(points)
-  idxs, dists = knn(kdtree, hcat(centers...), k, true) 
-
-  μ = Vector{Float64}[]
-  ω = zeros(c)
-  for i in 1:c
-      x̄ = vec(mean(view(points, :, idxs[i]), dims=2))
-      push!(μ, x̄)
-      ω[i] = sum((view(points, :, idxs[i]) .- x̄).^2) / k
-  end
-
-  μ, ω 
-
-end
 
 function meanvar!( μ, ω, points :: Matrix{Float64}, centers, k :: Int)
 
@@ -205,11 +200,6 @@ function kpdtm(points, k, c, nsignal; iter_max = 0, nstart = 1)
 
    μ, ω, colors = recolor(points, centers, k, nsignal)
    
-   return Dict( :centers => centers, 
-                :colors  => colors, 
-                :cost => cost, 
-                :means => μ,
-                :weights => ω,
-                :color_old => colors_old )
+   KpdtmResult{Float64}(k, centers, μ, ω, colors, cost)
 
 end

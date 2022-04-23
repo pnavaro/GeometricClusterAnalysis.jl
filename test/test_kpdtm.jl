@@ -43,11 +43,10 @@ results = Trimmed_kPDTM (P,k,c,sig,iter_max,nstart)
 r = @rget results
 jl = kpdtm(points, k, c, nsignal; iter_max = 0, nstart = 1)
 
-@test vcat(jl[:centers]'...) ≈ r[:centers]
-@test jl[:colors] ≈ Int.(r[:color])
-@test jl[:color_old] ≈ Int.(r[:color_old])
-@test vcat(jl[:means]'...) ≈ r[:means]
-@test jl[:cost] ≈ results[:cost]
-@test jl[:weights] ≈ results[:weights]
+@test vcat(jl.centers'...) ≈ r[:centers]
+@test jl.colors ≈ Int.(r[:color])
+@test vcat(jl.μ'...) ≈ r[:means]
+@test jl.cost ≈ results[:cost]
+@test jl.weights ≈ results[:weights]
 
 end

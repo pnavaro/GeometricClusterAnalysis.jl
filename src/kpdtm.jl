@@ -1,36 +1,6 @@
-using GeometricClusterAnalysis
+export kpdtm
+
 using NearestNeighbors
-using RCall
-using Random
-using Statistics
-using Test
-
-R"""
-library(FNN)
-library(here)
-source(here("test", "ellipsoids_intersection.R"))
-source(here("test", "fonctions_puissances.R"))
-source(here("test", "hierarchical_clustering_complexes.R"))
-source(here("test", "kpdtm.R"))
-
-k = 10
-c = 10
-sig = 100
-iter_max = 0
-nstart = 1
-d = 2
-"""
-
-nsignal = Int(@rget sig)
-nnoise = 10
-sigma = 0.05
-dim = 2
-rng = MersenneTwister(42)
-data = noisy_three_curves(rng, nsignal, nnoise, sigma, dim)
-
-P = collect(transpose(data.points))
-
-@rput P
 
 function meanvar(points :: Matrix{Float64}, centers, k :: Int)
 
@@ -75,17 +45,13 @@ function meanvar!( μ, ω, points :: Matrix{Float64}, centers, k :: Int)
 end
 
 
-c = Int(@rget c)
-k = Int(@rget k)
-iter_max = Int(@rget iter_max)
-nstart = Int(@rget nstart)
-points = collect(transpose(@rget P))
-nsignal = Int(@rget sig)
-
-function recolor!( μ, ω, points, centers, k, nsignal)
+function recolor( points, centers, k, nsignal)
 
     d, n = size(points)
 	c = length(centers)
+
+    μ = [zeros(d) for i = 1:c]
+    ω = zeros(c)
 
     # Step 1 : Update means and weights
     
@@ -118,7 +84,7 @@ function recolor!( μ, ω, points, centers, k, nsignal)
         colors[ix[1:(n-nsignal)]] .= 0
     end    
 
-    return colors
+    return μ, ω, colors
 
 end
 
@@ -236,10 +202,8 @@ function kpdtm(points, k, c, nsignal; iter_max = 0, nstart = 1)
    # Recompute colors with new centers
 
    c = length(centers)
-   μ = [zeros(d) for i = 1:c]
-   ω = zeros(c)
 
-   colors = recolor!(μ, ω, points, centers, k, nsignal)
+   μ, ω, colors = recolor(points, centers, k, nsignal)
    
    return Dict( :centers => centers, 
                 :colors  => colors, 
@@ -249,18 +213,3 @@ function kpdtm(points, k, c, nsignal; iter_max = 0, nstart = 1)
                 :color_old => colors_old )
 
 end
-
-
-R"""
-results = Trimmed_kPDTM (P,k,c,sig,iter_max,nstart)
-"""
-
-r = @rget results
-jl = kpdtm(points, k, c, nsignal; iter_max = 0, nstart = 1)
-
-@test vcat(jl[:centers]'...) ≈ r[:centers]
-@test jl[:colors] ≈ Int.(r[:color])
-@test jl[:color_old] ≈ Int.(r[:color_old])
-@test vcat(jl[:means]'...) ≈ r[:means]
-@test jl[:cost] ≈ results[:cost]
-@test jl[:weights] ≈ results[:weights]

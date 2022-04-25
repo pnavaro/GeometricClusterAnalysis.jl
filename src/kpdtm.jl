@@ -1,19 +1,3 @@
-"""
-    KpdtmResult
-
-Object resulting from kpdtm algorithm that contains the number of clusters, 
-centroids, means, weights, covariance matrices, costs
-"""
-struct KpdtmResult{T<:AbstractFloat}
-    k::Int
-    centers::Vector{Vector{T}}
-	μ::Vector{Vector{T}}
-	weights::Vector{T}
-    colors::Vector{Int}
-	Σ::Vector{Matrix{T}}
-	cost::T
-end
-
 export kpdtm
 
 using NearestNeighbors
@@ -36,7 +20,6 @@ function meanvar!( μ, ω, points :: Matrix{Float64}, centers, k :: Int)
       μ[i] .= x̄
       ω[i] = sum((view(points, :, idxs[i]) .- x̄).^2) / k
   end
-  println()
 
 end
 
@@ -84,7 +67,7 @@ function recolor( points, centers, k, nsignal)
 
 end
 
-function kpdtm(points, k, c, nsignal; iter_max = 0, nstart = 1)
+function kpdtm(rng, points, k, c, nsignal, iter_max, nstart)
 
    d, n = size(points)
 
@@ -100,11 +83,10 @@ function kpdtm(points, k, c, nsignal; iter_max = 0, nstart = 1)
 
    distance_min = zeros(n)
 
-
    for n_times = 1:nstart
 
        centers_old = [fill(Inf, d) for i = 1:c]
-       first_centers = 1:c  # randperm(n)[1:c]
+       first_centers = 1:c  # randperm(rng, n)[1:c]
        centers = [ points[:,i] for i in first_centers]
        fill!(kept_centers, true)
        fill!(colors, 0)
@@ -203,6 +185,6 @@ function kpdtm(points, k, c, nsignal; iter_max = 0, nstart = 1)
 
    Σ = [ diagm(ones(d)) for i in 1:c]
    
-   KpdtmResult{Float64}(k, centers, μ, ω, colors, Σ, cost)
+   KpResult(k, centers, μ, ω, colors, Σ, cost)
 
 end

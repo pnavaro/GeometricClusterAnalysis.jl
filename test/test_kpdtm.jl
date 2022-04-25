@@ -36,12 +36,14 @@ nstart = Int(@rget nstart)
 points = collect(transpose(@rget P))
 nsignal = Int(@rget sig)
 
-R"""
+	R"""
 results = Trimmed_kPDTM (P,k,c,sig,iter_max,nstart)
 """
 
 r = @rget results
-jl = kpdtm(points, k, c, nsignal; iter_max = 0, nstart = 1)
+iter_max = 0
+nstart = 1
+jl = kpdtm(rng, points, k, c, nsignal, iter_max, nstart)
 
 @test vcat(jl.centers'...) ≈ r[:centers]
 @test jl.colors ≈ Int.(r[:color])

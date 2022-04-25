@@ -80,7 +80,7 @@ end
 
 end
 
-function _ellipsoids_args( (points, indices, colors, dist_func, α) :: Tuple{Matrix{Float64}, Vector{Int}, Vector{Int}, KplmResult, Real} )
+function _ellipsoids_args( (points, indices, colors, dist_func, α) :: Tuple{Matrix{Float64}, Vector{Int}, Vector{Int}, KpResult, Real} )
 
     for (k,c) in enumerate(sort(unique(colors)))
       colors[ colors .== c ] .= k-1

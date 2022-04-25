@@ -5,12 +5,12 @@ import Base.Threads: @threads, @sync, @spawn, nthreads, threadid
 export kplm
 
 """
-    KplmResult
+    KpResult
 
-Object resulting from kplm algorithm that contains the number of clusters, 
+Object resulting from kplm or kpdtm algorithm that contains the number of clusters, 
 centroids, means, weights, covariance matrices, costs
 """
-struct KplmResult{T<:AbstractFloat}
+struct KpResult{T<:AbstractFloat}
     k::Int
     centers::Vector{Vector{T}}
 	μ::Vector{Vector{T}}
@@ -20,17 +20,17 @@ struct KplmResult{T<:AbstractFloat}
 	cost::T
 end
 
-function Base.print(io::IO, model::KplmResult{T}) where {T<:AbstractFloat}
+function Base.print(io::IO, model::KpResult{T}) where {T<:AbstractFloat}
     p = ["     $(v)\n" for v in model.centers]
 
-    print(IOContext(io, :limit => true), "KplmResult{$T}:
+    print(IOContext(io, :limit => true), "KpResult{$T}:
  k = $(model.k)
  centers = [\n", p..., " ]
  colors = ", model.colors, "
  cost = $(model.cost)")
 end
 
-Base.show(io::IO, model::KplmResult) = print(io, model)
+Base.show(io::IO, model::KpResult) = print(io, model)
 
 function compute_dists!(dists, center, points, Σ)
 
@@ -234,6 +234,6 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
     colorize!(colors, μ, weights, points, k, signal, centers, Σ)
 
-	return KplmResult(k, centers, μ, weights, colors, Σ, cost_opt)
+	return KpResult(k, centers, μ, weights, colors, Σ, cost_opt)
 
 end

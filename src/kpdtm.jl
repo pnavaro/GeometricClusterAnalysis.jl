@@ -86,7 +86,6 @@ function kpdtm(rng, points, k, c, nsignal, iter_max, nstart)
    colors_opt = zeros(Int, n)
    kept_centers_opt = trues(c)
 
-   centers = copy(points[:,1:c])
    colors = zeros(Int, n)
    kept_centers = trues(c)
 

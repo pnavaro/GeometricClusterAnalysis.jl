@@ -51,6 +51,17 @@ colorize2 <- function(P,k,sig,centers){
   return(list(color = color, means = means, weights = weights))
 }
 
+k_witnessed_distance <- function(P,k,c,sig,iter_max = 1,nstart = 1){
+  mv = colorize2(P,k,sig,P)
+  Sigma = list()
+  for(i in 1:nrow(P)){
+    Sigma[[i]] = diag(rep(1,ncol(P)))
+  }
+  return(list(means = mv$means,weights = mv$weights,color= mv$color,Sigma = Sigma))
+}
+
+
+
 
 # MAIN functions
 

@@ -6,9 +6,9 @@
 # And points that are in intersecting ellipsoids are of the same color.
 
 library(here)
-source(here("R","hierarchical_clustering_complexes.R"))
-source(here("R","versions_kPLM.R")) # Also for the function colorize
-source(here("R","version_kPDTM.R"))
+source(here("test","hierarchical_clustering_complexes.R"))
+source(here("test","kplm.R")) # Also for the function colorize
+source(here("test","kpdtm.R"))
 source(here("R","Sample_3curves.R"))
 source(here("R","plot_pointclouds_centers.R"))
 
@@ -62,16 +62,16 @@ plot_all_steps <- function(method,P,k,c,sig,iter_max,nstart,Stop = Inf,Seuil = I
 
 f_Sigma <- function(Sigma){return(Sigma)}
 method = function(P,k,c,sig,iter_max,nstart){
-  return(LL_minimizer_multidim_trimmed_lem(P,k,c,sig,iter_max,nstart,f_Sigma))
+  return(kplm(P,k,c,sig,iter_max,nstart,f_Sigma))
 }
 
 plot_all_steps(method,P,k,c,sig,iter_max,nstart,Stop = Inf,Seuil = Inf)
 
-# With the k-PDTM
-
-method = function(P,k,c,sig,iter_max,nstart){
-  return(Trimmed_kPDTM(P,k,c,sig,iter_max,nstart))
-}
-
+## With the k-PDTM
+#
+#method = function(P,k,c,sig,iter_max,nstart){
+#  return(kpdtm(P,k,c,sig,iter_max,nstart))
+#}
+#
 #plot_all_steps(method,P,k,c,sig,iter_max,nstart,Stop = Inf,Seuil = 5)
 

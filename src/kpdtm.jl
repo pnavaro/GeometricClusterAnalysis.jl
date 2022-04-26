@@ -67,6 +67,15 @@ function recolor( points, centers, k, nsignal)
 
 end
 
+function k_witnessed_distance(points, k, c, sig, iter_max, nstart)
+
+    μ, ω, colors = recolor(points, centers, k, sig)
+    d = size(points, 1)
+    Σ = [diagm(ones(d)) for i in eachindex(centers)]
+    return μ, ω, colors, Σ
+
+end
+
 function kpdtm(rng, points, k, c, nsignal, iter_max, nstart)
 
    d, n = size(points)
@@ -86,7 +95,7 @@ function kpdtm(rng, points, k, c, nsignal, iter_max, nstart)
    for n_times = 1:nstart
 
        centers_old = [fill(Inf, d) for i = 1:c]
-       first_centers = 1:c  # randperm(rng, n)[1:c]
+       first_centers = first(randperm(rng, n), c)
        centers = [ points[:,i] for i in first_centers]
        fill!(kept_centers, true)
        fill!(colors, 0)

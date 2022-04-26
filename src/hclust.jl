@@ -11,7 +11,6 @@ struct HClust
 
 end
 
-
 function dic_lambda(x, y, eigval, c, omega)
     h = (x + y) / 2
     f_moy = sum((eigval .- h^2) ./ (eigval .+ h) .^ 2 .* eigval .* c .^ 2)
@@ -195,9 +194,10 @@ function hierarchical_clustering_lem(
     indice = 1 # Only components with index not larger than indice are considered
 
     indice_hauteur = argmin(matrice_dist[1:indice, :])
-    ihj = indice_hauteur[2]
     ihi = indice_hauteur[1]
-    temps_step = matrice_dist[ihi, ihj] # Next time when something appends (a component get born or two components merge)
+    ihj = indice_hauteur[2]
+    # Next time when something appends (a component get born or two components merge)
+    temps_step = matrice_dist[indice_hauteur] 
     store_all_step_time && push!( Temps_step, temps_step)
 
     # ihi >= ihj since the matrix is triangular inferior with infinity value above the diagonal
@@ -241,9 +241,9 @@ function hierarchical_clustering_lem(
         end
 
         indice_hauteur = argmin(matrice_dist[1:min(indice, c),:])
-        ihj = indice_hauteur[2]
         ihi = indice_hauteur[1]
-        temps_step = matrice_dist[ihi, ihj]
+        ihj = indice_hauteur[2]
+        temps_step = matrice_dist[indice_hauteur]
         continu = (temps_step != Inf)
         step = step + 1
 

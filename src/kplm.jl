@@ -79,7 +79,7 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
         centers_old = [fill(Inf, dimension) for i = 1:n_centers]
         Σ_old = [diagm(ones(dimension)) for i = 1:n_centers]
-        first_centers = 1:n_centers
+        first_centers = first(randperm(rng, n_points), n_centers)
 
         centers = [ points[:,i] for i in first_centers]
         Σ = [diagm(ones(dimension)) for i = 1:n_centers]
@@ -203,8 +203,9 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
         end 
 
+        @show cost_opt, cost
+  
         if cost < cost_opt
-            cost_opt = cost
             for i = 1:n_centers
                 centers_opt[i] .= centers[i]
                 Σ_opt[i] .= Σ[i]

@@ -85,6 +85,6 @@ function infinity_symbol(rng, n_points, n_noise, σ, dimension, noise_min, noise
 
     colors = vcat(ones(Int, n_points), zeros(Int, n_noise))
 
-    return Data{Float64}( n_points+n_noise, dimension, hcat(points...), colors)
+    return Data{Float64}(n_points + n_noise, dimension, hcat(points...), colors)
 
 end

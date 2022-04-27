@@ -2,12 +2,12 @@ export HClust
 
 struct HClust
 
-  couleurs :: Vector{Int}
-  Couleurs :: Vector{Vector{Int}}
-  Temps_step :: Vector{Float64}
-  Naissance :: Vector{Float64}
-  Mort :: Vector{Float64}
-  Indices_depart :: Vector{Int}
+    couleurs::Vector{Int}
+    Couleurs::Vector{Vector{Int}}
+    Temps_step::Vector{Float64}
+    Naissance::Vector{Float64}
+    Mort::Vector{Float64}
+    Indices_depart::Vector{Int}
 
 end
 
@@ -197,8 +197,8 @@ function hierarchical_clustering_lem(
     ihi = indice_hauteur[1]
     ihj = indice_hauteur[2]
     # Next time when something appends (a component get born or two components merge)
-    temps_step = matrice_dist[indice_hauteur] 
-    store_all_step_time && push!( Temps_step, temps_step)
+    temps_step = matrice_dist[indice_hauteur]
+    store_all_step_time && push!(Temps_step, temps_step)
 
     # ihi >= ihj since the matrix is triangular inferior with infinity value above the diagonal
 
@@ -240,7 +240,7 @@ function hierarchical_clustering_lem(
             end
         end
 
-        indice_hauteur = argmin(matrice_dist[1:min(indice, c),:])
+        indice_hauteur = argmin(matrice_dist[1:min(indice, c), :])
         ihi = indice_hauteur[1]
         ihj = indice_hauteur[2]
         temps_step = matrice_dist[indice_hauteur]
@@ -266,13 +266,13 @@ export return_color
 """
 function return_color(centre, couleurs, Indices_depart)
 
-  color = zeros(Int, length(centre))
+    color = zeros(Int, length(centre))
 
-  for i in eachindex(Indices_depart)
-    if i <= length(couleurs)
-       color[centre .== Indices_depart[i]] .= couleurs[i]
+    for i in eachindex(Indices_depart)
+        if i <= length(couleurs)
+            color[centre.==Indices_depart[i]] .= couleurs[i]
+        end
     end
-  end
-  return color
+    return color
 
 end

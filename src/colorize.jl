@@ -23,7 +23,7 @@ en ajoutant "inverted = true".
 
 
 """
-function colorize!( colors, μ, weights, points, k, signal, centers, Σ)
+function colorize!(colors, μ, weights, points, k, signal, centers, Σ)
 
     dimension, n_points = size(points)
     n_centers = length(centers)
@@ -40,13 +40,14 @@ function colorize!( colors, μ, weights, points, k, signal, centers, Σ)
         for (j, x) in enumerate(eachcol(points))
             dists[j] = sqmahalanobis(x, centers[i], invΣ)
         end
-        
+
         idxs .= sortperm(dists)
 
-        μ[i] .= vec(mean(points[:, idxs[1:k]], dims=2))
+        μ[i] .= vec(mean(points[:, idxs[1:k]], dims = 2))
 
         weights[i] =
-            mean(sqmahalanobis(points[:,j], μ[i], invΣ) for j in idxs[1:k]) + log(det(Σ[i]))
+            mean(sqmahalanobis(points[:, j], μ[i], invΣ) for j in idxs[1:k]) +
+            log(det(Σ[i]))
 
     end
 
@@ -56,7 +57,7 @@ function colorize!( colors, μ, weights, points, k, signal, centers, Σ)
         cost = Inf
         best_index = 1
         for i = 1:n_centers
-            newcost = sqmahalanobis(points[:,j], μ[i], inv(Σ[i])) + weights[i]
+            newcost = sqmahalanobis(points[:, j], μ[i], inv(Σ[i])) + weights[i]
             if newcost <= cost
                 cost = newcost
                 best_index = i
@@ -79,19 +80,19 @@ function colorize!( colors, μ, weights, points, k, signal, centers, Σ)
 
 end
 
-function colorize( points, k, signal, centers, Σ)
+function colorize(points, k, signal, centers, Σ)
 
     dimension, n_points = size(points)
     n_centers = length(centers)
 
-	colors = zeros(Int, n_points)
+    colors = zeros(Int, n_points)
     dists = zeros(Float64, n_points)
     idxs = zeros(Int, n_points)
 
     # Step 1 : Update μ and weights
 
-	μ = Vector{Float64}[]
-	ω = Float64[]
+    μ = Vector{Float64}[]
+    ω = Float64[]
     for i = 1:n_centers
 
         invΣ = inv(Σ[i])
@@ -99,11 +100,15 @@ function colorize( points, k, signal, centers, Σ)
         for (j, x) in enumerate(eachcol(points))
             dists[j] = sqmahalanobis(x, centers[i], invΣ)
         end
-        
+
         idxs .= sortperm(dists)
 
-		push!(μ, vec(mean(points[:, idxs[1:k]], dims=2)))
-		push!(ω, mean(sqmahalanobis(points[:,j], μ[i], invΣ) for j in idxs[1:k]) + log(det(Σ[i])))
+        push!(μ, vec(mean(points[:, idxs[1:k]], dims = 2)))
+        push!(
+            ω,
+            mean(sqmahalanobis(points[:, j], μ[i], invΣ) for j in idxs[1:k]) +
+            log(det(Σ[i])),
+        )
 
     end
 
@@ -113,7 +118,7 @@ function colorize( points, k, signal, centers, Σ)
         cost = Inf
         best_index = 1
         for i = 1:n_centers
-            newcost = sqmahalanobis(points[:,j], μ[i], inv(Σ[i])) + ω[i]
+            newcost = sqmahalanobis(points[:, j], μ[i], inv(Σ[i])) + ω[i]
             if newcost <= cost
                 cost = newcost
                 best_index = i

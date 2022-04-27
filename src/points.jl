@@ -1,5 +1,5 @@
 struct Points
 
-    data :: Array{Float64, 2}
+    data::Array{Float64,2}
 
 end

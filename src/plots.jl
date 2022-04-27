@@ -1,26 +1,26 @@
 using Printf
 using RecipesBase
 
-@recipe function f(hc::HClust) 
+@recipe function f(hc::HClust)
 
-	aspect_ratio := :equal
+    aspect_ratio := :equal
 
-	lim_min, lim_max = get(plotattributes, :xlims, extrema(hc.Naissance))
+    lim_min, lim_max = get(plotattributes, :xlims, extrema(hc.Naissance))
 
-	@series begin
+    @series begin
 
-	    seriestype := :scatter
+        seriestype := :scatter
         hc.Naissance, min.(hc.Mort, lim_max)
 
-	end
+    end
 
-	primary := false
-	legend --> :none
-	title := "persistence diagram"
+    primary := false
+    legend --> :none
+    title := "persistence diagram"
     xlabel := "birth"
     ylabel := "death"
 
-	(lim_min-1):(lim_max+1), (lim_min-1):(lim_max+1)
+    (lim_min-1):(lim_max+1), (lim_min-1):(lim_max+1)
 
 end
 
@@ -39,55 +39,63 @@ end
     @series begin
         seriestype := :scatter
         x := x
-		y := y
-		color := colors
-		()
+        y := y
+        color := colors
+        ()
     end
 
     @series begin
         seriestype := :scatter
         markershape := :star
-        markercolor := :yellow 
+        markercolor := :yellow
         markersize := 5
-        getindex.(centers,1), getindex.(centers,2)
+        getindex.(centers, 1), getindex.(centers, 2)
     end
 
-    θ = range(0, 2π; length=100)
+    θ = range(0, 2π; length = 100)
 
     for i in eachindex(weights)
 
-         μ = centers[i]
-         Σ = covariances[i]
-         ω = weights[i]
-         λ, U = eigen(Σ)
-	     β = (α - ω) * (α - ω >= 0)
-	     S = U * diagm(sqrt.(β .* λ))
-         A = S * [cos.(θ)'; sin.(θ)']
+        μ = centers[i]
+        Σ = covariances[i]
+        ω = weights[i]
+        λ, U = eigen(Σ)
+        β = (α - ω) * (α - ω >= 0)
+        S = U * diagm(sqrt.(β .* λ))
+        A = S * [cos.(θ)'; sin.(θ)']
 
-         @series begin
-             primary := false
-             fillcolor := i
-             seriesalpha --> 0.3
-             seriestype := :shape
-             μ[1] .+ A[1,:], μ[2] .+ A[2,:]
-         end
+        @series begin
+            primary := false
+            fillcolor := i
+            seriesalpha --> 0.3
+            seriestype := :shape
+            μ[1] .+ A[1, :], μ[2] .+ A[2, :]
+        end
     end
 
-	title := @sprintf("time = %7.3f", α)
-	label := :none
-	()
+    title := @sprintf("time = %7.3f", α)
+    label := :none
+    ()
 
 
 end
 
-function _ellipsoids_args( (points, indices, colors, dist_func, α) :: Tuple{Matrix{Float64}, Vector{Int}, Vector{Int}, KpResult, Real} )
+function _ellipsoids_args(
+    (
+        points,
+        indices,
+        colors,
+        dist_func,
+        α,
+    )::Tuple{Matrix{Float64},Vector{Int},Vector{Int},KpResult,Real},
+)
 
-    for (k,c) in enumerate(sort(unique(colors)))
-      colors[ colors .== c ] .= k-1
+    for (k, c) in enumerate(sort(unique(colors)))
+        colors[colors.==c] .= k - 1
     end
 
-    pointsx = points[1,:]
-    pointsy = points[2,:]
+    pointsx = points[1, :]
+    pointsy = points[2, :]
     centers = dist_func.centers
     covariances = dist_func.Σ
     weights = dist_func.weights
@@ -96,14 +104,30 @@ function _ellipsoids_args( (points, indices, colors, dist_func, α) :: Tuple{Mat
 
 end
 
-function _ellipsoids_args( (points, colors, μ, ω, Σ, α) :: Tuple{Matrix{Float64}, Vector{Int}, Vector{Vector{Float64}}, Vector{Float64}, Vector{Matrix{Float64}}, Real} )
+function _ellipsoids_args(
+    (
+        points,
+        colors,
+        μ,
+        ω,
+        Σ,
+        α,
+    )::Tuple{
+        Matrix{Float64},
+        Vector{Int},
+        Vector{Vector{Float64}},
+        Vector{Float64},
+        Vector{Matrix{Float64}},
+        Real,
+    },
+)
 
-    for (k,c) in enumerate(sort(unique(colors)))
-      colors[ colors .== c ] .= k-1
+    for (k, c) in enumerate(sort(unique(colors)))
+        colors[colors.==c] .= k - 1
     end
 
-    pointsx = points[1,:]
-    pointsy = points[2,:]
+    pointsx = points[1, :]
+    pointsy = points[2, :]
 
     pointsx, pointsy, μ, colors, Σ, ω, α
 
@@ -165,23 +189,31 @@ export color_points_from_centers
 
 function color_points_from_centers(points, k, nsignal, model, hc)
 
-  remain_indices = hc.Indices_depart
+    remain_indices = hc.Indices_depart
 
-  matrices = [model.Σ[i] for i in remain_indices]
-  remain_centers = [model.centers[i] for i in remain_indices]
-  color_points = zeros(Int, size(points)[2])
+    matrices = [model.Σ[i] for i in remain_indices]
+    remain_centers = [model.centers[i] for i in remain_indices]
+    color_points = zeros(Int, size(points)[2])
 
-  GeometricClusterAnalysis.colorize!(color_points, model.μ, model.weights, points, k, nsignal, 
-            remain_centers, matrices)
+    GeometricClusterAnalysis.colorize!(
+        color_points,
+        model.μ,
+        model.weights,
+        points,
+        k,
+        nsignal,
+        remain_centers,
+        matrices,
+    )
 
 
-  c = length(model.weights)
-  remain_indices_2 = vcat(remain_indices,zeros(Int,c+1-length(remain_indices)))
-  color_points[color_points .== 0] .= c+1
-  color_points .= [remain_indices_2[c] for c in color_points] 
-  color_points[color_points .== 0] .= c+1
-  color_final = return_color(color_points, hc.couleurs, remain_indices)
+    c = length(model.weights)
+    remain_indices_2 = vcat(remain_indices, zeros(Int, c + 1 - length(remain_indices)))
+    color_points[color_points.==0] .= c + 1
+    color_points .= [remain_indices_2[c] for c in color_points]
+    color_points[color_points.==0] .= c + 1
+    color_final = return_color(color_points, hc.couleurs, remain_indices)
 
-  return color_final
+    return color_final
 
 end

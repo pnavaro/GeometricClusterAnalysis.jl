@@ -15,23 +15,23 @@ When ``d>2, y_i = 0`` for ``i>=2``; with the notation ``y=(y_i)_{i=1..d}``
 """
 function noisy_three_curves(rng, nsignal, nnoise, sigma, d)
 
-  nmid = nsignal ÷ 2
+    nmid = nsignal ÷ 2
 
-  x = 3.5 .* rand(rng, nsignal) .- 1
-  y = x.^2 .* (x .<= 1/2) .+ (1 .- (1 .- x).^2) .* (x .> 1/2)
-  y[(nmid+1):nsignal] .+= 0.5
+    x = 3.5 .* rand(rng, nsignal) .- 1
+    y = x .^ 2 .* (x .<= 1 / 2) .+ (1 .- (1 .- x) .^ 2) .* (x .> 1 / 2)
+    y[(nmid+1):nsignal] .+= 0.5
 
-  p0 = hcat(x,y)
-  signal = p0 .+ sigma .* randn(rng, nsignal, d)
-  noise = 4 .* rand(rng, nnoise, d) .- 1.5
+    p0 = hcat(x, y)
+    signal = p0 .+ sigma .* randn(rng, nsignal, d)
+    noise = 4 .* rand(rng, nnoise, d) .- 1.5
 
-  curve1 = 1 .+ (vec(p0[1:nmid,1]) .> 1/2)
-  curve2 = 2 .+ (vec(p0[(nmid+1):end,1]) .> 1/2)
+    curve1 = 1 .+ (vec(p0[1:nmid, 1]) .> 1 / 2)
+    curve2 = 2 .+ (vec(p0[(nmid+1):end, 1]) .> 1 / 2)
 
-  points = collect(transpose(vcat( signal, noise)))
-  colors = vcat( curve1, curve2, zeros(nnoise))
+    points = collect(transpose(vcat(signal, noise)))
+    colors = vcat(curve1, curve2, zeros(nnoise))
 
-  return Data{Float64}(nsignal+nnoise, d, points, colors)
+    return Data{Float64}(nsignal + nnoise, d, points, colors)
 
 end
 

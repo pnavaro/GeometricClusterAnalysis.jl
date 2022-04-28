@@ -1,4 +1,4 @@
-image: registry.plmlab.math.cnrs.fr/navaro/julia
+image: registry.plmlab.math.cnrs.fr/navaro/julia:1.7.2
 
 
 before_script:

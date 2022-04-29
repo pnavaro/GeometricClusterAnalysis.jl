@@ -76,7 +76,15 @@ function k_witnessed_distance(points, k, c, sig, iter_max, nstart)
 
 end
 
-function kpdtm(rng, points, k, c, nsignal, iter_max, nstart)
+function kpdtm(rng, points, k, c, nsignal, iter_max, nstart )
+
+    d, n = size(points)
+    first_centers = first(randperm(rng, n), c)
+    kpdtm(rng, points, k, c, nsignal, iter_max, nstart, first_centers )
+
+end
+
+function kpdtm(rng, points, k, c, nsignal, iter_max, nstart, first_centers )
 
     d, n = size(points)
 
@@ -94,7 +102,9 @@ function kpdtm(rng, points, k, c, nsignal, iter_max, nstart)
     for n_times = 1:nstart
 
         centers_old = [fill(Inf, d) for i = 1:c]
-        first_centers = first(randperm(rng, n), c)
+        if n_times > 1
+            first_centers = first(randperm(rng, n), c)
+        end
         centers = [points[:, i] for i in first_centers]
         fill!(kept_centers, true)
         fill!(colors, 0)

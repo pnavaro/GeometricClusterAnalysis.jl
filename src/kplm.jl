@@ -223,8 +223,6 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!, first_
 
         end
 
-        @show cost_opt, cost
-
         if cost < cost_opt
             cost_opt = cost
             for i = 1:n_centers

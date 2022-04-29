@@ -268,9 +268,9 @@ function return_color(centre, couleurs, Indices_depart)
         color = zeros(Int, length(centre))
     
         for i in eachindex(Indices_depart)
-            #if i <= length(couleurs)
+            if i <= length(couleurs)
                 color[centre.==Indices_depart[i]] .= couleurs[i]
-            #end
+            end
         end
         return color
     

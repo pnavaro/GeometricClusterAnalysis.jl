@@ -265,14 +265,13 @@ export return_color
 - couleurs[1] : label of the center that is born first, i.e. for the Indice_depart[1]-th center
 """
 function return_color(centre, couleurs, Indices_depart)
-
-    color = zeros(Int, length(centre))
-
-    for i in eachindex(Indices_depart)
-        if i <= length(couleurs)
-            color[centre.==Indices_depart[i]] .= couleurs[i]
+        color = zeros(Int, length(centre))
+    
+        for i in eachindex(Indices_depart)
+            #if i <= length(couleurs)
+                color[centre.==Indices_depart[i]] .= couleurs[i]
+            #end
         end
+        return color
+    
     end
-    return color
-
-end

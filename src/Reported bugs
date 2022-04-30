@@ -1,0 +1,19 @@
+kPLM ne marche pas pour moi...
+Après avoir lancé unions_ellipsoids_kplm.jl :
+ kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
+ on recoit :
+ setindex! not defined for UnitRange{Int64}
+
+
+unions_ellipsoids ne marche pas pour moi :
+
+R"""
+library(here)
+source(here("test", "ellipsoids_intersection.R"))
+source(here("test", "fonctions_puissances.R"))
+source(here("test", "hierarchical_clustering_complexes.R"))
+source(here("test", "colorize.R"))
+source(here("test", "kplm.R"))
+"""
+
+--> REvalError: Error in library(here) : aucun package nommé ‘here’ n'est trouvé

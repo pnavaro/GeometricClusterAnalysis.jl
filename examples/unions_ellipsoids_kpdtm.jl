@@ -2,14 +2,14 @@ using GeometricClusterAnalysis
 using Plots
 using Random
 
-nsignal = 500 # number of signal points
-nnoise = 10   # number of outliers
+nsignal = 2000 # number of signal points
+nnoise = 300   # number of outliers
 dim = 2       # dimension of the data
-sigma = 0.05  # standard deviation for the additive noise
+sigma = 0.02  # standard deviation for the additive noise
 k = 10        # number of nearest neighbors
-c = 10        # number of ellipsoids
-iter_max = 100# maximum number of iterations of the algorithm kPLM
-nstart = 1    # number of initializations of the algorithm kPLM
+c = 30        # number of ellipsoids
+iter_max = 20# maximum number of iterations of the algorithm kPLM
+nstart = 5    # number of initializations of the algorithm kPLM
 
 rng = MersenneTwister(1234)
 
@@ -54,4 +54,4 @@ anim = @animate for i = [1:ncolors-1; Iterators.repeated(ncolors-1,30)...]
     ylims!(-2, 2)
 end
 
-gif(anim, "anim_kpdtm.gif", fps = 2)
+gif(anim, "anim_kpdtm.gif", fps = 10)

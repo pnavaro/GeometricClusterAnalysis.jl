@@ -5,9 +5,9 @@ using Random
 nsignal = 2000 # number of signal points
 nnoise = 300   # number of outliers
 dim = 2       # dimension of the data
-sigma = 0.02  # standard deviation for the additive noise
-k = 10        # number of nearest neighbors
-c = 30        # number of ellipsoids
+sigma = 0.002  # standard deviation for the additive noise
+k = 20        # number of nearest neighbors
+c = 50        # number of ellipsoids
 iter_max = 20# maximum number of iterations of the algorithm kPLM
 nstart = 5    # number of initializations of the algorithm kPLM
 
@@ -20,8 +20,21 @@ df = kpdtm(rng, data.points, k, c, nsignal, iter_max, nstart)
 mh = build_matrix(df)
 
 hc = hierarchical_clustering_lem(mh, Stop = Inf, Seuil = Inf, 
+                                 store_all_colors = false, 
+                                 store_all_step_time = false)
+
+
+# Tracer le diagramme de persistance :
+lims = (min(min(hc.Naissance...),min(hc.Mort...)),max(max(hc.Naissance...),max(hc.Mort[hc.Mort.!=Inf]...)))
+plot(hc,xlims = lims, ylims = lims)
+
+hc = hierarchical_clustering_lem(mh, Stop = 0.025, Seuil = 0.1, 
                                  store_all_colors = true, 
                                  store_all_step_time = true)
+
+# Sélectionner les paramètres Stop et Seuil :
+
+# Relancer avec les paramètres :
 
 Col = hc.Couleurs
 Temps = hc.Temps_step

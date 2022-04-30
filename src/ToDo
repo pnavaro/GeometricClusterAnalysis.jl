@@ -1,0 +1,37 @@
+1) Modifier la variable signal des fonctions dtm et kpdtm etc. 
+en la remplaçant par alpha : la proportion de données aberrantes
+par défaut, alpha = 0
+Se référer au tuto sur le trimmed Bregman clustering
+
+1)bis) Faire intervenir la fonction colorize à l'intérieur de la fonction, comme le tuto.
+
+1)ter) Fair une struct pour toutes les fonctions de type partitionnement direct avec kpdtm, kplm, Bregman, etc.
+-> Possibilités d'affichage, de sélection de alpha,...
+
+2) Modifier les couleurs d'affichage des points : soucis car les nuages changent de couleur
+
+2)bis) Faire en sorte que les couleurs des indices redeviennent les couleurs de 1 au nombre d'ellispes gardées
+ (peut-être pas important pour l'affichage)
+ - peut-être le faire uniquement quand on demande de retourner le résultat final du partitionnement.
+(en même temps que les centres)
+ 
+3) Créer deux fonctions différentes d'affichage des points : 
+- Une qui fait ce qui est fait actuellement qui affiche juste les changements d'étapes
+- Une indexée par le temps qui fait grossir les ellipses petit à petit et d'arrête quand on atteint le nombre de points trimmés (?)
+
+4) Créer une struct pour le partitionnement hiérarchique avec des méthodes
+- build (calculer la matrice en fonction de la méthode choisie et des paramètres choisis !!) - eventuellement choix des paramètres pour la méthode ??
+- select_params (pour sélectionner Stop et Seuil) : Lance hierarchical_clustering_lem, trace le diagramme de persistance, demande le choix de paramètres
+- hierarchical (pour lancer l'algo) Attention !! kplm ne marche qu'en dimension 2 !! Sinon on ne sait pas quand les ellipses s'intersectent !!
+- affichage ??
+- ???? A voir comment on ajoute les fonctions kpdtm et kplm...
+
+5) Voir avec Pierre quel est le soucis avec les matrices de covariance...
+
+6) Me créer une autre branche (?) Pour mes outils avec Clément et Brertrand (pour la sélection de la dimension pour la kplm) -> meilleur estimateur ?
+
+7) Nettoyer un peu les noms des variables - certaines en Francais, certaines pas explicites du tout !!
+
+8) Ajouter une belle doc.
+
+FIN) Ecrire un papier pour mettre en avant ce beau logiciel !!

@@ -45,7 +45,6 @@ colorize <- function(P,k,sig,centers,Sigma){
 
 # MAIN
 
-kplm <- function(P,k,c,sig,iter_max = 10,nstart = 1,f_Sigma = function(Sigma){return(Sigma)}){
 # P : an Nxd matrix
 # k : number of neigbours to consider, in 2..N
 # c : number of ellipsoids, in 1..N
@@ -53,6 +52,7 @@ kplm <- function(P,k,c,sig,iter_max = 10,nstart = 1,f_Sigma = function(Sigma){re
 # iter_max : maximal number of iterations in the algorithm
 # nstart : number of initialisations of the algorithm
 # f_sigma : a function to transform the matrix Sigma (for instance, to force it to have a determinant = 1, or equal eigenvalues...)
+kplm <- function(P,k,c,sig,iter_max = 10,nstart = 1,f_Sigma = function(Sigma){return(Sigma)}){
   # Initialisation
   N = nrow(P)
   d = ncol(P)

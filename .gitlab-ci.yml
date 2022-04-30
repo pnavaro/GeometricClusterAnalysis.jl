@@ -1,9 +1,9 @@
-image: registry.plmlab.math.cnrs.fr/docker-images/julia
+image: registry.plmlab.math.cnrs.fr/navaro/julia-rcall:1.7.2
 
 
 before_script:
   # workaround for https://github.com/JuliaDocs/Documenter.jl/issues/686
-  - apt-get -qq update; apt-get -y install git
+  # - apt-get -qq update; apt-get -y install git
   - julia --project=@. -e "import Pkg; Pkg.build()"
 
 default:

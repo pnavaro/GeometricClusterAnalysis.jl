@@ -91,10 +91,6 @@ function _ellipsoids_args(
     )::Tuple{Matrix{Float64},Vector{Int},Vector{Int},Vector{Int},KpResult,Real},
 )
 
-    for (k, c) in enumerate(sort(unique(colors)))
-        colors[colors.==c] .= k - 1
-    end
-
     pointsx = points[1, :]
     pointsy = points[2, :]
     centers = dist_func.centers
@@ -124,10 +120,6 @@ function _ellipsoids_args(
         Real,
     },
 )
-
-    for (k, c) in enumerate(sort(unique(colors)))
-        colors[colors.==c] .= k - 1
-    end
 
     pointsx = points[1, :]
     pointsy = points[2, :]

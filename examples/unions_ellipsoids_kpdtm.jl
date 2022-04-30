@@ -29,23 +29,13 @@ Temps = hc.Temps_step
 remain_indices = hc.Indices_depart
 length_ri = length(remain_indices)
 
-
-
-#color_points, dists = subcolorize(data.points, nsignal, df, remain_indices)
-
-matrices = [df.Σ[i] for i in remain_indices]
-remain_centers = [df.centers[i] for i in remain_indices]
-color_points, μ, ω, dists = colorize( data.points, k, nsignal, remain_centers, matrices)
-
-c = length(ω)
-remain_indices_2 = vcat(remain_indices, zeros(Int, c + 1 - length(remain_indices)))
-color_points .+= (color_points.==0) .* (c + 1)
-color_points .= [remain_indices_2[c] for c in color_points]
-color_points .+= (color_points.==0) .* (c + 1)
-
+color_points, dists = subcolorize(data.points, nsignal, df, remain_indices) 
 
 # Associate colours to points (as represented in the plot)
 Colors = [return_color(color_points, col, remain_indices) for col in Col]
+
+# scatter(data.points[1,:],data.points[2,:],color = Colors[1])
+# scatter!([μ[8][1]], [μ[8][2]], color = "green", label = "", markersize = 10)
 
 for i = 1:length(Col)
     for j = 1:size(data.points)[2]
@@ -53,9 +43,9 @@ for i = 1:length(Col)
     end
 end
 
-μ = [df.μ[i] for i in remain_indices if i > 0]
-ω = [df.weights[i] for i in remain_indices if i > 0]
-Σ = [df.Σ[i] for i in remain_indices if i > 0]
+μ = [df.μ[i] for i in remain_indices] 
+ω = [df.weights[i] for i in remain_indices] 
+Σ = [df.Σ[i] for i in remain_indices] 
 
 ncolors = length(Colors)
 anim = @animate for i = [1:ncolors-1; Iterators.repeated(ncolors-1,30)...]
@@ -63,6 +53,5 @@ anim = @animate for i = [1:ncolors-1; Iterators.repeated(ncolors-1,30)...]
     xlims!(-2, 4)
     ylims!(-2, 2)
 end
-# Comment on change la couleur des ellipsoides ?
 
-gif(anim, "anim_kpdtm.gif", fps = 1)
+gif(anim, "anim_kpdtm.gif", fps = 2)

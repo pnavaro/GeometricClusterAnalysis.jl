@@ -258,20 +258,22 @@ end
 
 export return_color
 
+
 """
     return_color(centre, couleurs, Indices_depart)
 
 - centre : vector of integers such that centre[i] is the label of the center associated to the i-th point
 - couleurs[1] : label of the center that is born first, i.e. for the Indice_depart[1]-th center
 """
-function return_color(centre, couleurs, Indices_depart)
-        color = zeros(Int, length(centre))
-    
-        for i in eachindex(Indices_depart)
-            if i <= length(couleurs)
-                color[centre.==Indices_depart[i]] .= couleurs[i]
-            end
-        end
-        return color
-    
+# col : labels des centres en sortie d'algo.
+# label_points : les labels des points à valeurs dans le même ensemble que les indices de départ.
+# si label_points[j] = 3, alors on cherche le centre dont l'indice de départ vaut 3
+# par exemple, c'est le 5ème centre
+# alors color[j] = col[5]
+function return_color(label_points, col, Indices_depart)
+    color = zeros(Int, length(label_points))
+    for i in eachindex(Indices_depart)
+        color[label_points.==Indices_depart[i]] .= col[i]
     end
+    return color
+end

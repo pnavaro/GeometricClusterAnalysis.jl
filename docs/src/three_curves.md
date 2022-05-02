@@ -1,6 +1,5 @@
 # The Three-Curves example
 
-
 ```@example three-curves
 
 using GeometricClusterAnalysis

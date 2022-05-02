@@ -95,7 +95,7 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!, first_
         Σ_old = [diagm(ones(dimension)) for i = 1:n_centers]
         
         if n_times > 1
-            first_centers .= first(randperm(rng, n_points), n_centers)
+            first_centers = first(randperm(rng, n_points), n_centers)
         end
 
         centers = [points[:, i] for i in first_centers]

@@ -35,7 +35,7 @@ P = collect(points')
 
     function f_Σ(Σ) end # aucune contrainte sur la matrice de covariance
 
-    @time model = kplm(rng, points, k, c, signal, iter_max, nstart, f_Σ)
+    @time model = kplm(rng, points, k, c, signal, iter_max, nstart, f_Σ, 1:c)
 
     for (i,σ) in enumerate(model.Σ)
         @test σ ≈ results[:Sigma][i]
@@ -76,7 +76,7 @@ end
 
     results = @rget LL
 
-    @time model = kplm(rng, points, k, c, signal, iter_max, nstart, f_Σ_det1)
+    @time model = kplm(rng, points, k, c, signal, iter_max, nstart, f_Σ_det1, 1:c)
 
     for (i,σ) in enumerate(model.Σ)
         @test σ ≈ results[:Sigma][i]
@@ -187,7 +187,7 @@ end
 
     results = @rget LL
 
-    @time model = kplm(rng, points, k, c, signal, iter_max, nstart, f_Σ_dim_d)
+    @time model = kplm(rng, points, k, c, signal, iter_max, nstart, f_Σ_dim_d, 1:c)
 
     for (i,σ) in enumerate(model.Σ)
         @test σ ≈ results[:Sigma][i]

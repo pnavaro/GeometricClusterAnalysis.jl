@@ -9,9 +9,9 @@ nsignal = 2000 # number of signal points
 nnoise = 200   # number of outliers
 dim = 2       # dimension of the data
 sigma = 0.015  # standard deviation for the additive noise
-k = 50        # number of nearest neighbors
+k = 40        # number of nearest neighbors
 c = 20        # number of ellipsoids
-iter_max = 20# maximum number of iterations of the algorithm kPLM
+iter_max = 100# maximum number of iterations of the algorithm kPLM
 nstart = 1    # number of initializations of the algorithm kPLM
 
 d_prim = 1

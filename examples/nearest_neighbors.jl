@@ -15,10 +15,7 @@
 
 # # NearestNeighbors.jl
 
-import Pkg
-Pkg.activate(@__DIR__)
-
-using KPLMCenters
+using GeometricClusterAnalysis
 using Random
 using LinearAlgebra
 using Statistics
@@ -34,9 +31,11 @@ dimension = 3
 noise_min = -7
 noise_max = 7
 σ = 0.01
-points = infinity_symbol(rng, signal, noise, σ, dimension, noise_min, noise_max)
-points_matrix = hcat(points...)
+data = infinity_symbol(rng, signal, noise, σ, dimension, noise_min, noise_max)
+points_matrix = data.points
 size(points_matrix)
+
+points = [points_matrix[:,i] for i in 1:size(points_matrix,2)]
 
 # +
 function update_means_and_weights_1( points, k)

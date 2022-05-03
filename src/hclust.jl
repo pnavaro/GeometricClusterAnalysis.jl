@@ -51,8 +51,8 @@ function intersection_radius(Σ₁, Σ₂, μ₁, μ₂, ω₁, ω₂)
     #@assert issymmetric(Σ₁)
     #@assert issymmetric(Σ₂)
     @assert length(μ₁) == length(μ₂)
-    @assert length(μ₁) == size(Σ₁,1)
-    @assert length(μ₂) == size(Σ₂,1)
+    @assert length(μ₁) == nrow(Σ₁)
+    @assert length(μ₂) == nrow(Σ₂)
 
     Σ₁ .= (Σ₁ + transpose(Σ₁)) /2
     Σ₂ .= (Σ₂ + transpose(Σ₂)) /2

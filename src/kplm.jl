@@ -52,8 +52,7 @@ end
 
 function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
-    n = size(points, 2)
-    first_centers = first(randperm(rng, n), n_centers)
+    first_centers = 1:n_centers
     kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!, first_centers)
 
 end

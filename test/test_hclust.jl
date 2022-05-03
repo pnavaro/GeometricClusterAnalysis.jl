@@ -44,7 +44,7 @@ dist_func = @rget dist_func
 
 function f_Σ!(Σ) end
 
-df = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!, 1:c)
+df = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
 
 @test vcat(df.centers'...) ≈ dist_func[:centers]
 @test vcat(df.μ'...) ≈ dist_func[:means]

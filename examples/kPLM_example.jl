@@ -3,7 +3,7 @@ using LinearAlgebra
 using Plots
 using Random
 using Statistics
-using KPLMCenters
+using GeometricClusterAnalysis
 
 rng = MersenneTwister(1234)
 
@@ -18,12 +18,12 @@ signal = 500
 iter_max = 10
 nstart = 1
 
-function f_Σ_dim_d(Σ) 
+d_prim = 1
+lambdamin = 0.1
+s2min = 0.01
+s2max = 0.02
 
-    d_prim = 1
-    λmin = 0.1
-    s2min = 0.01
-    s2max = 0.02
+function aux_dim_d(Σ, s2min, s2max, λmin, d_prim)
 
     eig = eigen(Σ)
     v = eig.vectors
@@ -43,16 +43,19 @@ function f_Σ_dim_d(Σ)
         new_λ[1:(end-d_prim)] .= s2
     end
 
-    Σ .= v * Diagonal(new_λ) * transpose(v)
+    return v * Diagonal(new_λ) * transpose(v)
 
 end
 
-centers, μ, weights, colors, Σ, cost = kplm( rng, points, k, c, 
-    signal, iter_max, nstart, f_Σ_dim_d)
+function f_Σ_dim_d(Σ)
+
+    Σ .= aux_dim_d(Σ, s2min, s2max, lambdamin, d_prim)
+
+end
+
+model = kplm(rng, points, k, c, signal, iter_max, nstart, f_Σ_dim_d)
 
 scatter(points[1,:], points[2,:], ms = 3,  
-    marker_z=colors, color=:lightrainbow, aspect_ratio=:equal )
+    marker_z=model.colors, color=:lightrainbow, aspect_ratio=:equal )
 xlims!(-5,5)
 ylims!(-5,5)
-
-

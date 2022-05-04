@@ -57,7 +57,7 @@ end
 
 ncolors = length(Colors)
 anim = @animate for i = [1:ncolors-1; Iterators.repeated(ncolors-1,30)...]
-    ellipsoids(data.points, Colors[i], μ, ω, Σ, Temps[i]; markersize=1)
+    ellipsoids(data.points, Col[i], Colors[i], μ, ω, Σ, Temps[i]; markersize=5)
     xlims!(-2, 4)
     ylims!(-2, 2)
 end

@@ -34,7 +34,7 @@ end
 
 @recipe function f(e::Ellipsoids)
 
-    x, y, centers, colors, covariances, weights, α = _ellipsoids_args(e.args)
+    x, y, centers, col, colors, covariances, weights, α = _ellipsoids_args(e.args)
 
     @series begin
         seriestype := :scatter
@@ -66,7 +66,7 @@ end
 
         @series begin
             primary := false
-            fillcolor := i
+            fillcolor := col[i]
             seriesalpha --> 0.3
             seriestype := :shape
             μ[1] .+ A[1, :], μ[2] .+ A[2, :]
@@ -84,15 +84,12 @@ function _ellipsoids_args(
     (
         points,
         indices,
+        col,
         colors,
         dist_func,
         α,
-    )::Tuple{Matrix{Float64},Vector{Int},Vector{Int},KpResult,Real},
+    )::Tuple{Matrix{Float64},Vector{Int},Vector{Int},Vector{Int},KpResult,Real},
 )
-
-    for (k, c) in enumerate(sort(unique(colors)))
-        colors[colors.==c] .= k - 1
-    end
 
     pointsx = points[1, :]
     pointsy = points[2, :]
@@ -100,13 +97,14 @@ function _ellipsoids_args(
     covariances = dist_func.Σ
     weights = dist_func.weights
 
-    pointsx, pointsy, centers, colors, covariances, weights, α
+    pointsx, pointsy, centers, col, colors, covariances, weights, α
 
 end
 
 function _ellipsoids_args(
     (
         points,
+        col,
         colors,
         μ,
         ω,
@@ -115,6 +113,7 @@ function _ellipsoids_args(
     )::Tuple{
         Matrix{Float64},
         Vector{Int},
+        Vector{Int},
         Vector{Vector{Float64}},
         Vector{Float64},
         Vector{Matrix{Float64}},
@@ -122,14 +121,10 @@ function _ellipsoids_args(
     },
 )
 
-    for (k, c) in enumerate(sort(unique(colors)))
-        colors[colors.==c] .= k - 1
-    end
-
     pointsx = points[1, :]
     pointsy = points[2, :]
 
-    pointsx, pointsy, μ, colors, Σ, ω, α
+    pointsx, pointsy, μ, col, colors, Σ, ω, α
 
 end
 

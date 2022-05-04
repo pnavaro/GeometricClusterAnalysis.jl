@@ -17,7 +17,6 @@ Pkg.add("https://github.com/pnavaro/GeometricClusterAnalysis.jl")
 
 - K-plm
 - K-pdtm
-- Bregman clustering
 - ToMaTo
 
 [docs-latest-img]: https://img.shields.io/badge/docs-latest-blue.svg

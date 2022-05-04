@@ -5,3 +5,5 @@ Manifest.toml
 Rplots.pdf
 results
 examples/*.pdf
+.vscode/
+anim1.gif

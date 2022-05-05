@@ -115,7 +115,29 @@ Temps = hc3.Temps_step # Time at which a component get born or a component dies
 # This parameter can be chosen with some heuristic
 
 remain_indices = hc3.Indices_depart
-color_points, dists = subcolorize(data.points, nsignal, df, remain_indices) 
+color_points, dists = subcolorize(data.points, npoints, df, remain_indices) 
+
+
+# Method to select the number of outliers
+
+nsignal_vect = 1:npoints
+idxs = zeros(Int, npoints)
+sortperm!(idxs, dists, rev = false)
+costs = cumsum(dists[idxs])
+plot(nsignal_vect,costs, title = "Selection of the number of signal points",legend = false)
+xlabel!("Number of signal points")
+ylabel!("Cost")
+
+# We choose the number of points at which there is a slope change in the cost curve.
+# We set the label of the (npoints - nsignal) points with largest cost to 0.
+
+nsignal = 2100
+
+if nsignal < npoints
+    for i in idxs[(nsignal + 1):npoints]
+        color_points[i] = 0
+    end
+end
 
 
 
@@ -227,6 +249,6 @@ anim = @animate for i = [1:ncolors-1; Iterators.repeated(ncolors-1,30)...]
     ylims!(-60, 60)
 end
 
-gif(anim, "anim1.gif", fps = 10)
+gif(anim, "anim1.gif", fps = 6)
 
 

@@ -41,6 +41,7 @@ end
         x := x
         y := y
         color := colors
+        label := "data"
         ()
     end
 
@@ -49,6 +50,7 @@ end
         markershape := :star
         markercolor := :yellow
         markersize := 5
+        label := "centers"
         getindex.(centers, 1), getindex.(centers, 2)
     end
 

@@ -13,6 +13,10 @@ Julia implementation of data clustering using geometric methods.
 Pkg.add("https://github.com/pnavaro/GeometricClusterAnalysis.jl")
 ```
 
+```julia
+# import Pkg; Pkg.instantiate() ; using Pkg ; Pkg.activate(".")
+```
+
 ## Clustering Algorithms
 
 - K-plm

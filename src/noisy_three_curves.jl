@@ -13,6 +13,7 @@ Signal points are ``x = y+z`` with
 `d` is the dimension of the data and sigma, the standard deviation of the additive Gaussian noise.
 When ``d>2, y_i = 0`` for ``i>=2``; with the notation ``y=(y_i)_{i=1..d}``
 """
+
 function noisy_three_curves(rng, nsignal, nnoise, sigma, d)
 
     nmid = nsignal ÷ 2

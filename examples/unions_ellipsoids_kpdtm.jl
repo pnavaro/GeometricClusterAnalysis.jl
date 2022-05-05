@@ -96,7 +96,7 @@ for i = 1:length(time)
         updated = true
     end
     if updated
-        new_col2 = Col[idx]
+        new_col2 = Col[idx-1]
         new_colors2 = return_color(color_points, new_col2, remain_indices)
         updated = false
     end
@@ -111,7 +111,7 @@ for i = 1:length(Col2)
 end
 
 ncolors2 = length(Colors2)
-anim = @animate for i = [1:ncolors2-1; Iterators.repeated(ncolors2-1,30)...]
+anim = @animate for i = [1:ncolors2; Iterators.repeated(ncolors2,30)...]
     ellipsoids(data.points, Col2[i], Colors2[i], μ, ω, Σ, sq_time[i]; markersize=5)
     xlims!(-2, 4)
     ylims!(-2, 2)

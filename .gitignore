@@ -2,3 +2,8 @@
 Manifest.toml
 *.swp
 .ipynb_checkpoints/
+Rplots.pdf
+results
+examples/*.pdf
+.vscode/
+anim1.gif

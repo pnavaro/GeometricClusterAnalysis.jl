@@ -34,5 +34,5 @@ colorize <- function(P,k,sig,centers,Sigma){
   if(sig<N){
     color[distance_sort$ix[1:(N-sig)]]=0
   }
-  return(list(color = color, means = means, weights = weights))
+  return(list(color = color, means = means, weights = weights, value = distance_min))
 }

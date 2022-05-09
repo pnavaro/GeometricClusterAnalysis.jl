@@ -1,4 +1,3 @@
-using Clustering
 using LinearAlgebra
 using Random
 using RCall
@@ -100,8 +99,8 @@ P = vcat(points'...)
 @rput nstart
 
 R"""
-source("test/colorize.r")
-source("test/kplm.r")
+source("test/colorize.R")
+source("test/kplm.R")
 
 f_Sigma_dim_d <- function(Sigma){
   return(aux_dim_d(Sigma, s2min, s2max, lambdamin, d_prim))

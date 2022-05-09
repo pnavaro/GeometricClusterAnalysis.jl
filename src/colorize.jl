@@ -1,8 +1,10 @@
 import Statistics: mean
 
+export colorize!, colorize
+
 """
 
-    colorize(points, k, signal, centers, Σ)
+    colorize!( colors, μ, weights, points, k, signal, centers, Σ)
 
 Fonction auxiliaire qui, étant donnés k centres, calcule les "nouvelles 
 distances tordues" de tous les points de P, à tous les centres
@@ -21,7 +23,7 @@ en ajoutant "inverted = true".
 
 
 """
-function colorize!( colors, μ, weights, points, k, signal, centers, Σ)
+function colorize!(colors, μ, weights, points, k, signal, centers, Σ)
 
     dimension, n_points = size(points)
     n_centers = length(centers)
@@ -38,13 +40,14 @@ function colorize!( colors, μ, weights, points, k, signal, centers, Σ)
         for (j, x) in enumerate(eachcol(points))
             dists[j] = sqmahalanobis(x, centers[i], invΣ)
         end
-        
+
         idxs .= sortperm(dists)
 
-        μ[i] .= vec(mean(points[:, idxs[1:k]], dims=2))
+        μ[i] .= vec(mean(points[:, idxs[1:k]], dims = 2))
 
         weights[i] =
-            mean(sqmahalanobis(points[:,j], μ[i], invΣ) for j in idxs[1:k]) + log(det(Σ[i]))
+            mean(sqmahalanobis(points[:, j], μ[i], invΣ) for j in idxs[1:k]) +
+            log(det(Σ[i]))
 
     end
 
@@ -54,7 +57,7 @@ function colorize!( colors, μ, weights, points, k, signal, centers, Σ)
         cost = Inf
         best_index = 1
         for i = 1:n_centers
-            newcost = sqmahalanobis(points[:,j], μ[i], inv(Σ[i])) + weights[i]
+            newcost = sqmahalanobis(points[:, j], μ[i], inv(Σ[i])) + weights[i]
             if newcost <= cost
                 cost = newcost
                 best_index = i
@@ -73,5 +76,129 @@ function colorize!( colors, μ, weights, points, k, signal, centers, Σ)
         end
     end
 
+    dists
+
+end
+
+function colorize(points, k, signal, centers, Σ)
+
+    dimension, n_points = size(points)
+    n_centers = length(centers)
+
+    colors = zeros(Int, n_points)
+    dists = zeros(Float64, n_points)
+    idxs = zeros(Int, n_points)
+
+    # Step 1 : Update μ and weights
+
+    μ = Vector{Float64}[]
+    ω = Float64[]
+    for i = 1:n_centers
+
+        invΣ = inv(Σ[i])
+
+        for (j, x) in enumerate(eachcol(points))
+            dists[j] = sqmahalanobis(x, centers[i], invΣ)
+        end
+
+        idxs .= sortperm(dists)
+
+        push!(μ, vec(mean(points[:, idxs[1:k]], dims = 2)))
+        push!(
+            ω,
+            mean(sqmahalanobis(points[:, j], μ[i], invΣ) for j in idxs[1:k]) +
+            log(det(Σ[i])),
+        )
+
+    end
+
+    # Step 2 : Update colors
+
+    for j = 1:n_points
+        cost = Inf
+        best_index = 1
+        for i = 1:n_centers
+            newcost = sqmahalanobis(points[:, j], μ[i], inv(Σ[i])) + ω[i]
+            if newcost <= cost
+                cost = newcost
+                best_index = i
+            end
+        end
+        colors[j] = best_index
+        dists[j] = cost
+    end
+
+    # Step 3 : Trimming and Update cost
+
+    sortperm!(idxs, dists, rev = true)
+    if signal < n_points
+        for i in idxs[1:(n_points-signal)]
+            colors[i] = 0
+        end
+    end
+
+    colors, μ, ω, dists
+
+end
+
+export subcolorize
+
+"""
+
+    subcolorize(points, signal, result, Indices_depart)
+
+Fonction auxiliaire qui, étant donnés le nuage de points,
+le nombre de points du signal, le résultat de kpdtm ou de kplm 
+et les indices de départ de la méthode de hclust.jl, calcule les "nouvelles 
+distances tordues" de tous les points de P, à tous les centres dont les indices sont dans les indices de départ.
+On leur associe le centre le plus proche.
+"""
+function subcolorize(points, signal, result, Indices_depart)
+# To be used when some centers are removed, 
+# after using hierarchical_clustering_lem and before using return_color.
+    dimension, n_points = size(points)
+    n_centers = length(result.centers)
+
+    colors = zeros(Int, n_points)
+    dists = zeros(Float64, n_points)
+    idxs = zeros(Int, n_points)
+
+    μ = result.μ
+    ω = result.weights
+    Σ = result.Σ
+
+    # To ensure that no point has label associated to points not in Indice_depart, 
+    # we put infinite weight to these points
+
+    #ω[(1:n_centers) .∈ Ref(Indices_depart)] .= Inf
+    not_removed = (1:n_centers) .∈ Ref(Indices_depart)
+    ω = [(not_removed[j] ? ω[j] : Inf) for j in 1:n_centers]
+
+    # Update colors
+
+    for j = 1:n_points
+        cost = Inf
+        best_index = 1
+        for i = 1:n_centers
+            newcost = sqmahalanobis(points[:, j], μ[i], inv(Σ[i])) + ω[i]
+            if newcost <= cost
+                cost = newcost
+                best_index = i
+            end
+        end
+        colors[j] = best_index
+        dists[j] = cost
+    end
+
+    # Trimming and Update cost
+
+    sortperm!(idxs, dists, rev = true)
+    if signal < n_points
+        for i in idxs[1:(n_points-signal)]
+            colors[i] = 0
+        end
+    end
+
+    colors, dists
 
 end

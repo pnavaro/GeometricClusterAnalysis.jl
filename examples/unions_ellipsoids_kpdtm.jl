@@ -78,6 +78,8 @@ gif(anim, "anim_kpdtm.gif", fps = 10)
 ## COLORIZE - steps parametrized by regularly increasing time parameter time
 # Attention - vérifier que le dernier élément de Temps vaut forcément Inf.
 
+let
+
 time = (1:20)./40 # A regler en fonction du vecteur Temps 
 sq_time = time.^2
 Col2 = Vector{Int}[] 
@@ -112,9 +114,12 @@ end
 
 ncolors2 = length(Colors2)
 anim = @animate for i = [1:ncolors2-1; Iterators.repeated(ncolors2-1,30)...]
-    ellipsoids(data.points, Col2[i], Colors2[i], μ, ω, Σ, sq_time[i]; markersize=5)
+    ellipsoids(data.points, Col2[i], Colors2[i], μ, ω, Σ, sq_time[i]; markersize=5,
+    label = ["points", "centers"])
     xlims!(-2, 4)
     ylims!(-2, 2)
 end
 
 gif(anim, "anim_kpdtm2.gif", fps = 2)
+
+end

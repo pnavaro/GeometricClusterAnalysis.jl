@@ -2,7 +2,8 @@ using DataFrames
 using DelimitedFiles
 using Distributions
 using NamedArrays
-using StatsBase
+import StatsBase: sample, pweights
+using RCall
 
 table =readdlm(joinpath(@__DIR__,"..","docs","src","assets","textes.txt"))
 
@@ -221,20 +222,51 @@ end
 function simule_poissond(n, lambdas, proba)
     dimd = size(lambdas, 2)
     x = eachindex(proba)
-    proba = sample(x, proba, n, replace=true)
-    λ = lambdas[Proba]
+    p = sample(x, pweights(proba), n, replace=true)
+    @show λ = Float64.(lambdas[p])
     d = Poisson(λ)
     return rand(d, dimd,n)
 end
 
+R"""
+library(ggplot2)
+simule_poissond <- function(N,lambdas,proba){
+  dimd = ncol(lambdas)
+  Proba = sample(x=1:length(proba),size=N,replace=TRUE,prob=proba)
+  Lambdas = lambdas[Proba,]
+  return(list(points=matrix(rpois(dimd*N,Lambdas),N,dimd),labels=Proba))
+}
+sample_outliers = function(n_outliers,d,L = 1) { return(matrix(L*runif(d*n_outliers),n_outliers,d))
+}
+plot_clustering_dim1 <- function(x,labels,centers){
+  df = data.frame(x = 1:nrow(x), y =x[,1], Etiquettes = as.factor(labels))
+  gp = ggplot(df,aes(x,y,color = Etiquettes))+geom_point()
+for(i in 1:k){gp = gp + geom_point(x = 1,y = centers[1,i],color = "black",size = 2,pch = 17)}
+  return(gp)
+}
+n = 1000 # Taille de l'echantillon
+n_outliers = 50 # Dont points generes uniformement sur [0,120]
+d = 1 # Dimension ambiante
 
-const n = 1000 # Taille de l'echantillon
-const n_outliers = 50 # Dont points generes uniformement sur [0,120]
-const d = 1 # Dimension ambiante
+lambdas =  matrix(c(10,20,40),3,d)
+proba = rep(1/3,3)
+P = simule_poissond(n - n_outliers,lambdas,proba)
 
-lambdas =  [10,20,40]
-proba = [1/3, 1/3, 1/3]
-points = simule_poissond(n - n_outliers,lambdas, proba)
+k = 3 # Nombre de groupes dans le partitionnement
+alpha = 0.04 # Proportion de donnees aberrantes
+iter.max = 50 # Nombre maximal d'iterations
+nstart = 20 # Nombre de departs
+
+set.seed(1)
+x = rbind(P$points,sample_outliers(n_outliers,d,120)) # Coordonnees des n points
+labels_true = c(P$labels,rep(0,n_outliers)) # Vraies etiquettes 
+library(tclust)
+set.seed(1)
+t_kmeans = tkmeans(x,k,alpha,iter.max = iter.max,nstart = nstart)
+plot_clustering_dim1(x,t_kmeans$cluster,t_kmeans$centers)
+"""
+
+
 
 #=
 performance.measurement<-function(n,n_outliers,k,alpha,sample_generator,outliers_generator,Bregman_divergence,iter.max=100,nstart=10,replications_nb=100){

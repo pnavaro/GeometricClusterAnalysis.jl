@@ -9,7 +9,7 @@ origin()
 background("white")
 
 n = 5000
-colors = [Luxor.julia_purple, Luxor.julia_red, Luxor.julia_green]
+colors = [Luxor.julia_red, Luxor.julia_green, Luxor.julia_purple]
 r = 60
 centers = [(-2r*sin(π/3), r), (0,-2r), (2r*sin(π/3), r)]
 data = Vector{Float64}[]

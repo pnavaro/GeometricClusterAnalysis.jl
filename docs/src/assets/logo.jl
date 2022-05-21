@@ -4,24 +4,24 @@ using Luxor
 using Random
 using Plots
 
-
 Drawing(600, 600, "logo.png")
 origin()
+background("white")
 
-sethue("black")
-squircle(Point(0,0), 200, 200, rt=0.3)
-strokepath()
-
-n = 500
-centers = [(100,100), (-100,100), (0,-100)]
+n = 5000
 colors = [Luxor.julia_purple, Luxor.julia_red, Luxor.julia_green]
-centers = [(-100*sin(π/3), 50), (0,-100), (100*sin(π/3), 50)]
+r = 60
+centers = [(-2r*sin(π/3), r), (0,-2r), (2r*sin(π/3), r)]
 data = Vector{Float64}[]
-for (center, color) in zip(centers, colors)
-    sethue(color)
-    setopacity(0.4)
-    for (x, y) in zip(rand(-50:50,n), rand(-50:50,n))
-        if x^2 + y^2 < 50^2
+a = 50
+b = 100
+r = 100
+alphas = [-π / 3, 0, π /3]
+setopacity(0.7)
+for (center, color, α) in zip(centers, colors, alphas)
+    for (x, y) in zip(rand(-200:200,n), rand(-200:200,n))
+        if (x*cos(α)+y*sin(α))^2 / a^2 + (x*sin(α)-y*cos(α))^2 / b^2 < 1
+           sethue(color)
            circle(Point(x+center[1], y+center[2]), 3, :fill)
            push!(data, [x+center[1], y+center[2]])
         end
@@ -30,11 +30,10 @@ end
 points = hcat(data...) 
 
 k = 10
-c = 4
+c = 3
 nsignal = size(points, 2)
 iter_max = 10
 nstart = 5 
-ngon(0, 0, 100, 8, 0, :clip)
 
 function f_Σ!(Σ) end
 
@@ -61,48 +60,35 @@ centers = [df.μ[i] for i in remain_indices if i > 0]
 weights = [df.weights[i] for i in remain_indices if i > 0]
 covariances = [df.Σ[i] for i in remain_indices if i > 0]
 
-@show ncolors = length(Colors)
-anim = @animate for i = [1:ncolors-1; Iterators.repeated(ncolors-1,30)...]
-    ellipsoids(points, Col[i], Colors[i], centers, weights, covariances, Temps[i]; markersize=5)
-    xlims!(-300, 300)
-    ylims!(-300, 300)
+@show α = Temps[end-1]
+
+npoints = 120
+θ = LinRange(0, 2π, npoints)
+
+
+#setopacity(1.0)
+
+for i in eachindex(centers)
+    μ = centers[i]
+    Σ = covariances[i]
+    ω = weights[i]
+    λ, U = eigen(Σ)
+    β = (α - ω) * (α - ω >= 0)
+    S = U * diagm(sqrt.(β .* λ))
+
+    A = S * [cos.(θ)'; sin.(θ)']
+    h, w = sqrt.(β .* λ)
+
+    sethue("black")
+    for (j1, j2) in zip(1:npoints-1, 2:npoints)
+
+        p1 = Point(μ[1]+A[1,j1], μ[2]+A[2,j1])
+        p2 = Point(μ[1]+A[1,j2], μ[2]+A[2,j2])
+        line(p1, p2, :stroke)
+
+    end
+
 end
-
-gif(anim, "logo.gif", fps = 10)
-
-@show centers
-
-
-i = 1
-θ = range(0, 2π; length = 100)
-@show α = Temps[i]
-@show μ = centers[i]
-@show Σ = covariances[i]
-@show ω = weights[i]
-@show λ, U = eigen(Σ)
-@show β = (α - ω) * (α - ω >= 0)
-@show S = U * diagm(sqrt.(β .* λ))
-
-width = 50
-height = 100
-sethue(Luxor.julia_red)
-setopacity(0.2)
-ellipse(Point(μ...), width, height, :fill)
-#rotate(2pi/3)
-
-#μ[1] .+ A[1, :], μ[2] .+ A[2, :]
-
-
-#width += 20
-#sethue(Luxor.julia_green)
-#ellipse(Point(50, 00), width, height, :fill)
-#rotate(2pi/3)
-#height += 20
-#sethue(Luxor.julia_purple)
-#ellipse(Point(50, 00), width, height, :fill)
-#rotate(2pi/3)
-
-
 
 finish()
 preview()

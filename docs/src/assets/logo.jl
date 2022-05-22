@@ -6,7 +6,6 @@ using Plots
 
 Drawing(600, 600, "logo.png")
 origin()
-background("white")
 
 n = 5000
 colors = [Luxor.julia_red, Luxor.julia_green, Luxor.julia_purple]

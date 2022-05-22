@@ -4,13 +4,9 @@ using Luxor
 using Random
 using Plots
 
-Drawing(800, 800, "logo.png")
+Drawing(600, 600, "logo.png")
 origin()
 background("white")
-
-sethue(Luxor.julia_blue)
-squircle(Point(0,0), 300, 300, rt=0.3)
-strokepath()
 
 n = 5000
 colors = [Luxor.julia_red, Luxor.julia_green, Luxor.julia_purple]
@@ -20,7 +16,7 @@ data = Vector{Float64}[]
 a = 0.5
 b = 1.0
 alphas = [-π / 3, 0, π /3]
-setopacity(0.7)
+setopacity(0.5)
 for (center, color, α) in zip(centers, colors, alphas)
 
     for (x, y) in zip(r .* randn(n), r .* randn(n))
@@ -28,7 +24,7 @@ for (center, color, α) in zip(centers, colors, alphas)
         py = (a*x*sin(α)-b*y*cos(α)) + center[2] + 40
         if abs(px) < 300 && abs(py) < 300
             sethue(color)
-            circle(Point(px, py), 2, :fill)
+            circle(Point(px, py), 3, :fill)
             push!(data, [px, py])
         end
     end

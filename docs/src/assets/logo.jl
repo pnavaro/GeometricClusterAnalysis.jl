@@ -4,28 +4,35 @@ using Luxor
 using Random
 using Plots
 
-Drawing(600, 600, "logo.png")
+Drawing(800, 800, "logo.png")
 origin()
 background("white")
+
+sethue(Luxor.julia_blue)
+squircle(Point(0,0), 300, 300, rt=0.3)
+strokepath()
 
 n = 5000
 colors = [Luxor.julia_red, Luxor.julia_green, Luxor.julia_purple]
 r = 60
 centers = [(-2r*sin(π/3), r), (0,-2r), (2r*sin(π/3), r)]
 data = Vector{Float64}[]
-a = 50
-b = 100
-r = 100
+a = 0.5
+b = 1.0
 alphas = [-π / 3, 0, π /3]
 setopacity(0.7)
 for (center, color, α) in zip(centers, colors, alphas)
-    for (x, y) in zip(rand(-200:200,n), rand(-200:200,n))
-        if (x*cos(α)+y*sin(α))^2 / a^2 + (x*sin(α)-y*cos(α))^2 / b^2 < 1
-           sethue(color)
-           circle(Point(x+center[1], y+center[2]), 3, :fill)
-           push!(data, [x+center[1], y+center[2]])
+
+    for (x, y) in zip(r .* randn(n), r .* randn(n))
+        px = (a*x*cos(α)+b*y*sin(α)) + center[1] 
+        py = (a*x*sin(α)-b*y*cos(α)) + center[2] + 40
+        if abs(px) < 300 && abs(py) < 300
+            sethue(color)
+            circle(Point(px, py), 2, :fill)
+            push!(data, [px, py])
         end
     end
+
 end
 points = hcat(data...) 
 

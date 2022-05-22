@@ -87,6 +87,7 @@ for i in eachindex(centers)
         p1 = Point(μ[1]+A[1,j1], μ[2]+A[2,j1])
         p2 = Point(μ[1]+A[1,j2], μ[2]+A[2,j2])
         line(p1, p2, :stroke)
+        setline(4)
 
     end
 

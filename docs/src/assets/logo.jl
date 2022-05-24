@@ -15,7 +15,7 @@ data = Vector{Float64}[]
 a = 0.5
 b = 1.0
 alphas = [-π / 3, 0, π /3]
-setopacity(0.5)
+setopacity(0.7)
 for (center, color, α) in zip(centers, colors, alphas)
 
     for (x, y) in zip(r .* randn(n), r .* randn(n))
@@ -62,13 +62,13 @@ centers = [df.μ[i] for i in remain_indices if i > 0]
 weights = [df.weights[i] for i in remain_indices if i > 0]
 covariances = [df.Σ[i] for i in remain_indices if i > 0]
 
-@show α = Temps[end-1]
+α = Temps[end-1]
 
 npoints = 120
 θ = LinRange(0, 2π, npoints)
 
 
-#setopacity(1.0)
+setopacity(1.0)
 
 for i in eachindex(centers)
     μ = centers[i]

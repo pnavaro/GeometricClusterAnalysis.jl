@@ -219,14 +219,7 @@ function trimmed_bregman_clustering(x, centers,
 
 end
 
-function simule_poissond(n, lambdas, proba)
-    dimd = size(lambdas, 2)
-    x = eachindex(proba)
-    p = sample(x, pweights(proba), n, replace=true)
-    @show λ = Float64.(lambdas[p])
-    d = Poisson(λ)
-    return rand(d, dimd,n)
-end
+
 
 R"""
 library(ggplot2)
@@ -264,8 +257,30 @@ library(tclust)
 set.seed(1)
 t_kmeans = tkmeans(x,k,alpha,iter.max = iter.max,nstart = nstart)
 plot_clustering_dim1(x,t_kmeans$cluster,t_kmeans$centers)
+
+x
 """
 
+@show n = Int(@rget n)
+@show lambdas = @rget lambdas
+@show proba = @rget proba
+
+P = @rget P
+
+function simule_poissond(n, lambdas, proba)
+    x = eachindex(proba)
+    p = sample(lambdas, pweights(proba), n, replace=true)
+    data = [rand(Poisson(λ)) for λ in p]
+    return data, p
+end
+
+data, labels = simule_poissond(n, lambdas, proba)
+
+@show size(data), size(labels)
+
+scatter( 1:n, data, color = Int.(labels))
+nv = length(lambdas)
+scatter!( ones(nv), lambdas, markershape = :star, mc = :yellow )
 
 
 #=
@@ -339,30 +354,6 @@ select.parameters <- function(k,alpha,x,Bregman_divergence,iter.max=100,nstart=1
 
 sample_outliers = function(n_outliers,d,L = 1) { return(matrix(L*runif(d*n_outliers),n_outliers,d))
 }
-
-plot_clustering_dim1 <- function(x,labels,centers){
-  df = data.frame(x = 1:nrow(x), y =x[,1], Etiquettes = as.factor(labels))
-  gp = ggplot(df,aes(x,y,color = Etiquettes))+geom_point()
-for(i in 1:k){gp = gp + geom_point(x = 1,y = centers[1,i],color = "black",size = 2,pch = 17)}
-  return(gp)
-}
-
-n = 1000 # Taille de l'echantillon
-n_outliers = 50 # Dont points generes uniformement sur [0,120]
-d = 1 # Dimension ambiante
-
-lambdas =  matrix(c(10,20,40),3,d)
-proba = rep(1/3,3)
-P = simule_poissond(n - n_outliers,lambdas,proba)
-
-set.seed(1)
-x = rbind(P$points,sample_outliers(n_outliers,d,120)) # Coordonnees des n points
-labels_true = c(P$labels,rep(0,n_outliers)) # Vraies etiquettes 
-
-k = 3 # Nombre de groupes dans le partitionnement
-alpha = 0.04 # Proportion de donnees aberrantes
-iter.max = 50 # Nombre maximal d'iterations
-nstart = 20 # Nombre de departs
 
 set.seed(1)
 tB_kmeans = Trimmed_Bregman_clustering(x,k,alpha,euclidean_sq_distance_dimd,iter.max,nstart)

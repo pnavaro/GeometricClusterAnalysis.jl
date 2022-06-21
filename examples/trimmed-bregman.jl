@@ -348,15 +348,14 @@ R"""
   # Mise a jour des etiquettes : suppression des groupes vides
   
   opt_cluster_nonempty = sapply(1:k,function(.){sum(opt_cluster==.)>0})
+  print(opt_cluster_nonempty)
   new_labels = c(0,cumsum(opt_cluster_nonempty)) 
+  print(new_labels)
   opt_cluster = new_labels[opt_cluster+1]
   opt_centers = matrix(opt_centers[,opt_cluster_nonempty],nrow = d)
   
 """
 
-end
-
-#=
 
   # Reprise des Etapes 1 et 2 pour mettre a jour les etiquettes, opt_cluster, 
   # et calculer le cout, opt_risk, ainsi que toutes les divergences, divergence_min.
@@ -366,30 +365,47 @@ end
 
   for i in 1:k
       if opt_cluster_nonempty[i]
-          divergence = divergence_Bregman.(x,opt_centers[i])
-          improvement = (divergence .< divergence_min)
-          divergence_min[improvement] .= divergence[improvement]
-          opt_cluster[improvement] .= i
+          divergence = [divergence_Bregman(p, opt_centers[i]) for p in x]
+          for j in 1:n
+              if divergence[j] < divergence_min[j]
+                  divergence_min[j] = divergence[j]
+                  opt_cluster[j] = i
+              end
+          end
       end
   end
 
+
   if a > 0
     ix = sortperm(divergence_min, rev = true)
-    opt_cluster[divergence_min[ix[1:a]]] .= 0
+    for i in ix[1:a]
+        opt_cluster[divergence_min[i]] = 0
+    end 
     opt_risk = mean(divergence_min[ix[(a+1):n]])
   else
     opt_risk = mean(divergence_min)
   end
 
+
   # Mise a jour des etiquettes : suppression des groupes vides
   
   @show opt_cluster_nonempty = [sum(opt_cluster .== i) > 0 for i in 1:k]
-  new_labels = [0, cumsum(opt_cluster_nonempty)...]
-  opt_cluster .= new_labels[opt_cluster .+ 1]
-  opt_centers .= opt_centers[opt_cluster_nonempty]
-  
-  @show opt_centers, opt_cluster, opt_risk, divergence_min
 
+  new_labels = [0, cumsum(opt_cluster_nonempty)...]
+  @test  new_labels ≈ Int.(@rget new_labels)
+  for i in eachindex(opt_cluster)
+      opt_cluster[i] = new_labels[opt_cluster[i]+1]
+  end
+  opt_centers = opt_centers[opt_cluster_nonempty]
+  
+  @test opt_cluster ≈ Int.(@rget opt_cluster)
+  @test opt_cluster_nonempty ≈ Int.(@rget opt_cluster_nonempty)
+  @test opt_risk ≈ @rget opt_risk
+  @test opt_centers ≈ vec(@rget opt_centers)
+
+end
+
+#=
 
 
 set.seed(1)

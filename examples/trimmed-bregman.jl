@@ -9,6 +9,8 @@ using RCall
 import StatsBase: sample, pweights
 using Test
 
+@testset "Trimmed Bregman" begin
+
 rng = MersenneTwister(2022)
 
 table =readdlm(joinpath(@__DIR__,"..","docs","src","assets","textes.txt"))
@@ -204,7 +206,6 @@ R"""
 
 
 """
-r_cluster = @rget cluster
 
 centers = @rget Centers
 
@@ -250,11 +251,8 @@ centers = @rget Centers
         end
     end
 
-@test r_cluster ≈ cluster	
 
-@show cluster
 
-#=
 
 R"""
 library(magrittr)
@@ -269,12 +267,13 @@ risk = mean(divergence_sorted$x[(a+1):n])
 } else{ risk = mean(divergence_min) }
 
 Centers = matrix(sapply(1:k,function(.){matrix(x[cluster==.,],ncol = d) %>% colMeans}),nrow = d)
+print(Centers)
 cluster_nonempty = !is.nan(Centers[1,])
 non_stopping = ((!identical(as.numeric(Centers_copy),as.numeric(Centers))) && (Nstep<=iter.max))
 
 #    } ## fin while 
     
-if(risk<=opt_risk){ # Important de laisser inferieur ou egal, pour ne pas garder les centres initiaux.
+if(risk<=opt_risk){ 
     opt_centers = Centers
     opt_cluster_nonempty = cluster_nonempty
     opt_risk = risk
@@ -282,6 +281,14 @@ if(risk<=opt_risk){ # Important de laisser inferieur ou egal, pour ne pas garder
 #  } ## fin for iter.max
 
 """
+
+println("k = $k")
+r_cluster = Int.(@rget cluster)
+@test r_cluster ≈ cluster	
+
+r_x = @rget x
+@test x ≈ r_x
+
 if a > 0 #On elague
     ix = sortperm(divergence_min, rev = true)
     cluster[ix[1:a]] .= 0
@@ -290,11 +297,20 @@ else
     risk = mean(divergence_min)
 end
 
-for i = 1:k
-    Centers[k] = mean(x[cluster .== i]) 
+@test risk ≈ @rget risk
+
+for i in 1:k
+    @test x[cluster .== i] ≈ r_x[ r_cluster .== i]
 end
+
+for i = 1:k
+    centers[i] = mean(x[cluster .== i]) 
+end
+
+@test centers ≈ @rget Centers
+
 cluster_nonempty = .!(isinf.(Centers))
-non_stopping = Centers_copy ≈ Centers && (Nstep<=maxiter)
+non_stopping = ( centers_copy ≈ centers && (Nstep<=maxiter) )
 #pn end # fin while
         
 if risk <= opt_risk # Important de laisser inferieur ou egal, pour ne pas garder les centres initiaux.
@@ -302,6 +318,8 @@ if risk <= opt_risk # Important de laisser inferieur ou egal, pour ne pas garder
     opt_cluster_nonempty = cluster_nonempty
     opt_risk = risk
 end
+
+# @test centers ≈ @rget opt_centers
 
 @show opt_centers
 #pn end ## fin iter_max
@@ -335,6 +353,10 @@ R"""
   opt_centers = matrix(opt_centers[,opt_cluster_nonempty],nrow = d)
   
 """
+
+end
+
+#=
 
   # Reprise des Etapes 1 et 2 pour mettre a jour les etiquettes, opt_cluster, 
   # et calculer le cout, opt_risk, ainsi que toutes les divergences, divergence_min.
@@ -422,5 +444,6 @@ function update_cluster_risk(x, n, k, alpha, divergence_Bregman, cluster_nonempt
   return cluster, divergence_min, risk
 
 end
+
 
 

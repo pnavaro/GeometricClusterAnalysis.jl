@@ -51,6 +51,7 @@ Output :
 
 """
 function trimmed_bregman_clustering(
+    rng, 
     x,
     k;
     α = 0.0,
@@ -78,7 +79,7 @@ function trimmed_bregman_clustering(
 
     for n_times = 1:nstart
 
-        first_centers = sample(1:n, k, replace = false)
+        first_centers = sample(rng, 1:n, k, replace = false)
         for (k,i) in enumerate(first_centers)
             centers[k] .= x[:,i]
         end

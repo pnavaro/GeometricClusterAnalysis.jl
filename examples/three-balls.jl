@@ -10,12 +10,14 @@ function three_balls( rng; n = 5000, c = 300, r = 100, α = 0.0)
     a = 0.5
     b = 1.0
     alphas = [-π / 3, 0, π /3]
+    labels = Int[]
     for (c, α) in enumerate(alphas)
     
         for (x, y) in zip(r .* randn(rng, n), r .* randn(rng, n))
             px = (a*x*cos(α)+b*y*sin(α)) + centers[c][1] 
             py = (a*x*sin(α)-b*y*cos(α)) + centers[c][2] + 40
             push!(data, [px, py])
+            push!(labels, c)
         end
     
     end
@@ -25,9 +27,10 @@ function three_balls( rng; n = 5000, c = 300, r = 100, α = 0.0)
 
     for (i,j) in enumerate(sample(rng, 1:n, n_outliers, replace = false))
         data[j] .= outliers[:,i]
+        labels[j] = 0
     end
 
-    return hcat(data...) 
+    return hcat(data...) , labels
 
 end
 
@@ -35,7 +38,7 @@ rng = MersenneTwister(1234)
 
 α = 0.01
 
-points = three_balls(rng; α = α)
+points, labels = three_balls(rng; α = α)
 
 d, n = size(points)
 k = 3
@@ -50,13 +53,15 @@ for (i, c) in enumerate(result.centers)
 
 end
 
+p = plot(layout=(1,2))
+scatter!(p[1,1], points[1,:], points[2,:], color = labels, label = :none, palette = :rainbow, aspect_ratio = :equal)
 c = result.cluster .== 0
-scatter(points[1,c], points[2,c], label = "outliers")
+scatter!(p[1,2], points[1,c], points[2,c], label = "outliers", aspect_ratio = :equal)
 for i in eachindex(result.centers)
     c = result.cluster .== i
-    scatter!(points[1,c], points[2,c], label = "$i")
+    scatter!(p[1,2], points[1,c], points[2,c], label = "$i")
 end
-scatter!(centers[1,:], centers[2,:], markershape = :star, markercolor = :yellow)
+scatter!(p[1,2], centers[1,:], centers[2,:], markershape = :star, markercolor = :yellow)
 xlims!(-1000,1000)
 ylims!(-1000,1000)
 

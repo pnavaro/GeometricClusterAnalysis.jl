@@ -11,8 +11,8 @@ include("colorize.jl")
 include("kplm.jl")
 include("kpdtm.jl")
 include("hclust.jl")
+include("trimmed_bregman.jl")
 include("plots.jl")
 include("validate.jl")
-include("trimmed_bregman.jl")
 
 end

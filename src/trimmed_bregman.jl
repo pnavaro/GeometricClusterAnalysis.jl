@@ -4,9 +4,15 @@ export divergence_poisson
 
 function divergence_poisson(x, y)
 
-    distance = (x, y) -> x .== 0.0 ?  y : x .* log.(x) .- x .+ y .- x .* log.(y)
+    function distance(x, y) 
+        if x == 0 
+           return y 
+        else 
+           return x .* log.(x) .- x .+ y .- x .* log.(y)
+        end
+    end
 
-    return sum(distance(x, y))
+    return sum(distance.(x, y))
 
 end
 
@@ -22,6 +28,7 @@ end
 
 struct TrimmedBregmanResult
 
+    points::Array{Float64, 2}
     cluster::Vector{Int}
     centers::Vector{Vector{Float64}}
     risk::Float64
@@ -181,6 +188,7 @@ function trimmed_bregman_clustering(
     end
 
     return TrimmedBregmanResult(
+        x,
         cluster,
         opt_centers[opt_cluster_nonempty],
         opt_risk,

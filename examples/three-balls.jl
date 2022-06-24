@@ -2,6 +2,7 @@ using GeometricClusterAnalysis
 using Random
 using Plots
 import StatsBase: sample
+import GeometricClusterAnalysis: divergence_poisson
 
 function three_balls( rng; n = 5000, c = 300, r = 100, α = 0.0)
 
@@ -30,7 +31,11 @@ function three_balls( rng; n = 5000, c = 300, r = 100, α = 0.0)
         labels[j] = 0
     end
 
-    return hcat(data...) , labels
+    points = hcat(data...)
+    points[1,:] .-= minimum(view(points, 1, :))
+    points[2,:] .-= minimum(view(points, 2, :))
+
+    return points, labels
 
 end
 
@@ -43,8 +48,17 @@ points, labels = three_balls(rng; α = α)
 d, n = size(points)
 k = 3
 
-result = trimmed_bregman_clustering( rng, points, k, α = α )
+result1 = trimmed_bregman_clustering( rng, points, k, α = α, nstart = 20 )
 
+plot(result1)
+png("euclidian")
+
+result2 = trimmed_bregman_clustering( rng, points, k, α = α, nstart = 20, divergence_bregman = divergence_poisson )
+
+plot(result2)
+png("poisson")
+
+#=
 centers = zeros(d,k)
 
 for (i, c) in enumerate(result.centers)
@@ -53,7 +67,7 @@ for (i, c) in enumerate(result.centers)
 
 end
 
-p = plot(layout=(1,2))
+p = plot(layout=(1,3))
 scatter!(p[1,1], points[1,:], points[2,:], color = labels, label = :none, palette = :rainbow, aspect_ratio = :equal)
 c = result.cluster .== 0
 scatter!(p[1,2], points[1,c], points[2,c], label = "outliers", aspect_ratio = :equal)
@@ -62,6 +76,16 @@ for i in eachindex(result.centers)
     scatter!(p[1,2], points[1,c], points[2,c], label = "$i")
 end
 scatter!(p[1,2], centers[1,:], centers[2,:], markershape = :star, markercolor = :yellow)
-xlims!(-1000,1000)
-ylims!(-1000,1000)
+xlims!(0,2000)
+ylims!(0,2000)
 
+result = trimmed_bregman_clustering( rng, points, k, α = α, divergence_bregman = divergence_poisson )
+
+scatter!(p[1,3], points[1,c], points[2,c], label = "outliers", aspect_ratio = :equal)
+for i in eachindex(result.centers)
+    c = result.cluster .== i
+    scatter!(p[1,3], points[1,c], points[2,c], label = "$i")
+end
+
+png("three-balls")
+=#

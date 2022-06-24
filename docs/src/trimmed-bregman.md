@@ -148,7 +148,7 @@ Soit ``\mathbb{X} = \{X_1, X_2,\ldots, X_n\}`` un échantillon de ``n`` points d
 
 Partitionner ``\mathbb{X}`` en ``k`` groupes revient à associer une
 étiquette dans ``[\![1,k]\!]`` à chacun des ``n`` points. La méthode
-de partitionnement avec une divergence de Bregman [@Banerjee2005]
+de partitionnement avec une divergence de Bregman [Banerjee2005](@cite)
 consiste en fait à associer à chaque point un centre dans un
 dictionnaire ``\mathbf{c} = (c_1, c_2,\ldots c_k)\in\mathcal{R}^{d\times
 k}``.  Pour chaque point, le choix sera fait de sorte à minimiser

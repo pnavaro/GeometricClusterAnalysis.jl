@@ -1,19 +1,24 @@
 import StatsBase: sample
 
+export divergence_poisson
+
 function divergence_poisson(x, y)
-    if x == 0
-        return y
-    else
-        return x .* log.(x) .- x .+ y .- x .* log.(y)
-    end
+
+    distance = (x, y) -> x .== 0.0 ?  y : x .* log.(x) .- x .+ y .- x .* log.(y)
+
+    return sum(distance(x, y))
+
 end
 
-function divergence_poisson_dimd(x, y)
-    return sum(divergence_poisson.(x, y))
-end
+export euclidean_sq_distance
 
-euclidean_sq_distance(x, y) = (x .- y).^2
-euclidean_sq_distance_dimd(x, y) = sum(euclidean_sq_distance.(x, y))
+function euclidean_sq_distance(x, y) 
+
+    distance  = (x, y) -> (x .- y).^2
+
+    return sum(distance(x, y))
+
+end
 
 struct TrimmedBregmanResult
 
@@ -29,7 +34,7 @@ export trimmed_bregman_clustering
 
 """
     function trimmed_bregman_clustering(x, k; α = 0, 
-    divergence_bregman = euclidean_sq_distance_dimd, maxiter = 10, nstart = 1)
+    divergence_bregman = euclidean_sq_distance, maxiter = 10, nstart = 1)
 
 - n : number of points
 - d : dimension
@@ -54,7 +59,7 @@ function trimmed_bregman_clustering(
     x,
     k;
     α = 0.0,
-    divergence_bregman = euclidean_sq_distance_dimd,
+    divergence_bregman = euclidean_sq_distance,
     maxiter = 10,
     nstart = 1,
 )
@@ -185,15 +190,16 @@ function trimmed_bregman_clustering(
 end
 
 
-#=
 
 """
 - k est un nombre ou un vecteur contenant les valeurs des differents k
 - alpha est un nombre ou un vecteur contenant les valeurs des differents alpha
 - force_decreasing = TRUE force la courbe de risque a etre decroissante en alpha - en forcant un depart a utiliser les centres optimaux du alpha precedent. Lorsque force_decreasing = FALSE, tous les departs sont aleatoires.
 """
-function select_parameters(k,alpha,x,Bregman_divergence,iter.max=100,nstart=10,.export = c(),.packages = c(),force_nonincreasing = TRUE){
+function select_parameters(k,alpha,x,Bregman_divergence,maxiter=100,nstart=10,force_nonincreasing = true)
+
   alpha = sort(alpha)
+#=
   grid_params = expand.grid(alpha = alpha,k=k)
   cl <- detectCores() %>% -1 %>% makeCluster
   if(force_nonincreasing){
@@ -240,3 +246,11 @@ function select_parameters(k,alpha,x,Bregman_divergence,iter.max=100,nstart=10,.
 }
 """
 =#
+end
+
+"""
+    performance_measurement
+"""
+function performance_measurement()
+
+end

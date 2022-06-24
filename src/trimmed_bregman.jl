@@ -63,12 +63,13 @@ function trimmed_bregman_clustering(
     d, n = size(x)
     a = trunc(Int, n * α)
 
-    opt_risk = Inf
     risk = Inf
-    opt_centers = [zeros(d) for i in 1:k]
-    opt_cluster_nonempty = trues(k)
     cluster = zeros(Int, n)
     cluster_nonempty = trues(k)
+
+    opt_risk = Inf
+    opt_centers = [zeros(d) for i in 1:k]
+    opt_cluster_nonempty = trues(k)
 
     nstep = 1
     centers = deepcopy(opt_centers)
@@ -79,18 +80,21 @@ function trimmed_bregman_clustering(
 
     for n_times = 1:nstart
 
+        fill!(cluster, 0)
+        fill!(cluster_nonempty, true)
+
         first_centers = sample(rng, 1:n, k, replace = false)
         for (k,i) in enumerate(first_centers)
             centers[k] .= x[:,i]
         end
         non_stopping = true
-        fill!(cluster, 0)
-        fill!(cluster_nonempty, true)
 
         while non_stopping
 
             nstep += 1
             centers_copy = copy(centers)
+
+            # Step 1 update cluster and compute divergences
 
             fill!(divergence_min, Inf)
             fill!(cluster, 0)
@@ -109,6 +113,8 @@ function trimmed_bregman_clustering(
                 end
             end
 
+            # Step 2 Trimming
+
             if a > 0
                 ix = sortperm(divergence_min, rev = true)
                 cluster[ix[1:a]] .= 0
@@ -121,7 +127,7 @@ function trimmed_bregman_clustering(
                 centers[i] .= vec(mean(x[:,cluster.==i], dims=2))
             end
 
-            cluster_nonempty .= [!(Inf in c) for c in eachcol(centers)]
+            cluster_nonempty .= [!(Inf in c) for c in centers]
             non_stopping = (centers_copy ≈ centers && (nstep <= maxiter))
         end
 
@@ -133,9 +139,10 @@ function trimmed_bregman_clustering(
 
     end
 
+    # After loop, step 1 and step 2 to fix labels and compute risk
     divergence_min = fill(Inf, n)
-
     fill!(cluster, 0)
+
     for i = 1:k
         if opt_cluster_nonempty[i]
             for j = 1:n
@@ -160,7 +167,7 @@ function trimmed_bregman_clustering(
     end
 
 
-    # Mise a jour des etiquettes : suppression des groupes vides
+    # Updte labels and remove empty clusters
 
     opt_cluster_nonempty = [sum(cluster .== i) > 0 for i = 1:k]
 

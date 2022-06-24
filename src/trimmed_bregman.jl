@@ -1,20 +1,19 @@
 import StatsBase: sample
 
-function divergence_Poisson(x, y)
+function divergence_poisson(x, y)
     if x == 0
         return y
     else
-        return x * log(x) - x + y - x * log(y)
+        return x .* log.(x) .- x .+ y .- x .* log.(y)
     end
 end
 
-function divergence_Poisson_dimd(x, y)
-    return sum(divergence_Poisson.(x, y))
+function divergence_poisson_dimd(x, y)
+    return sum(divergence_poisson.(x, y))
 end
 
-euclidean_sq_distance(x, y) = (x - y)^2
+euclidean_sq_distance(x, y) = (x .- y).^2
 euclidean_sq_distance_dimd(x, y) = sum(euclidean_sq_distance.(x, y))
-
 
 struct TrimmedBregmanResult
 
@@ -184,3 +183,60 @@ function trimmed_bregman_clustering(
     )
 
 end
+
+
+#=
+
+"""
+- k est un nombre ou un vecteur contenant les valeurs des differents k
+- alpha est un nombre ou un vecteur contenant les valeurs des differents alpha
+- force_decreasing = TRUE force la courbe de risque a etre decroissante en alpha - en forcant un depart a utiliser les centres optimaux du alpha precedent. Lorsque force_decreasing = FALSE, tous les departs sont aleatoires.
+"""
+function select_parameters(k,alpha,x,Bregman_divergence,iter.max=100,nstart=10,.export = c(),.packages = c(),force_nonincreasing = TRUE){
+  alpha = sort(alpha)
+  grid_params = expand.grid(alpha = alpha,k=k)
+  cl <- detectCores() %>% -1 %>% makeCluster
+  if(force_nonincreasing){
+    if(nstart ==1){
+      res = foreach(k_=k,.export = c("Trimmed_Bregman_clustering",.export),.packages = c('magrittr',.packages)) %dopar% {
+        res_k_ = c()
+        centers = t(matrix(x[sample(1:nrow(x),k_,replace = FALSE),],k_,ncol(x))) # Initialisation aleatoire pour le premier alpha
+        
+        for(alpha_ in alpha){
+          tB = Trimmed_Bregman_clustering(x,centers,alpha_,Bregman_divergence,iter.max,1,random_initialisation = FALSE)
+          centers = tB$centers
+          res_k_ = c(res_k_,tB$risk)
+        }
+        res_k_
+      }
+    }
+    else{
+      res = foreach(k_=k,.export = c("Trimmed_Bregman_clustering",.export),.packages = c('magrittr',.packages)) %dopar% {
+        res_k_ = c()
+        centers = t(matrix(x[sample(1:nrow(x),k_,replace = FALSE),],k_,ncol(x))) # Initialisation aleatoire pour le premier alpha
+        for(alpha_ in alpha){
+          tB1 = Trimmed_Bregman_clustering(x,centers,alpha_,Bregman_divergence,iter.max,1,random_initialisation = FALSE)
+          tB2 = Trimmed_Bregman_clustering(x,k_,alpha_,Bregman_divergence,iter.max,nstart - 1)
+          if(tB1$risk < tB2$risk){
+            centers = tB1$centers
+            res_k_ = c(res_k_,tB1$risk)
+          }
+          else{
+            centers = tB2$centers
+            res_k_ = c(res_k_,tB2$risk)
+          }
+        }
+        res_k_
+      }
+    }
+  }
+  else{
+    clusterExport(cl=cl, varlist=c('Trimmed_Bregman_clustering',.export))
+    clusterEvalQ(cl, c(library("magrittr"),.packages))
+    res = parLapply(cl,data.table::transpose(grid_params),function(.){return(Trimmed_Bregman_clustering(x,.[2],.[1],Bregman_divergence,iter.max,nstart)$risk)})
+  }
+  stopCluster(cl)
+  return(cbind(grid_params,risk = unlist(res)))
+}
+"""
+=#

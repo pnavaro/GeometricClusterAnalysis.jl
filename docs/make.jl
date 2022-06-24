@@ -1,10 +1,15 @@
 using Documenter
+using DocumenterCitations
 using GeometricClusterAnalysis
 using Plots
 
 ENV["GKSwstype"]="100"
 
-makedocs(;
+using DocumenterCitations
+
+bib = CitationBibliography(joinpath(@__DIR__, "references.bib"), sorting = :nyt)
+
+makedocs(bib,
     sitename = "GeometricClusterAnalysis.jl",
     authors = "k-PLM team", 
     modules = [GeometricClusterAnalysis],

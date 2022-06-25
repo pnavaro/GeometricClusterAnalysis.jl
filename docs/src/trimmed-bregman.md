@@ -30,9 +30,7 @@ Soit ``x,y\in\mathcal{R}^d``,
 \end{aligned}
 ```
 
-
 ### Le lien avec certaines familles de lois
-
 
 Pour certaines distributions de probabilité définies sur ``\mathcal{R}``, d'espérance ``\mu\in\mathcal{R}``, la densité ou la fonction de probabilité (pour les variables discrètes), ``x\mapsto p_{\phi,\mu,f}(x)``, s'exprime en fonction d'une divergence de Bregman [Banerjee2005](@cite) entre ``x`` et l'espérance ``\mu`` :
 ```math
@@ -43,7 +41,7 @@ p_{\phi,\mu,f}(x) = \exp(-\mathrm{d}_\phi(x,\mu))f(x).
 ```
 Ici, ``\phi`` est une fonction strictement convexe et ``f`` est une fonction positive.
 
-Certaines distributions sur ``\mathcal{R}^d`` satisfont cette même propriété. C'est en particulier le cas des distributions de vecteurs aléatoires dont les coordonnées sont des variables aléatoires indépendantes de lois sur ``\mathcal{R}`` du type \@ref(eq:familleBregman).
+Certaines distributions sur ``\mathcal{R}^d`` satisfont cette même propriété. C'est en particulier le cas des distributions de vecteurs aléatoires dont les coordonnées sont des variables aléatoires indépendantes de lois sur ``\mathcal{R}`` du type \eqref(eq:familleBregman).
 
 Soit ``Y = (X_1,X_2,\ldots,X_d)``, un ``d``-échantillon de variables aléatoires indépendantes, de lois respectives ``p_{\phi_1,\mu_1,f_1},p_{\phi_2,\mu_2,f_2},\ldots, p_{\phi_d,\mu_d,f_d}``.
 
@@ -188,9 +186,7 @@ pour la divergence de Bregman ``\mathrm{d}_\phi``.
 On note ``\hat{\mathbf{c}}_{\alpha}`` un minimiseur de ``R_{n,\alpha}(\cdot,\mathbb{X})``.
 
 
-# Implémentation de la méthode de partitionnement élagué des données, avec des divergences de Bregman
-
-## La méthode
+## Implémentation de la méthode de partitionnement élagué des données, avec des divergences de Bregman
 
 ### L'algorithme de partitionnement sans élagage
 
@@ -303,12 +299,13 @@ La fonction [`euclidean_sq_distance`](@ref) calcule le carré de la norme Euclid
 
 ### Le code pour le partitionnement élagué avec divergence de Bregman
 
-La méthode de partitionnement élagué avec une divergence de Bregman est codée dans la fonction suivante, `Trimmed_Bregman_clustering`, dont les arguments sont :
+La méthode de partitionnement élagué avec une divergence de Bregman est codée dans la fonction suivante, 
+[`trimmed_bregman_clustering`](@ref), dont les arguments sont :
 
 - `x` : une matrice de taille ``n\times d`` représentant les coordonnées des ``n`` points de dimension ``d`` à partitionner,
 - `centers` : un ensemble de centres ou un nombre ``k`` correspondant au nombre de groupes,
 - `alpha` : dans ``[0,1[``, la proportion de points de l'échantillon à retirer ; par défaut 0 (pas d'élagage),
-- `divergence_Bregman` : la divergence à utiliser ; par défaut `euclidean_sq_distance`, le carré de la norme Euclidienne (on retrouve le k-means élagué de [Cuesta-Albertos1997](@cite), `tkmeans`),
+- `divergence_bregman` : la divergence à utiliser ; par défaut `euclidean_sq_distance`, le carré de la norme Euclidienne (on retrouve le k-means élagué de [Cuesta-Albertos1997](@cite), `tkmeans`),
 - `maxiter` : le nombre maximal d'itérations,
 - `nstart` : le nombre d'initialisations différentes de l'algorithme (on garde le meilleur résultat).
 
@@ -317,7 +314,7 @@ La sortie de cette fonction est une liste dont les arguments sont :
 - `centers` : matrice de taille ``d\times k`` dont les ``k`` colonnes représentent les ``k`` centres des groupes,
 - `cluster` : vecteur d'entiers dans ``[\![0,k]\!]`` indiquant l'indice du groupe auquel chaque point (chaque ligne) de `x` est associé, l'étiquette ``0`` est assignée aux points considérés comme des données aberrantes,
 - `risk` : moyenne des divergences des points de `x` (non considérés comme des données aberrantes) à leur centre associé,
-- `divergence` : le vecteur des divergences des points de `x` à leur centre le plus proche dans `centers`, pour la divergence `divergence_Bregman`.
+- `divergence` : le vecteur des divergences des points de `x` à leur centre le plus proche dans `centers`, pour la divergence `divergence_bregman`.
 
 ```@docs
 trimmed_bregman_clustering
@@ -333,7 +330,7 @@ Afin de sélectionner le meilleur paramètre ``\alpha``, il suffit,
 pour une famille de paramètres ``\alpha``, de calculer le coût
 optimal ``R_{n,\alpha}(\hat{\mathbf{c}}_\alpha)`` obtenu à partir
 du minimiseur local ``\hat{\mathbf{c}}_\alpha`` de ``R_{n,\alpha}``
-en sortie de l'algorithme `Trimmed_Bregman_clustering`.
+en sortie de l'algorithme [`trimmed_bregman_clustering`](@ref).
 
 Nous représentons ensuite ``R_{n,\alpha}(\hat{\mathbf{c}}_\alpha)``
 en fonction de ``\alpha`` sur un graphique. Nous pouvons représenter
@@ -341,7 +338,7 @@ de telles courbes pour différents nombres de groupes, ``k``.  Une
 heuristique permettra de choisir les meilleurs paramètres ``k`` et
 ``\alpha``.
 
-La fonction `select.parameters`, parallélisée, permet de calculer
+La fonction [`select_parameters`](@ref), parallélisée, permet de calculer
 le critère optimal ``R_{n,\alpha}(\hat{\mathbf{c}}_\alpha)`` pour
 différentes valeurs de ``k`` et de ``\alpha``, sur les données `x`.
 
@@ -349,7 +346,7 @@ différentes valeurs de ``k`` et de ``\alpha``, sur les données `x`.
 select_parameters
 ```
 
-# Mise en œuvre de l'algorithme
+## Mise en œuvre de l'algorithme
 
 Nous étudions les performances de notre méthode de partitionnement
 de données élagué, avec divergence de Bregman, sur différents jeux
@@ -377,9 +374,9 @@ Nous allons également appliquer une heuristique permettant de choisir
 les paramètres `k` (nombre de groupes) et `alpha` (proportion de
 données aberrantes) à partir d'un jeu de données.
 
-## Données de loi de Poisson en dimension 1
+### Données de loi de Poisson en dimension 1
 
-### Simulation des variables selon un mélange de lois de Poisson
+#### Simulation des variables selon un mélange de lois de Poisson
 
 La fonction `simule_poissond` permet de simuler des variables
 aléatoires selon un mélange de ``k`` lois de Poisson en dimension
@@ -399,7 +396,10 @@ simule_poissond
 sample_outliers
 ```
 
-On génère un premier échantillon de 950 points de loi de Poisson de paramètre ``10``, ``20`` ou ``40`` avec probabilité ``\frac13``, puis un échantillon de 50 données aberrantes de loi uniforme sur ``[0,120]``. On note `x` l'échantillon ainsi obtenu.
+On génère un premier échantillon de 950 points de loi de Poisson
+de paramètre ``10``, ``20`` ou ``40`` avec probabilité ``\frac13``,
+puis un échantillon de 50 données aberrantes de loi uniforme sur
+``[0,120]``. On note `x` l'échantillon ainsi obtenu.
 
 ```julia
 n = 1000 # Taille de l'echantillon
@@ -415,7 +415,7 @@ x = rbind(P$points,sample_outliers(n_outliers,d,120)) # Coordonnees des n points
 labels_true = c(P$labels,rep(0,n_outliers)) # Vraies etiquettes 
 ```
 
-### Partitionnement des données sur un exemple
+#### Partitionnement des données sur un exemple
 
 Pour partitionner les données, nous utiliserons les paramètres suivants.
 
@@ -428,7 +428,9 @@ nstart = 20 # Nombre de departs
 
 #### Application de l'algorithme classique de ``k``-means élagué [Cuesta-Albertos1997](@cite)
 
-Dans un premier temps, nous utilisons notre algorithme `Trimmed_Bregman_clustering` avec le carré de la norme Euclidienne `euclidean_sq_distance`.
+Dans un premier temps, nous utilisons notre algorithme
+[`trimmed_bregman_clustering`](@ref) avec le carré de la norme Euclidienne
+[`euclidean_sq_distance`](@ref).
 
 ```julia
 using Random
@@ -515,13 +517,13 @@ sur cet exemple, l'utilisation de la bonne divergence permet
 d'améliorer le partitionnement, par rapport à un ``k``-means élagué
 basique.
 
-### Mesure de la performance
+#### Mesure de la performance
 
 Afin de s'assurer que la méthode avec la bonne divergence de Bregman
 est la plus performante, nous répétons l'expérience précédente
 `replications_nb` fois.
 
-Pour ce faire, nous appliquons l'algorithme `Trimmed_Bregman_clustering`,
+Pour ce faire, nous appliquons l'algorithme [`trimmed_bregman_clustering`](@ref),
 sur `replications_nb` échantillons de taille ``n = 1000``, sur des
 données générées selon la même procédure que l'exemple précédent.
 
@@ -564,7 +566,7 @@ ggplot(df_NMI, aes(x=Methode, y=NMI)) + geom_boxplot(aes(group = Methode))
 
 ```
 
-### Sélection des paramètres ``k`` et ``\alpha``
+#### Sélection des paramètres ``k`` et ``\alpha``
 
 On garde le même jeu de données `x`.
 
@@ -630,9 +632,9 @@ tB_Poisson$centers
 """
 ```
 
-## Données de loi de Poisson en dimension 2
+### Données de loi de Poisson en dimension 2
 
-### Simulation des variables selon un mélange de lois de Poisson
+#### Simulation des variables selon un mélange de lois de Poisson
 
 Pour afficher les données, nous pourrons utiliser la fonction suivante.
 
@@ -670,7 +672,7 @@ labels_true = c(P$labels,rep(0,n_outliers)) # Vraies etiquettes
 """
 ```
 
-###  Partitionnement des données sur un exemple
+####  Partitionnement des données sur un exemple
 
 Pour partitionner les données, nous utiliserons les paramètres suivants.
 
@@ -686,7 +688,7 @@ nstart = 1
 
 [Cuesta-Albertos1997](@cite)
 
-Dans un premier temps, nous utilisons notre algorithme [`trimmed_Bregman_clustering`](@ref) 
+Dans un premier temps, nous utilisons notre algorithme [`trimmed_bregman_clustering`](@ref) 
 avec le carré de la norme Euclidienne `euclidean_sq_distance`.
 
 ```julia
@@ -758,13 +760,13 @@ d'améliorer le partitionnement, par rapport à un ``k``-means élagué
 basique.
 
 
-### Mesure de la performance
+#### Mesure de la performance
 
 Afin de s'assurer que la méthode avec la bonne divergence de Bregman
 est la plus performante, nous répétons l'expérience précédente
 `replications_nb` fois.
 
-Pour ce faire, nous appliquons l'algorithme `Trimmed_Bregman_clustering`,
+Pour ce faire, nous appliquons l'algorithme [`trimmed_bregman_clustering`](@ref),
 sur `replications_nb` échantillons de taille ``n = 1000``, sur des
 données générées selon la même procédure que l'exemple précédent.
 
@@ -790,7 +792,7 @@ ggplot(df_NMI, aes(x=Methode, y=NMI)) + geom_boxplot(aes(group = Methode))
 """
 ```
 
-### Sélection des paramètres ``k`` et ``\alpha``
+#### Sélection des paramètres ``k`` et ``\alpha``
 
 On garde le même jeu de données `x`.
 
@@ -843,7 +845,7 @@ plot_clustering_dim2(x,tB_Poisson$cluster,tB_Poisson$centers)
 """
 ```
 
-## Application au partitionnement de textes d'auteurs
+### Application au partitionnement de textes d'auteurs
 
 Les données des textes d'auteurs sont enregistrées dans la variable `data`.
 Les commandes utilisées pour l'affichage étaient les suivantes.
@@ -868,7 +870,7 @@ plot_clustering <- function(axis1 = 1, axis2 = 2, labels, title = "Textes d'aute
 
 ```
 
-### Partitionnement des données
+#### Partitionnement des données
 
 Pour partitionner les données, nous utiliserons les paramètres suivants.
 
@@ -1035,4 +1037,5 @@ plot_clustering(1,2,tB$cluster)
 # -
 ```
 
-On obtient 6 groupes correspondant aux textes des 4 auteurs différents, aux textes de la bible et au discours de Obama.
+On obtient 6 groupes correspondant aux textes des 4 auteurs différents,
+aux textes de la bible et au discours de Obama.

@@ -2,6 +2,12 @@ import StatsBase: sample
 
 export divergence_poisson
 
+"""
+    divergence_poisson(x, y)
+
+Bregman divergence associated with the Poisson distribution
+
+"""
 function divergence_poisson(x, y)
 
     function distance(x, y) 
@@ -18,11 +24,45 @@ end
 
 export euclidean_sq_distance
 
+"""
+    euclidean_sq_distance(x, y) 
+
+Euclidian sqaured distance
+"""
 function euclidean_sq_distance(x, y) 
 
     distance  = (x, y) -> (x .- y).^2
 
     return sum(distance(x, y))
+
+end
+
+export simule_poissond
+
+"""
+    simule_poissond(n, lambdas, proba)
+"""
+function simule_poissond(rng, n, lambdas, proba)
+
+    x = eachindex(proba)
+    p = sample(rng, lambdas, pweights(proba), n, replace=true)
+    data = [rand(rng, Poisson(λ)) for λ in p]
+    for (k,c) in enumerate(unique(p))
+        p[ p .== c ] .= k
+    end
+
+    return data, p
+
+end
+
+export sample_outliers
+
+"""
+    sample_outliers(n_outliers, d; L = 1) 
+"""
+function sample_outliers(rng, n_outliers, d; L = 1) 
+
+    return L .* rand(rng, n_outliers, d)
 
 end
 
@@ -198,63 +238,33 @@ function trimmed_bregman_clustering(
 end
 
 
+export select_parameters
 
 """
+    select_parameters(rng, k, alpha, x, Bregman_divergence, maxiter=100)
+
 - k est un nombre ou un vecteur contenant les valeurs des differents k
 - alpha est un nombre ou un vecteur contenant les valeurs des differents alpha
-- force_decreasing = TRUE force la courbe de risque a etre decroissante en alpha - en forcant un depart a utiliser les centres optimaux du alpha precedent. Lorsque force_decreasing = FALSE, tous les departs sont aleatoires.
+- force_decreasing = true force la courbe de risque a etre decroissante en alpha, on utilise les centres optimaux du alpha precedent. 
+- force_decreasing = false, tous les departs sont aléatoires.
 """
-function select_parameters(k,alpha,x,Bregman_divergence,maxiter=100,nstart=10,force_nonincreasing = true)
+function select_parameters(rng, k, alpha, x, Bregman_divergence, maxiter=100)
 
-  alpha = sort(alpha)
-#=
-  grid_params = expand.grid(alpha = alpha,k=k)
-  cl <- detectCores() %>% -1 %>% makeCluster
-  if(force_nonincreasing){
-    if(nstart ==1){
-      res = foreach(k_=k,.export = c("Trimmed_Bregman_clustering",.export),.packages = c('magrittr',.packages)) %dopar% {
-        res_k_ = c()
-        centers = t(matrix(x[sample(1:nrow(x),k_,replace = FALSE),],k_,ncol(x))) # Initialisation aleatoire pour le premier alpha
-        
-        for(alpha_ in alpha){
-          tB = Trimmed_Bregman_clustering(x,centers,alpha_,Bregman_divergence,iter.max,1,random_initialisation = FALSE)
-          centers = tB$centers
-          res_k_ = c(res_k_,tB$risk)
-        }
-        res_k_
-      }
-    }
-    else{
-      res = foreach(k_=k,.export = c("Trimmed_Bregman_clustering",.export),.packages = c('magrittr',.packages)) %dopar% {
-        res_k_ = c()
-        centers = t(matrix(x[sample(1:nrow(x),k_,replace = FALSE),],k_,ncol(x))) # Initialisation aleatoire pour le premier alpha
-        for(alpha_ in alpha){
-          tB1 = Trimmed_Bregman_clustering(x,centers,alpha_,Bregman_divergence,iter.max,1,random_initialisation = FALSE)
-          tB2 = Trimmed_Bregman_clustering(x,k_,alpha_,Bregman_divergence,iter.max,nstart - 1)
-          if(tB1$risk < tB2$risk){
-            centers = tB1$centers
-            res_k_ = c(res_k_,tB1$risk)
-          }
-          else{
-            centers = tB2$centers
-            res_k_ = c(res_k_,tB2$risk)
-          }
-        }
-        res_k_
-      }
-    }
-  }
-  else{
-    clusterExport(cl=cl, varlist=c('Trimmed_Bregman_clustering',.export))
-    clusterEvalQ(cl, c(library("magrittr"),.packages))
-    res = parLapply(cl,data.table::transpose(grid_params),function(.){return(Trimmed_Bregman_clustering(x,.[2],.[1],Bregman_divergence,iter.max,nstart)$risk)})
-  }
-  stopCluster(cl)
-  return(cbind(grid_params,risk = unlist(res)))
-}
-"""
-=#
+    sort!(alpha)
+    for k_ = k
+        risks = []
+        centers = [x[:,i] for i in sample(rng, 1:n, k_, replace = false)]
+        for alpha_ in alpha
+            tbc = trimmed_bregman_clustering(rng, x, centers, alpha_, divergence, maxiter, nstart = 1)
+            centers = tbc.centers
+            push!(risks, tbc.risk)
+        end
+        risks
+    end
+
 end
+
+export performance_measurement
 
 """
     performance_measurement

@@ -94,20 +94,6 @@ print(t_kmeans$centers)
 
 #PN P = @rget P
 #PN 
-#PN function simule_poissond(n, lambdas, proba)
-#PN     x = eachindex(proba)
-#PN     p = sample(rng, lambdas, pweights(proba), n, replace=true)
-#PN     data = [rand(rng, Poisson(λ)) for λ in p]
-#PN     for (k,c) in enumerate(unique(p))
-#PN         p[ p .== c ] .= k
-#PN     end
-#PN 
-#PN     return data, p
-#PN end
-#PN 
-#PN function sample_outliers(n_outliers, d; L = 1) 
-#PN     return L .* rand(rng, n_outliers, d)
-#PN end
 #PN 
 #PN data, labels = simule_poissond(n - n_outliers, lambdas, proba)
 #PN 

@@ -50,42 +50,10 @@ k = 3
 
 result1 = trimmed_bregman_clustering( rng, points, k, α = α, nstart = 20 )
 
-plot(result1)
-png("euclidian")
 
 result2 = trimmed_bregman_clustering( rng, points, k, α = α, nstart = 20, divergence_bregman = divergence_poisson )
 
+p1 = plot(result1)
+png("dddddeuclidian")
 plot(result2)
 png("poisson")
-
-#=
-centers = zeros(d,k)
-
-for (i, c) in enumerate(result.centers)
-
-    centers[:,i] .= c
-
-end
-
-p = plot(layout=(1,3))
-scatter!(p[1,1], points[1,:], points[2,:], color = labels, label = :none, palette = :rainbow, aspect_ratio = :equal)
-c = result.cluster .== 0
-scatter!(p[1,2], points[1,c], points[2,c], label = "outliers", aspect_ratio = :equal)
-for i in eachindex(result.centers)
-    c = result.cluster .== i
-    scatter!(p[1,2], points[1,c], points[2,c], label = "$i")
-end
-scatter!(p[1,2], centers[1,:], centers[2,:], markershape = :star, markercolor = :yellow)
-xlims!(0,2000)
-ylims!(0,2000)
-
-result = trimmed_bregman_clustering( rng, points, k, α = α, divergence_bregman = divergence_poisson )
-
-scatter!(p[1,3], points[1,c], points[2,c], label = "outliers", aspect_ratio = :equal)
-for i in eachindex(result.centers)
-    c = result.cluster .== i
-    scatter!(p[1,3], points[1,c], points[2,c], label = "$i")
-end
-
-png("three-balls")
-=#

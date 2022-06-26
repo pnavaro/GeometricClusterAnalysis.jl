@@ -2,9 +2,8 @@ using GeometricClusterAnalysis
 using Random
 using Plots
 import StatsBase: sample
-import GeometricClusterAnalysis: divergence_poisson
 
-function three_balls( rng; n = 5000, c = 300, r = 100, α = 0.0)
+function three_balls( rng; n = 5000, c = 400, r = 100, α = 0.0)
 
     centers = [(-2c*sin(π/3), c), (0,-2c), (2r*sin(π/3), c)]
     data = Vector{Float64}[]
@@ -48,12 +47,12 @@ points, labels = three_balls(rng; α = α)
 d, n = size(points)
 k = 3
 
-result1 = trimmed_bregman_clustering( rng, points, k, α = α, nstart = 20 )
-
-
-result2 = trimmed_bregman_clustering( rng, points, k, α = α, nstart = 20, divergence_bregman = divergence_poisson )
+result1 = trimmed_bregman_clustering( rng, points, k, α = α, nstart = 5 )
+result2 = trimmed_bregman_clustering( rng, points, k, α = α, nstart = 5, bregman = poisson )
+println(result1.risk)
+println(result2.risk)
 
 p1 = plot(result1)
-png("dddddeuclidian")
+png("euclidian")
 plot(result2)
 png("poisson")

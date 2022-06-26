@@ -47,8 +47,8 @@ points, labels = three_balls(rng; α = α)
 d, n = size(points)
 k = 3
 
-result1 = trimmed_bregman_clustering( rng, points, k, α = α, nstart = 5 )
-result2 = trimmed_bregman_clustering( rng, points, k, α = α, nstart = 5, bregman = poisson )
+result1 = trimmed_bregman_clustering( rng, points, k, α = 0.1, nstart = 5 )
+result2 = trimmed_bregman_clustering( rng, points, k, α = 0.1, nstart = 5, bregman = poisson )
 println(result1.risk)
 println(result2.risk)
 
@@ -56,3 +56,14 @@ p1 = plot(result1)
 png("euclidian")
 plot(result2)
 png("poisson")
+
+k = [3]
+α = collect(0.0:0.01:0.1)
+params = select_parameters_nonincreasing(rng, k, α, points, bregman = poisson)
+println(findmin(params))
+
+k = [3]
+α = collect(0.0:0.01:0.1)
+params = select_parameters(rng, k, α, points; bregman = euclidean, nstart = 10, maxiter = 100)
+println(findmin(params))
+

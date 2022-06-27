@@ -18,7 +18,7 @@ function poisson(x, y)
         end
     end
 
-    return sum(distance.(x, y))
+    return sum(distance(x, y))
 
 end
 
@@ -57,7 +57,6 @@ function update_cluster!(divergence_min, cluster, x, cluster_nonempty, divergenc
         if cluster_nonempty[i]
             for j in eachindex(divergence)
                 divergence[j] = bregman(x[:, j], centers[i])
-                #divergence[divergence .== Inf] .= typemax(Float64)
                 if divergence[j] < divergence_min[j]
                     divergence_min[j] = divergence[j]
                     cluster[j] = i
@@ -118,7 +117,7 @@ function trimmed_bregman_clustering(
 )
 
     d, n = size(x)
-    a = trunc(Int, n * α)
+    a = floor(Int, n * α)
 
     risk = Inf
     cluster = zeros(Int, n)
@@ -128,7 +127,6 @@ function trimmed_bregman_clustering(
     opt_centers = [zeros(d) for i in 1:k]
     opt_cluster_nonempty = trues(k)
 
-    nstep = 1
     centers = deepcopy(opt_centers)
     opt_cluster_nonempty = trues(k)
     cluster = zeros(Int, n)
@@ -141,7 +139,9 @@ function trimmed_bregman_clustering(
         for (k,i) in enumerate(first_centers)
             centers[k] .= x[:,i]
         end
-        non_stopping = true
+
+        nstep = 1
+        non_stopping = (nstep <= maxiter)
 
         while non_stopping
 
@@ -155,12 +155,12 @@ function trimmed_bregman_clustering(
             # Step 2 Trimming
             risk =  update_risk!( cluster, x, a, divergence_min)
 
-            for i = 1:k
-                centers[i] .= vec(mean(x[:,cluster.==i], dims=2))
+            for i in eachindex(centers)
+                centers[i] .= vec(mean(view(x,:,cluster.==i), dims=2))
             end
 
             cluster_nonempty .= [!(Inf in c) for c in centers]
-            non_stopping = (centers_copy ≈ centers && (nstep <= maxiter))
+            non_stopping = (centers_copy ≈ centers ) 
         end
 
         if risk <= opt_risk

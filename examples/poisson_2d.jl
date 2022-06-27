@@ -1,5 +1,5 @@
 using GeometricClusterAnalysis
-import GeometricClusterAnalysis: sample_poisson, sample_outliers
+import GeometricClusterAnalysis: sample_poisson, sample_outliers, performance
 using Plots
 using Random
 using StatsPlots
@@ -68,9 +68,9 @@ params_risks = select_parameters_nonincreasing(rng, [3], vec_alpha, x;
 plot(vec_alpha, params_risks[1, :], markershape = :circle)
 
 k, alpha = 3, 0.04
-tb_poisson = trimmed_bregman_clustering( rng, x, k; 
-                α = alpha, bregman = euclidean, maxiter = maxiter, nstart = nstart )
+tb = trimmed_bregman_clustering( rng, x, k; 
+                α = alpha, bregman = poisson, maxiter = maxiter, nstart = nstart )
 
-scatter( x[1,:], x[2,:], c = labels_true, palette = :rainbow)
+scatter( x[1,:], x[2,:], c = tb.cluster, palette = :rainbow)
 scatter!( getindex.(tb_poisson.centers, 1), getindex.(tb_poisson.centers,2), 
           markershape = :star, markercolor = :yellow, markersize = 5)

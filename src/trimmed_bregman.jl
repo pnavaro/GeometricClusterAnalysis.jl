@@ -37,34 +37,6 @@ function euclidean(x, y)
 
 end
 
-export simule_poissond
-
-"""
-    simule_poissond(n, lambdas, proba)
-"""
-function simule_poissond(rng, n, lambdas, proba)
-
-    x = eachindex(proba)
-    p = sample(rng, lambdas, pweights(proba), n, replace=true)
-    data = [rand(rng, Poisson(λ)) for λ in p]
-    for (k,c) in enumerate(unique(p))
-        p[ p .== c ] .= k
-    end
-
-    return data, p
-
-end
-
-export sample_outliers
-
-"""
-    sample_outliers(n_outliers, d; L = 1) 
-"""
-function sample_outliers(rng, n_outliers, d; L = 1) 
-
-    return L .* rand(rng, n_outliers, d)
-
-end
 
 struct TrimmedBregmanResult
 
@@ -85,6 +57,7 @@ function update_cluster!(divergence_min, cluster, x, cluster_nonempty, divergenc
         if cluster_nonempty[i]
             for j in eachindex(divergence)
                 divergence[j] = bregman(x[:, j], centers[i])
+                #divergence[divergence .== Inf] .= typemax(Float64)
                 if divergence[j] < divergence_min[j]
                     divergence_min[j] = divergence[j]
                     cluster[j] = i
@@ -224,23 +197,23 @@ end
 
 """
     function trimmed_bregman_clustering(x, centers; α = 0, 
-    divergence_bregman = euclidean_sq_distance, maxiter = 10)
+    bregman = euclidean_sq_distance, maxiter = 10)
 
 - n : number of points
 - d : dimension
 
 Input :
 - `x` : sample of n points in R^d - matrix of size n ``\\times`` d
+- `centers` : intial centers
 - `alpha` : proportion of eluted points, because considered as outliers. They are given the label 0
-- `centers` : centers
-- `divergence_bregman` : function of two numbers or vectors named x and y, which reviews their Bregman divergence.
+- `bregman` : function of two numbers or vectors named x and y, which reviews their Bregman divergence.
 - `maxiter`: maximum number of iterations allowed.
 
 Output :
 - `centers`: matrix of size dxk whose columns represent the centers of the clusters
 - `cluster`: vector of integers in `1:k` indicating the index of the cluster to which each point (line) of x is associated.
 - `risk`: average of the divergences of the points of x at their associated center.
-- `divergence`: the vector of divergences of the points of x at their nearest center in centers, for `divergence_bregman`.
+- `divergence`: the vector of divergences of the points of x at their nearest center in centers, for `bregman` divergence.
 
 """
 function trimmed_bregman_clustering(
@@ -285,7 +258,7 @@ function trimmed_bregman_clustering(
         risk =  update_risk!(cluster, x, a, divergence_min)
 
         for i = 1:k
-            centers[i] .= vec(mean(x[:,cluster.==i], dims=2))
+            centers[i] .= vec(mean(view(x,:,cluster.==i), dims=2))
         end
 
         cluster_nonempty .= [!(Inf in c) for c in centers]
@@ -313,21 +286,22 @@ export select_parameters
 - force_decreasing = true force la courbe de risque a etre decroissante en alpha, on utilise les centres optimaux du alpha precedent. 
 - force_decreasing = false, tous les departs sont aléatoires.
 """
-function select_parameters_nonincreasing(rng, k::Vector{Int}, alpha::Vector{Float64}, x::Matrix{Float64}; bregman = euclidean, maxiter = 100)
+function select_parameters_nonincreasing(rng, vk::Vector{Int}, valpha::Vector{Float64}, 
+    x::Matrix{Float64}; bregman = euclidean, maxiter = 100, nstart = 1)
 
     n = size(x, 2)
-    sort!(alpha)
-    results = Dict{Tuple{Int64,Float64}, Float64}()
-    for k_ in k
-        centers = [x[:,i] for i in sample(rng, 1:n, k_, replace = false)]
-        for alpha_ in alpha
-            tbc = trimmed_bregman_clustering(rng, x, k_; α = alpha_, bregman = bregman, maxiter = maxiter, nstart = 1)
-            centers, risk = trimmed_bregman_clustering(rng, x, centers; α = alpha_, bregman = bregman, maxiter = maxiter)
+    sort!(valpha)
+    results = zeros(length(vk), length(valpha))
+    for (i,k) in enumerate(vk)
+        centers = [x[:,i] for i in sample(rng, 1:n, k, replace = false)]
+        for (j,alpha) in enumerate(valpha)
+            tbc = trimmed_bregman_clustering(rng, x, k; α = alpha, bregman = bregman, maxiter = maxiter, nstart = nstart-1)
+            centers, risk = trimmed_bregman_clustering(rng, x, centers; α = alpha, bregman = bregman, maxiter = maxiter)
             if tbc.risk < risk
                 centers .= [center for center in tbc.centers]
-                results[(k_, alpha_)] = tbc.risk
+                results[i, j] = tbc.risk
             else
-                results[(k_, alpha_)] = risk
+                results[i, j] = risk
             end
         end
     end

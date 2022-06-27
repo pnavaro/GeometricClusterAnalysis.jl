@@ -14,5 +14,6 @@ include("hclust.jl")
 include("trimmed_bregman.jl")
 include("plots.jl")
 include("validate.jl")
+include("poisson.jl")
 
 end

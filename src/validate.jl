@@ -10,13 +10,17 @@ Add something in the docs...
 
 """
 function mutualinfo(a, b, normed::Bool)
+
+    ta = a .+ 1
+    tb = b .+ 1
+
     n = length(a)
     @assert n == length(b)
-    minA, maxA = extrema(a)
-    minB, maxB = extrema(b)
+    minA, maxA = extrema(ta)
+    minB, maxB = extrema(tb)
     @assert minA > 0 && minB > 0
 
-    A = counts(a, b, (1:maxA, 1:maxB))
+    A = counts(ta, tb, (1:maxA, 1:maxB))
 
     N = sum(A)
     (N == 0.0) && return 0.0

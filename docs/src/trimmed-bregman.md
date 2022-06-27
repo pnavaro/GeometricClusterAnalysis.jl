@@ -785,7 +785,7 @@ perf_meas_Poisson = performance.measurement(1200,200,3,0.1,s_generator,o_generat
 
 Les boîtes à moustaches permettent de se faire une idée de la répartition des NMI pour les deux méthodes différentes. On voit que la méthode utilisant la divergence de Bregman associée à la loi de Poisson est la plus performante.
 
-``julia
+```julia
 R"""
 df_NMI = data.frame(Methode = c(rep("k-means",replications_nb),rep("Poisson",replications_nb)), NMI = c(perf_meas_kmeans$NMI,perf_meas_Poisson$NMI))
 ggplot(df_NMI, aes(x=Methode, y=NMI)) + geom_boxplot(aes(group = Methode))

@@ -46,7 +46,6 @@ outliers_generator = (rng, n) -> sample_outliers(rng, n, d; scale = 120)
 nmi_kmeans, _, _ = performance(n, n_outliers, k, alpha, sample_generator, outliers_generator, euclidean)
 nmi_poisson, _, _ = performance(n, n_outliers, k, alpha, sample_generator, outliers_generator, poisson)
 
-
 vect_k = collect(1:5)
 vect_alpha = sort([((0:2)./50)...,((1:4)./5)...])
 

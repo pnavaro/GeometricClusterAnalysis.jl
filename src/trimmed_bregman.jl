@@ -307,11 +307,12 @@ export select_parameters_nonincreasing
 export select_parameters
 
 """
-    select_parameters(rng, k, alpha, x, Bregman_divergence, maxiter=100)
+    select_parameters_nonincreasing(rng, k, alpha, x, Bregman_divergence, maxiter=100)
+
+Nous forcons la courbe de risque a etre decroissante en alpha, on utilise les centres optimaux du alpha precedent. 
 
 - k est un nombre ou un vecteur contenant les valeurs des differents k
 - alpha est un nombre ou un vecteur contenant les valeurs des differents alpha
-- force_decreasing = true force la courbe de risque a etre decroissante en alpha, on utilise les centres optimaux du alpha precedent. 
 - force_decreasing = false, tous les departs sont aléatoires.
 """
 function select_parameters_nonincreasing(rng, vk::Vector{Int}, valpha::Vector{Float64}, 
@@ -338,6 +339,14 @@ x::Matrix{Float64}, bregman, maxiter::Int, nstart::Int)
 
 end
 
+"""
+    select_parameters(rng, k, alpha, x, bregman, maxiter=100)
+
+On utilise des centres initiaux aléatoire
+
+- k est un nombre ou un vecteur contenant les valeurs des differents k
+- alpha est un nombre ou un vecteur contenant les valeurs des differents alpha
+"""
 function select_parameters(rng, vk, valpha, x, bregman, maxiter, nstart)
 
     sort!(valpha)

@@ -290,12 +290,12 @@ En pratique, il faut ajouter quelques lignes dans le code pour :
 
 ### Quelques divergences de Bregman
 
-La fonction [`divergence_poisson`](@ref) calcule la divergence de
+La fonction [`poisson`](@ref) calcule la divergence de
 Bregman associée à la loi de Poisson entre `x`et `y` en dimension
 ``d\in^*``. \eqref(eq:divBregmanPoisson)
 
 
-La fonction [`euclidean_sq_distance`](@ref) calcule le carré de la norme Euclidienne entre `x` et `y` en dimension ``d\in\mathcal{N}^*``.
+La fonction [`euclidean`](@ref) calcule le carré de la norme Euclidienne entre `x` et `y` en dimension ``d\in\mathcal{N}^*``.
 
 ### Le code pour le partitionnement élagué avec divergence de Bregman
 
@@ -305,7 +305,7 @@ La méthode de partitionnement élagué avec une divergence de Bregman est codé
 - `x` : une matrice de taille ``n\times d`` représentant les coordonnées des ``n`` points de dimension ``d`` à partitionner,
 - `centers` : un ensemble de centres ou un nombre ``k`` correspondant au nombre de groupes,
 - `alpha` : dans ``[0,1[``, la proportion de points de l'échantillon à retirer ; par défaut 0 (pas d'élagage),
-- `divergence_bregman` : la divergence à utiliser ; par défaut `euclidean_sq_distance`, le carré de la norme Euclidienne (on retrouve le k-means élagué de [Cuesta-Albertos1997](@cite), `tkmeans`),
+- `divergence_bregman` : la divergence à utiliser ; par défaut `euclidean`, le carré de la norme Euclidienne (on retrouve le k-means élagué de [Cuesta-Albertos1997](@cite), `tkmeans`),
 - `maxiter` : le nombre maximal d'itérations,
 - `nstart` : le nombre d'initialisations différentes de l'algorithme (on garde le meilleur résultat).
 
@@ -338,12 +338,12 @@ de telles courbes pour différents nombres de groupes, ``k``.  Une
 heuristique permettra de choisir les meilleurs paramètres ``k`` et
 ``\alpha``.
 
-La fonction [`select_parameters`](@ref), parallélisée, permet de calculer
+La fonction [`GeometricClusterAnalysis.select_parameters`](@ref), parallélisée, permet de calculer
 le critère optimal ``R_{n,\alpha}(\hat{\mathbf{c}}_\alpha)`` pour
 différentes valeurs de ``k`` et de ``\alpha``, sur les données `x`.
 
 ```@docs
-select_parameters
+GeometricClusterAnalysis.select_parameters
 ```
 
 ## Mise en œuvre de l'algorithme
@@ -438,7 +438,7 @@ nstart = 20 # Nombre de departs
 
 Dans un premier temps, nous utilisons notre algorithme
 [`trimmed_bregman_clustering`](@ref) avec le carré de la norme Euclidienne
-[`euclidean_sq_distance`](@ref).
+[`euclidean`](@ref).
 
 ```@example poisson1
 tb_kmeans = trimmed_bregman_clustering(rng, x, k, alpha, euclidean, maxiter, nstart)
@@ -609,32 +609,37 @@ avec probabilité ``\frac13`` selon une loi de Poisson de paramètre
 aberrantes de loi uniforme sur ``[0,120]\times[0,120]`` est ajouté
 à l'échantillon. On note `x` l’échantillon ainsi obtenu.
 
-```julia name="Poisson generation"
-R"""
-n = 1000 # Taille de l'echantillon
-n_outliers = 50 # Dont points generes uniformement sur [0,120]x[0,120] 
-d = 2 # Dimension ambiante
+```@example poisson2
+using GeometricClusterAnalysis
+import GeometricClusterAnalysis: sample_poisson, sample_outliers, performance
+using Plots
+using Random
 
-lambdas =  matrix(c(10,20,40),3,d)
-proba = rep(1/3,3)
-P = simule_poissond(n - n_outliers,lambdas,proba)
+n = 1000 
+n_outliers = 50 
+d = 2 
 
-set.seed(1)
-x = rbind(P$points,sample_outliers(n_outliers,d,120)) # Coordonnees des n points
-labels_true = c(P$labels,rep(0,n_outliers)) # Vraies etiquettes 
-"""
+rng = MersenneTwister(1)
+lambdas =  [10,20,40]
+proba = [1/3,1/3,1/3]
+points, labels = sample_poisson(rng, n - n_outliers, d, lambdas, proba)
+
+outliers = sample_outliers(rng, n_outliers, d; scale = 120) 
+x = hcat(points, outliers) 
+labels_true = vcat(labels, zeros(Int, n_outliers))
+
+scatter( x[1,:], x[2,:], c = labels_true, palette = :rainbow)
 ```
 
 ####  Partitionnement des données sur un exemple
 
 Pour partitionner les données, nous utiliserons les paramètres suivants.
 
-```julia name="Calcul des centres et des etiquettes"
-k = 3
-alpha = 0.1
-maxiter = 50
-nstart = 1
-"""
+```@example poisson2
+k = 3 
+α = 0.1 
+maxiter = 50 
+nstart = 50 
 ```
 
 #### Application de l'algorithme classique de ``k``-means élagué 
@@ -642,15 +647,11 @@ nstart = 1
 [Cuesta-Albertos1997](@cite)
 
 Dans un premier temps, nous utilisons notre algorithme [`trimmed_bregman_clustering`](@ref) 
-avec le carré de la norme Euclidienne `euclidean_sq_distance`.
+avec le carré de la norme Euclidienne `euclidean`.
 
-```julia
-R"""
-set.seed(1)
-tB_kmeans = Trimmed_Bregman_clustering(x,k,alpha,euclidean_sq_distance,maxiter,nstart)
-plot_clustering_dim2(x,tB_kmeans$cluster,tB_kmeans$centers)
-tB_kmeans$centers
-"""
+```@example poisson2
+tb_kmeans = trimmed_bregman_clustering( rng, x, k, α, euclidean, maxiter, nstart )
+println("k-means : $(tb_kmeans.centers)")
 ```
 
 On observe trois groupes de même diamètre. Ainsi, de nombreuses
@@ -659,15 +660,8 @@ la loi de Poisson de paramètre ``(10,10)``. Ce groupe était sensé
 avoir un diamètre plus faible que les groupes de points issus des
 lois de Poisson de paramètres ``(20,20)`` et ``(40,40)``.
 
-Cette méthode coïncide avec l'algorithme `tkmeans` de la bibliothèque `tclust`.
-
-```julia
-R"""
-library(tclust)
-set.seed(1)
-t_kmeans = tkmeans(x,k,alpha,maxiter = maxiter,nstart = nstart)
-plot_clustering_dim2(x,t_kmeans$cluster,t_kmeans$centers)
-"""
+```@example poisson2
+plot(tb_kmeans)
 ```
 
 #### Choix de la divergence de Bregman associée à la loi de Poisson
@@ -677,13 +671,13 @@ Poisson, les groupes sont de diamètres variables et sont particulièrement
 adaptés aux données. En particulier, les estimations `tB_Poisson$centers`
 des moyennes par les centres sont bien meilleures.
 
-```julia
-R"""
-set.seed(1)
-tB_Poisson = Trimmed_Bregman_clustering(x,k,alpha,divergence_poisson,maxiter,nstart)
-plot_clustering_dim2(x,tB_Poisson$cluster,tB_Poisson$centers)
-tB_Poisson$centers
-"""
+```@example poisson2
+tb_poisson = trimmed_bregman_clustering( rng, x, k, α, poisson, maxiter, nstart )
+println("poisson : $(tb_poisson.centers)")
+```
+
+```@example poisson2
+plot(tb_poisson)
 ```
 
 #### Comparaison des performances
@@ -693,17 +687,9 @@ Nous mesurons directement la performance des deux partitionnements
 Bregman associée à la loi de Poisson), à l'aide de l'information
 mutuelle normalisée.
 
-```julia 
-
-# Pour le k-means elague :
-R"""
-NMI(labels_true,tB_kmeans$cluster, variant="sqrt")
-"""
-
-# Pour le partitionnement elague avec divergence de Bregman associee a la loi de Poisson :
-R"""
-NMI(labels_true,tB_Poisson$cluster, variant="sqrt")
-"""
+```@example poisson2 
+println("k-means : $(mutualinfo( tb_kmeans.cluster, labels_true, true ))")
+println("poisson : $(mutualinfo( tb_poisson.cluster, labels_true, true ))")
 ```
 
 L'information mutuelle normalisée est supérieure pour la divergence
@@ -725,41 +711,42 @@ données générées selon la même procédure que l'exemple précédent.
 
 La fonction `performance.measurement` permet de le faire. 
 
-```julia
-R"""
-s_generator = function(n_signal){return(simule_poissond(n_signal,lambdas,proba))}
-o_generator = function(n_outliers){return(sample_outliers(n_outliers,d,120))}
+```@example poisson2
+sample_generator = (rng, n) -> sample_poisson(rng, n, d, lambdas, proba)
+outliers_generator = (rng, n) -> sample_outliers(rng, n, d; scale = 120)
 
-perf_meas_kmeans = performance.measurement(1200,200,3,0.1,s_generator,o_generator,euclidean_sq_distance,10,1,replications_nb=replications_nb)
-
-perf_meas_Poisson = performance.measurement(1200,200,3,0.1,s_generator,o_generator,divergence_Poisson,10,1,replications_nb=replications_nb)
-"""
+nmi_kmeans, _, _ = performance(n, n_outliers, k, α, sample_generator, outliers_generator, euclidean)
+nmi_poisson, _, _ = performance(n, n_outliers, k, α, sample_generator, outliers_generator, poisson)
 ```
 
 Les boîtes à moustaches permettent de se faire une idée de la répartition des NMI pour les deux méthodes différentes. On voit que la méthode utilisant la divergence de Bregman associée à la loi de Poisson est la plus performante.
 
-```julia
-R"""
-df_NMI = data.frame(Methode = c(rep("k-means",replications_nb),rep("Poisson",replications_nb)), NMI = c(perf_meas_kmeans$NMI,perf_meas_Poisson$NMI))
-ggplot(df_NMI, aes(x=Methode, y=NMI)) + geom_boxplot(aes(group = Methode))
-"""
+```@example poisson2
+using StatsPlots
+
+boxplot( ones(100), nmi_kmeans, label = "kmeans" )
+boxplot!( fill(2, 100), nmi_poisson, label = "poisson" )
 ```
 
 #### Sélection des paramètres ``k`` et ``\alpha``
 
 On garde le même jeu de données `x`.
 
-```julia
-R"""
-vect_k = 1:5
-vect_alpha = c((0:2)/50,(1:4)/5)
+```@example poisson2
+vect_k = collect(1:5)
+vect_α = sort([((0:2)./50)...,((1:4)./5)...])
 
-set.seed(1)
-params_risks = select.parameters(vect_k,vect_alpha,x,divergence_Poisson,maxiter,5,.export = c('divergence_Poisson','divergence_Poisson','x','nstart','maxiter'),force_nonincreasing = TRUE)
+rng = MersenneTwister(42)
+nstart = 5
 
-params_risks$k = as.factor(params_risks$k)
-ggplot(params_risks, aes(x = alpha, y = risk, group = k, color = k))+   geom_line() +   geom_point()
-"""
+params_risks = select_parameters_nonincreasing(rng, vect_k, vect_α, x, poisson, maxiter, nstart)
+
+plot(; title = "select parameters")
+for (i,k) in enumerate(vect_k)
+   plot!( vect_α, params_risks[i, :], label ="k=$k", markershape = :circle )
+end
+xlabel!("alpha")
+ylabel!("NMI")
 ```
 
 D'après la courbe, on voit qu'on gagne beaucoup à passer de 1 à 2
@@ -777,25 +764,22 @@ nous pouvons nous concentrer que la courbe ``k = 3`` en augmentant
 la valeur de `nstart` et en nous concentrant sur les petites valeurs
 de ``\alpha``.
 
-```julia
-R"""
-set.seed(1)
-params_risks = select.parameters(3,(0:15)/200,x,divergence_Poisson,maxiter,5,.export = c('divergence_Poisson','divergence_Poisson','x','nstart','maxiter'),force_nonincreasing = TRUE)
+```@example poisson2
+vec_k = [3]
+vec_α = collect(0:15) ./ 200
+params_risks = select_parameters_nonincreasing(rng, vec_k, vec_α, x, poisson, maxiter, nstart)
 
-params_risks$k = as.factor(params_risks$k)
-ggplot(params_risks, aes(x = alpha, y = risk, group = k, color = k))+   geom_line() +   geom_point()
-"""
+plot(vec_α, params_risks[1, :], markershape = :circle)
 ```
 
 On ne voit pas de changement radical de pente mais on voit que la
 pente se stabilise après ``\alpha = 0.04``. Nous choisissons le
 paramètre ``\alpha = 0.04``.
 
-```julia
-R"""
-tB = Trimmed_Bregman_clustering(x,3,0.04,divergence_Poisson,maxiter,nstart)
-plot_clustering_dim2(x,tB_Poisson$cluster,tB_Poisson$centers)
-"""
+```@example poisson2
+k, α = 3, 0.04
+tb = trimmed_bregman_clustering( rng, x, k, α, poisson, maxiter, nstart )
+plot(tb)
 ```
 
 ### Application au partitionnement de textes d'auteurs
@@ -804,11 +788,26 @@ Les données des textes d'auteurs sont enregistrées dans la variable `data`.
 Les commandes utilisées pour l'affichage étaient les suivantes.
 
 ```julia
-R"""
-data = t(read.table("textes_auteurs_avec_donnees_aberrantes.txt"))
-acp = dudi.pca(data, scannf = FALSE, nf = 50)
-lda<-discrimin(acp,scannf = FALSE,fac = as.factor(true_labels),nf=20)
-"""
+using DataFrames
+using DelimitedFiles
+using GeometricClusterAnalysis
+using NamedArrays
+using Random
+
+rng = MersenneTwister(2022)
+
+table = readdlm(joinpath("assets","textes.txt"))
+
+df = DataFrame( hcat(table[2:end,1], table[2:end,2:end]), vec(vcat("authors",table[1,1:end-1])), makeunique=true)
+
+dft = DataFrame([[names(df)[2:end]]; collect.(eachrow(df[:,2:end]))], [:column; Symbol.(axes(df, 1))])
+rename!(dft, String.(vcat("authors",values(df[:,1]))))
+
+data = NamedArray( table[2:end,2:end]', (names(df)[2:end], df.authors ), ("Rows", "Cols"))
+
+authors = ["God", "Doyle", "Dickens", "Hawthorne",  "Obama", "Twain"]
+authors_names = ["Bible",  "Conan Doyle", "Dickens", "Hawthorne", "Obama", "Twain"]
+true_labels = [sum(count.(author, names(df))) for author in authors]
 ```
 
 Afin de pouvoir représenter les données, nous utiliserons la fonction suivante.
@@ -828,34 +827,28 @@ plot_clustering <- function(axis1 = 1, axis2 = 2, labels, title = "Textes d'aute
 Pour partitionner les données, nous utiliserons les paramètres suivants.
 
 ```julia
-R"""
 k = 4
 alpha = 20/209 # La vraie proportion de donnees aberrantes vaut : 20/209 car il y a 15+5 textes issus de la bible et du discours de Obama.
-
 maxiter = 50
 nstart = 50
-"""
 ```
 
 #### Application de l'algorithme classique de ``k``-means élagué [@Cuesta-Albertos1997]
 
 ```julia
-R"""
-tB_authors_kmeans = Trimmed_Bregman_clustering(data,k,alpha,euclidean_sq_distance,maxiter,nstart)
+tb_authors_kmeans = trimmed_bregman_clustering(rng, data, k, alpha, euclidean, maxiter, nstart)
 
-plot_clustering(1,2,tB_authors_kmeans$cluster)
-plot_clustering(3,4,tB_authors_kmeans$cluster)
-"""
+#plot_clustering(1,2,tB_authors_kmeans$cluster)
+#plot_clustering(3,4,tB_authors_kmeans$cluster)
 ```
 
 #### Choix de la divergence de Bregman associée à la loi de Poisson
 
 ```julia
-R"""
-tB_authors_Poisson = Trimmed_Bregman_clustering(data,k,alpha,divergence_Poisson,maxiter,nstart)
+tb_authors_poisson = trimmed_bregman_clustering(rng, data, k, alpha, poisson, maxiter, nstart)
 
-plot_clustering(1,2,tB_authors_Poisson$cluster)
-plot_clustering(3,4,tB_authors_Poisson$cluster)
+#plot_clustering(1,2,tB_authors_Poisson$cluster)
+#plot_clustering(3,4,tB_authors_Poisson$cluster)
 """
 ```
 

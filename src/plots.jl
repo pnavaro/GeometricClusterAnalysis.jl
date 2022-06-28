@@ -151,7 +151,6 @@ function color_points_from_centers(points, k, nsignal, model, hc)
         matrices,
     )
 
-
     c = length(model.weights)
     remain_indices_2 = vcat(remain_indices, zeros(Int, c + 1 - length(remain_indices)))
     color_points[color_points.==0] .= c + 1
@@ -166,6 +165,9 @@ end
 
 @recipe function f(results::TrimmedBregmanResult)
 
+    d, n = size(results.points)
+    k = size(results.centers,2)
+
     palette --> :rainbow
 
     @series begin
@@ -173,8 +175,19 @@ end
         seriestype := :scatter
         color := results.cluster
         label := "data"
-        markersize := 2
-        collect(results.points')
+        markersize := 3
+        if d == 1
+            x := 1:n
+            y := results.points[1,:]
+        elseif d == 2
+            x := results.points[1,:]
+            y := results.points[2,:]
+        else 
+            x := results.points[1,:]
+            y := results.points[2,:]
+            z := results.points[3,:]
+        end
+        ()
 
     end
 
@@ -184,10 +197,20 @@ end
         markercolor := :yellow
         markersize := 5
         label := "centers"
-        transpose(results.centers)
+        if d == 1
+            x := 1:k
+            y := results.centers[1,:]
+        elseif d == 2
+            x := results.centers[1,:]
+            y := results.centers[2,:]
+        else
+            x := results.centers[1,:]
+            y := results.centers[2,:]
+            z := results.centers[3,:]
+        end
+        ()
     end
 
-    legend --> :none
     title := "Trimmed Bregman Clustering"
     label := :none
     ()

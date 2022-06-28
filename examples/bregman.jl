@@ -57,4 +57,3 @@ print(sort(kmeans$centers))
 poisson = trimmed_bregman_clustering(x,k,alpha,divergence_Poisson_dimd ,maxiter,nstart)
 print(sort(poisson$centers))
 """
-

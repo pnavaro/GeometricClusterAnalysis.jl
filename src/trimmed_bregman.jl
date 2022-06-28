@@ -38,51 +38,17 @@ function euclidean(x, y)
 end
 
 
-struct TrimmedBregmanResult
+struct TrimmedBregmanResult{T}
 
-    points::Array{Float64, 2}
+    points::Matrix{T}
     cluster::Vector{Int}
-    centers::Vector{Vector{Float64}}
+    centers::Matrix{Float64}
     risk::Float64
     divergence::Vector{Float64}
 
 end
 
-function update_cluster!(divergence_min, cluster, x, cluster_nonempty, divergence, centers, bregman)
-
-    fill!(divergence_min, Inf)
-    fill!(cluster, 0)
-
-    for i in eachindex(centers)
-        if cluster_nonempty[i]
-            for j in eachindex(divergence)
-                divergence[j] = bregman(x[:, j], centers[i])
-                if divergence[j] < divergence_min[j]
-                    divergence_min[j] = divergence[j]
-                    cluster[j] = i
-                end
-            end
-        end
-    end
-
-end
-
-function update_risk!(cluster, x, a, divergence_min)
-
-    if a > 0
-        ix = sortperm(divergence_min, rev = true)
-        for i in ix[1:a]
-            cluster[i] = 0
-        end
-        return mean(divergence_min[ix[(a+1):end]])
-    else
-        return mean(divergence_min)
-    end
-
-end
-
 export trimmed_bregman_clustering
-
 
 """
     function trimmed_bregman_clustering(x, k; α = 0, 
@@ -106,98 +72,116 @@ Output :
 - `divergence`: the vector of divergences of the points of x at their nearest center in centers, for `divergence_bregman`.
 
 """
-function trimmed_bregman_clustering(
-    rng, 
-    x,
-    k :: Int;
-    α = 0.0,
-    bregman = euclidean,
-    maxiter = 10,
-    nstart = 1,
-)
+function trimmed_bregman_clustering(rng, x::Matrix{T}, k :: Int, α :: Float64, 
+    bregman :: Function, maxiter :: Int, nstart :: Int) where {T}
 
     d, n = size(x)
     a = floor(Int, n * α)
+    
+    risk = Inf 
+    opt_risk = risk 
+    opt_centers = zeros(d,k) 
+    opt_cluster_nonempty = trues(k) 
 
-    risk = Inf
-    cluster = zeros(Int, n)
-    cluster_nonempty = trues(k)
-
-    opt_risk = Inf
-    opt_centers = [zeros(d) for i in 1:k]
-    opt_cluster_nonempty = trues(k)
-
-    centers = deepcopy(opt_centers)
-    opt_cluster_nonempty = trues(k)
-    cluster = zeros(Int, n)
-    divergence_min = fill(Inf, n)
-    divergence = similar(divergence_min)
-
-    for n_times = 1:nstart
-
-        first_centers = sample(rng, 1:n, k, replace = false)
-        for (k,i) in enumerate(first_centers)
-            centers[k] .= x[:,i]
-        end
-
+    for n_times in 1:nstart
+    
+        cluster = zeros(Int,n) 
+        cluster_nonempty = trues(k)
+        centers = x[:, first(randperm(rng, n), k)]
+        
         nstep = 1
-        non_stopping = (nstep <= maxiter)
-
+        non_stopping = (nstep<=maxiter)
+            
         while non_stopping
 
             nstep += 1
-            centers_copy = deepcopy(centers)
-
-            # Step 1 update cluster and compute divergences
-
-            update_cluster!(divergence_min, cluster, x, cluster_nonempty, divergence, centers, bregman)
-
-            # Step 2 Trimming
-            risk =  update_risk!( cluster, x, a, divergence_min)
-
-            for i in eachindex(centers)
-                centers[i] .= vec(mean(view(x,:,cluster.==i), dims=2))
+            centers_copy = copy(centers) 
+            
+            divergence_min = fill(Inf,n)
+            fill!(cluster, 0)
+            for i in 1:k
+                if cluster_nonempty[i]
+                    divergence = [bregman(p, centers[:,i]) for p in eachcol(x)]
+	                #divergence[divergence .== Inf] .= typemax(Float64)/n 
+                    for j in 1:n
+                        if divergence[j] < divergence_min[j]
+                            divergence_min[j] = divergence[j]
+                            cluster[j] = i
+                        end
+                    end
+                end
             end
 
-            cluster_nonempty .= [!(Inf in c) for c in centers]
-            non_stopping = (centers_copy ≈ centers ) 
-        end
+            if a > 0
+                ix = sortperm(divergence_min, rev = true)
+                for i in ix[1:a]
+                    cluster[i] = 0
+                end
+                risk = mean(view(divergence_min, ix[(a+1):n]))
+            else
+                risk = mean(divergence_min)
+            end
 
-        if risk <= opt_risk
-            opt_centers .= centers
-            opt_cluster_nonempty .= cluster_nonempty
+            for i = 1:k
+                centers[:,i] .= vec(mean(x[:,cluster .== i], dims=2))
+            end
+
+            cluster_nonempty = [!(any(isinf.(center))) for center in eachcol(centers)]
+            non_stopping = ( centers_copy ≈ centers && (nstep<=maxiter) )
+        end 
+        
+        if risk <= opt_risk 
+            opt_centers = centers
+            opt_cluster_nonempty = cluster_nonempty
             opt_risk = risk
         end
 
     end
 
-    # After loop, step 1 and step 2 to fix labels and compute risk
-    update_cluster!(divergence_min, cluster, x, opt_cluster_nonempty, divergence, opt_centers, bregman)
+    divergence_min = fill(Inf,n)
+    opt_cluster = zeros(Int, n)
 
-    risk =  update_risk!( cluster, x, a, divergence_min)
-
-    # Updte labels and remove empty clusters
-
-    opt_cluster_nonempty = [sum(cluster .== i) > 0 for i = 1:k]
-
-    new_labels = [0, cumsum(opt_cluster_nonempty)...]
-    for i in eachindex(cluster)
-        cluster[i] = new_labels[cluster[i]+1]
+    for i in 1:k
+        if opt_cluster_nonempty[i]
+            divergence = [bregman(p, opt_centers[i]) for p in eachcol(x)]
+            for j in 1:n
+                if divergence[j] < divergence_min[j]
+                    divergence_min[j] = divergence[j]
+                    opt_cluster[j] = i
+                end
+            end
+        end
     end
 
-    return TrimmedBregmanResult(
-        x,
-        cluster,
-        opt_centers[opt_cluster_nonempty],
-        risk,
-        divergence_min,
-    )
+    if a > 0
+      ix = sortperm(divergence_min, rev = true)
+      for i in ix[1:a]
+          opt_cluster[i] = 0
+      end 
+      opt_risk = mean(divergence_min[ix[(a+1):n]])
+    else
+      opt_risk = mean(divergence_min)
+    end
 
+    opt_cluster_nonempty = [sum(opt_cluster .== i) > 0 for i in 1:k]
+
+    new_labels = [0, cumsum(opt_cluster_nonempty)...]
+    for i in eachindex(opt_cluster)
+        opt_cluster[i] = new_labels[opt_cluster[i]+1]
+    end
+
+    return TrimmedBregmanResult{T}(
+        x,
+        opt_cluster,
+        opt_centers[:, opt_cluster_nonempty],
+        risk,
+        divergence_min
+    )
+  
 end
 
 """
-    function trimmed_bregman_clustering(x, centers; α = 0, 
-    bregman = euclidean_sq_distance, maxiter = 10)
+    function trimmed_bregman_clustering(x, centers, α, bregman, maxiter)
 
 - n : number of points
 - d : dimension
@@ -211,67 +195,112 @@ Input :
 
 Output :
 - `centers`: matrix of size dxk whose columns represent the centers of the clusters
-- `cluster`: vector of integers in `1:k` indicating the index of the cluster to which each point (line) of x is associated.
 - `risk`: average of the divergences of the points of x at their associated center.
-- `divergence`: the vector of divergences of the points of x at their nearest center in centers, for `bregman` divergence.
 
 """
-function trimmed_bregman_clustering(
-    rng, 
-    x,
-    centers :: Vector{Vector{Float64}};
-    α = 0.0,
-    bregman = euclidean,
-    maxiter = 10
-)
+function trimmed_bregman_clustering(rng, x :: Matrix{T}, centers :: Vector{Float64}, α :: Float64, bregman :: Function, 
+             maxiter :: Int) where {T}
 
-    k = length(centers)
     d, n = size(x)
-    a = trunc(Int, n * α)
+    a = floor(Int, n * α)
+    k = size(centers, 2)
+    @assert size(centers, 1) == d
+    
+    risk = Inf 
+    opt_risk = risk 
+    opt_centers = zero(centers) 
+    opt_cluster_nonempty = trues(k) 
 
-    risk = Inf
-    cluster = zeros(Int, n)
+    cluster = zeros(Int,n) 
     cluster_nonempty = trues(k)
-
-    opt_risk = Inf
-    opt_cluster_nonempty = trues(k)
-
-    opt_centers = deepcopy(centers)
-    opt_cluster_nonempty = trues(k)
-    cluster = zeros(Int, n)
-    divergence_min = fill(Inf, n)
-    divergence = similar(divergence_min)
-
-    nstep = 0
-    non_stopping = true
-
+    
+    nstep = 1
+    non_stopping = (nstep<=maxiter)
+        
     while non_stopping
 
         nstep += 1
-        centers_copy = deepcopy(centers)
-
-        # Step 1 update cluster and compute divergences
-
-        update_cluster!(divergence_min, cluster, x, cluster_nonempty, divergence, centers, bregman)
-
-        # Step 2 Trimming
-        risk =  update_risk!(cluster, x, a, divergence_min)
-
-        for i = 1:k
-            centers[i] .= vec(mean(view(x,:,cluster.==i), dims=2))
+        centers_copy = copy(centers) 
+        
+        divergence_min = fill(Inf,n)
+        fill!(cluster, 0)
+        for i in eachindex(centers)
+            if cluster_nonempty[i]
+                divergence = [bregman(p, centers[:,i]) for p in eachcol(x)]
+                for j in 1:n
+                    if divergence[j] < divergence_min[j]
+                        divergence_min[j] = divergence[j]
+                        cluster[j] = i
+                    end
+                end
+            end
         end
 
-        cluster_nonempty .= [!(Inf in c) for c in centers]
-        non_stopping = (centers_copy ≈ centers && (nstep <= maxiter))
+        if a > 0
+            ix = sortperm(divergence_min, rev = true)
+            for i in ix[1:a]
+                cluster[i] = 0
+            end
+            risk = mean(view(divergence_min, ix[(a+1):n]))
+        else
+            risk = mean(divergence_min)
+        end
 
+        for i = 1:k
+            centers[:,i] .= vec(mean(x[:,cluster .== i], dims=2))
+        end
+
+        cluster_nonempty = [!(any(isinf.(center))) for center in eachcol(centers)]
+        non_stopping = ( centers_copy ≈ centers && (nstep<=maxiter) )
+
+    end 
+    
+    if risk <= opt_risk 
+        opt_centers = centers
+        opt_cluster_nonempty = cluster_nonempty
+        opt_risk = risk
     end
 
-    update_cluster!(divergence_min, cluster, x, cluster_nonempty, divergence, centers, bregman)
+    divergence_min = fill(Inf,n)
+    opt_cluster = zeros(Int, n)
 
-    risk = update_risk!(cluster, x, a, divergence_min)
+    for i in 1:k
+        if opt_cluster_nonempty[i]
+            divergence = [bregman(p, opt_centers[i]) for p in eachcol(x)]
+            for j in 1:n
+                if divergence[j] < divergence_min[j]
+                    divergence_min[j] = divergence[j]
+                    opt_cluster[j] = i
+                end
+            end
+        end
+    end
 
-    return centers, risk
+    if a > 0
+      ix = sortperm(divergence_min, rev = true)
+      for i in ix[1:a]
+          opt_cluster[i] = 0
+      end 
+      opt_risk = mean(divergence_min[ix[(a+1):n]])
+    else
+      opt_risk = mean(divergence_min)
+    end
 
+    opt_cluster_nonempty = [sum(opt_cluster .== i) > 0 for i in 1:k]
+
+    new_labels = [0, cumsum(opt_cluster_nonempty)...]
+    for i in eachindex(opt_cluster)
+        opt_cluster[i] = new_labels[opt_cluster[i]+1]
+    end
+
+    return TrimmedBregmanResult{T}(
+        x,
+        cluster,
+        opt_centers[opt_cluster_nonempty],
+        risk,
+        divergence_min
+    )
+  
 end
 
 

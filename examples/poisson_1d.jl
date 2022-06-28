@@ -29,15 +29,13 @@ nstart = 20
 
 scatter( x[1,:], c = labels_true, palette = :rainbow)
 
-tb_kmeans = trimmed_bregman_clustering( rng, x, k; 
-                α = alpha, bregman = euclidean, maxiter = maxiter, nstart = nstart )
-tb_poisson = trimmed_bregman_clustering( rng, x, k; 
-                α = alpha, bregman = poisson, maxiter = maxiter, nstart = nstart )
+tb_kmeans = trimmed_bregman_clustering( rng, x, k, alpha, euclidean, maxiter, nstart )
+tb_poisson = trimmed_bregman_clustering( rng, x, k, alpha, poisson, maxiter, nstart )
 
 println("k-means : $(tb_kmeans.centers)")
 println("poisson : $(tb_poisson.centers)")
 
-scatter!( ones(k), getindex.(tb_poisson.centers,1), markershape = :star, markercolor = :yellow, markersize = 5)
+scatter!( ones(k), tb_poisson.centers[1,:], markershape = :star, markercolor = :yellow, markersize = 5)
 
 println("k-means : $(mutualinfo( tb_kmeans.cluster, labels_true, true ))")
 println("poisson : $(mutualinfo( tb_poisson.cluster, labels_true, true ))")
@@ -54,8 +52,7 @@ vect_alpha = sort([((0:2)./50)...,((1:4)./5)...])
 
 rng = MersenneTwister(42)
 
-params_risks = select_parameters_nonincreasing(rng, vect_k, vect_alpha, x; 
-                   bregman = poisson, maxiter = maxiter)
+params_risks = select_parameters_nonincreasing(rng, vect_k, vect_alpha, x, poisson, maxiter, nstart)
 
 p = plot()
 for (i,k) in enumerate(vect_k)
@@ -63,15 +60,14 @@ for (i,k) in enumerate(vect_k)
 end
 display(p)
 
+vect_k = [3]
 vec_alpha = collect(0:15) ./ 200
-params_risks = select_parameters_nonincreasing(rng, [3], vec_alpha, x; 
-                   bregman = poisson, maxiter = maxiter, nstart = 5)
+params_risks = select_parameters_nonincreasing(rng, [3], vec_alpha, x, poisson, maxiter, 5)
 
 plot(vec_alpha, params_risks[1, :], markershape = :circle)
 
 k, alpha = 3, 0.03
-tb_poisson = trimmed_bregman_clustering( rng, x, k; 
-                α = alpha, bregman = poisson, maxiter = maxiter, nstart = nstart )
+tb_poisson = trimmed_bregman_clustering( rng, x, k, alpha, poisson, maxiter, nstart )
 
 boxplot( ones(100), nmi_kmeans, label = "kmeans" )
 boxplot!( fill(2, 100), nmi_poisson, label = "poisson" )

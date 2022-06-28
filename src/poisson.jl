@@ -49,8 +49,7 @@ function performance(n, n_outliers, k, alpha, sample_generator, outliers_generat
       outliers = outliers_generator(rng, n_outliers)
       x = hcat(points, outliers)
       labels_true = vcat(labels, zeros(Int,n_outliers))
-      tbc = trimmed_bregman_clustering(rng, x, k; α = alpha, bregman = bregman, 
-          maxiter = maxiter, nstart = nstart)
+      tbc = trimmed_bregman_clustering(rng, x, k, alpha, bregman, maxiter, nstart)
       push!(nmi, mutualinfo(labels_true, tbc.cluster, true))
 
     end

@@ -166,17 +166,15 @@ end
 
 @recipe function f(results::TrimmedBregmanResult)
 
-    aspect_ratio := :equal
     palette --> :rainbow
 
     @series begin
 
         seriestype := :scatter
-        x := results.points[1,:]
-        y := results.points[2,:]
         color := results.cluster
         label := "data"
-        ()
+        markersize := 2
+        collect(results.points')
 
     end
 
@@ -186,16 +184,13 @@ end
         markercolor := :yellow
         markersize := 5
         label := "centers"
-        getindex.(results.centers, 1), getindex.(results.centers, 2)
+        transpose(results.centers)
     end
 
     legend --> :none
     title := "Trimmed Bregman Clustering"
     label := :none
     ()
-
-
-
 
 end
 

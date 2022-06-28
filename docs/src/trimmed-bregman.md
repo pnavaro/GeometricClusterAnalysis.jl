@@ -378,7 +378,7 @@ données aberrantes) à partir d'un jeu de données.
 
 #### Simulation des variables selon un mélange de lois de Poisson
 
-La fonction `simule_poissond` permet de simuler des variables
+La fonction `sample_poisson` permet de simuler des variables
 aléatoires selon un mélange de ``k`` lois de Poisson en dimension
 ``d``, de paramètres donnés par la matrice `lambdas` de taille
 ``k\times d``. Les probabilités associées à chaque composante du
@@ -389,11 +389,11 @@ aléatoires uniformément sur l'hypercube ``[0,L]^d``. On utilisera
 cette fonction pour générer des données aberrantes.
 
 ```@docs
-simule_poissond 
+GeometricClusterAnalysis.sample_poisson
 ```
 
 ```@docs
-sample_outliers
+GeometricClusterAnalysis.sample_outliers
 ```
 
 On génère un premier échantillon de 950 points de loi de Poisson
@@ -401,25 +401,33 @@ de paramètre ``10``, ``20`` ou ``40`` avec probabilité ``\frac13``,
 puis un échantillon de 50 données aberrantes de loi uniforme sur
 ``[0,120]``. On note `x` l'échantillon ainsi obtenu.
 
-```julia
-n = 1000 # Taille de l'echantillon
-n_outliers = 50 # Dont points generes uniformement sur [0,120]
-d = 1 # Dimension ambiante
+```@example poisson1
+using GeometricClusterAnalysis
+import GeometricClusterAnalysis: sample_poisson, sample_outliers, performance
+using Plots
+using Random
 
-lambdas =  reshape(c[10,20,40],3,d)
-proba = repeat([1/3],3)
-P = simule_poissond(n - n_outliers,lambdas,proba)
+n = 1000 
+n_outliers = 50 
+d = 1 
 
-set.seed(1)
-x = rbind(P$points,sample_outliers(n_outliers,d,120)) # Coordonnees des n points
-labels_true = c(P$labels,rep(0,n_outliers)) # Vraies etiquettes 
+rng = MersenneTwister(1)
+lambdas =  [10,20,40]
+proba = [1/3,1/3,1/3]
+points, labels = sample_poisson(rng, n - n_outliers, d, lambdas, proba)
+
+outliers = sample_outliers(rng, n_outliers, 1; scale = 120) 
+
+x = hcat(points, outliers) 
+labels_true = vcat(labels, zeros(Int, n_outliers))
+scatter( x[1,:], c = labels_true, palette = :rainbow)
 ```
 
 #### Partitionnement des données sur un exemple
 
 Pour partitionner les données, nous utiliserons les paramètres suivants.
 
-```julia
+```@example poisson1
 k = 3 # Nombre de groupes dans le partitionnement
 alpha = 0.04 # Proportion de donnees aberrantes
 maxiter = 50 # Nombre maximal d'iterations
@@ -432,48 +440,24 @@ Dans un premier temps, nous utilisons notre algorithme
 [`trimmed_bregman_clustering`](@ref) avec le carré de la norme Euclidienne
 [`euclidean_sq_distance`](@ref).
 
-```julia
-using Random
-rng = MersenneTwister(1)
-tB_kmeans = trimmed_Bregman_clustering(rng, x, k, alpha, euclidean_sq_distance, maxiter, nstart)
-plot_clustering_dim1(x,tB_kmeans$cluster,tB_kmeans$centers)
-tB_kmeans.centers
-"""
+```@example poisson1
+tb_kmeans = trimmed_bregman_clustering(rng, x, k, alpha, euclidean, maxiter, nstart)
+tb_kmeans.centers
 ```
 
 Nous avons effectué un simple algorithme de ``k``-means élagué,
 comme [Cuesta-Albertos1997](@cite).  On voit trois groupes de même diamètre.
 Ce qui fait que le groupe centré en ``10`` contient aussi des points
 du groupe centré en ``20``. En particulier, les estimations
-`tB_kmeans$centers` des moyennes par les centres ne sont pas très
+`tB_kmeans.centers` des moyennes par les centres ne sont pas très
 bonnes. Les deux moyennes les plus faibles sont bien supérieures
 aux vraies moyennes ``10`` et ``20``.
 
-Cette méthode coïncide avec l'algorithme `tkmeans` de la bibliothèque `tclust`.
-
-```julia
-R"""
-library(tclust)
-set.seed(1)
-t_kmeans = tkmeans(x,k,alpha,maxiter = maxiter,nstart = nstart)
-"""
+```@example poisson1
+plot(tb_kmeans)
 ```
 
-```julia
-R"""
-plot_clustering_dim1 <- function(x,labels,centers){
 
-    df = data.frame(x = 1:nrow(x), y =x[,1], Etiquettes = as.factor(labels))
-    gp = ggplot(df,aes(x,y,color = Etiquettes))+geom_point()
-    for(i in 1:k){gp = gp + geom_point(x = 1,y = centers[1,i],color = "black",size = 2,pch = 17)}
-    return(gp)
-
-}
-
-plot_clustering_dim1(x,t_kmeans$cluster,t_kmeans$centers)
-
-"""
-```
 
 #### Choix de la divergence de Bregman associée à la loi de Poisson
 
@@ -483,11 +467,13 @@ adaptés aux données. En particulier, les estimations `tB_Poisson$centers`
 des moyennes par les centres sont bien meilleures.
 
 
-```julia
-rng = MersenneTwister(1)
-tB_Poisson = trimmed_Bregman_clustering(rng, x, k, alpha, divergence_poisson, maxiter, nstart)
-plot_clustering_dim1(x,tB_Poisson$cluster,tB_Poisson$centers)
-tB_Poisson.centers
+```@example poisson1
+tb_poisson = trimmed_bregman_clustering(rng, x, k, alpha, poisson, maxiter, nstart)
+tb_poisson.centers
+```
+
+```@example poisson1
+plot(tb_poisson)
 ```
 
 #### Comparaison des performances
@@ -498,17 +484,13 @@ Bregman associée à la loi de Poisson), à l'aide de l'information
 mutuelle normalisée.
 
 Pour le k-means elague :
-```julia
-R"""
-NMI(labels_true,tB_kmeans$cluster, variant="sqrt")
-"""
+```@example poisson1
+mutualinfo(labels_true,tb_kmeans.cluster, true)
 ```
 
 Pour le partitionnement elague avec divergence de Bregman associee a la loi de Poisson :
-```julia
-R"""
-NMI(labels_true,tB_Poisson$cluster, variant="sqrt")
-"""
+```@example poisson1
+mutualinfo(labels_true,tb_poisson.cluster, true)
 ```
 
 L'information mutuelle normalisée est supérieure pour la divergence
@@ -521,33 +503,29 @@ basique.
 
 Afin de s'assurer que la méthode avec la bonne divergence de Bregman
 est la plus performante, nous répétons l'expérience précédente
-`replications_nb` fois.
+`replications` fois.
 
 Pour ce faire, nous appliquons l'algorithme [`trimmed_bregman_clustering`](@ref),
-sur `replications_nb` échantillons de taille ``n = 1000``, sur des
+sur `replications` échantillons de taille ``n = 1000``, sur des
 données générées selon la même procédure que l'exemple précédent.
 
 La fonction [`performance_measurement`](@ref) permet de le faire. 
 
 
-```julia
-R"""
-s_generator = function(n_signal){return(simule_poissond(n_signal,lambdas,proba))}
-o_generator = function(n_outliers){return(sample_outliers(n_outliers,d,120))}
-"""
+```@example poisson1
+sample_generator = (rng, n) -> sample_poisson(rng, n, d, lambdas, proba)
+outliers_generator = (rng, n) -> sample_outliers(rng, n, d; scale = 120)
 ```
 
-```julia
-R"""
-replications_nb = 10
-system.time({
-div = euclidean_sq_distance
-perf_meas_kmeans = performance.measurement(1200,200,3,0.1,s_generator,o_generator,div,10,1,replications_nb=replications_nb)
+Valeurs par défault: `maxiter = 100, nstart = 10, replications = 100`
 
-div = divergence_Poisson
-perf_meas_Poisson = performance.measurement(1200,200,3,0.1,s_generator,o_generator,div,10,1,replications_nb=replications_nb)
-})
-"""
+```@example poisson1
+n = 1200
+n_outliers = 200
+k = 3
+alpha = 0.1
+nmi_kmeans, _, _ = performance(n, n_outliers, k, alpha, sample_generator, outliers_generator, euclidean)
+nmi_poisson, _, _ = performance(n, n_outliers, k, alpha, sample_generator, outliers_generator, poisson)
 ```
 
 Les boîtes à moustaches permettent de se faire une idée de la
@@ -555,41 +533,29 @@ répartition des NMI pour les deux méthodes différentes. On voit que
 la méthode utilisant la divergence de Bregman associée à la loi de
 Poisson est la plus performante.
 
-```julia
+```@example poisson1
+using StatsPlots
 
-R"""
-df_NMI = data.frame(Methode = c(rep("k-means",replications_nb),
-                                rep("Poisson",replications_nb)), 
-								NMI = c(perf_meas_kmeans$NMI,perf_meas_Poisson$NMI))
-ggplot(df_NMI, aes(x=Methode, y=NMI)) + geom_boxplot(aes(group = Methode))
-"""
-
+boxplot( ones(100), nmi_kmeans, label = "kmeans" )
+boxplot!( fill(2, 100), nmi_poisson, label = "poisson" )
 ```
 
 #### Sélection des paramètres ``k`` et ``\alpha``
 
 On garde le même jeu de données `x`.
 
-```julia 
+```@example poisson1 
+vect_k = collect(1:5)
+vect_alpha = sort([((0:2)./50)...,((1:4)./5)...])
 
-R"""
-vect_k = 1:5
-vect_alpha = c((0:2)/50,(1:4)/5)
+params_risks = select_parameters_nonincreasing(rng, vect_k, vect_alpha, x, poisson, maxiter, nstart)
 
-set.seed(1)
-params_risks = select.parameters(vect_k,vect_alpha,x,divergence_Poisson,maxiter,1,.export = c('divergence_Poisson','divergence_Poisson','nstart'),force_nonincreasing = TRUE)
-"""
-
-```
-
-```julia 
-R"""
-Il faut exporter les fonctions divergence_Poisson et divergence_Poisson nécessaires pour le calcul de la divergence de Bregman.
-Ajouter l'argument .packages = c('package1', 'package2',..., 'packagen') si des packages sont nécessaires au calcul de la divergence de Bregman.
-
-params_risks$k = as.factor(params_risks$k)
-ggplot(params_risks, aes(x = alpha, y = risk, group = k, color = k))+   geom_line() +   geom_point() 
-"""
+plot(; title = "select parameters")
+for (i,k) in enumerate(vect_k)
+   plot!( vect_alpha, params_risks[i, :], label ="k=$k", markershape = :circle )
+end
+xlabel!("alpha")
+ylabel!("NMI")
 ```
 
 D'après la courbe, on voit qu'on gagne beaucoup à passer de 1 à 2
@@ -607,14 +573,12 @@ nous pouvons nous concentrer sur la courbe ``k = 3`` en augmentant
 la valeur de `nstart` et en nous concentrant sur les petites valeurs
 de ``\alpha``.
 
-```julia 
-R"""
-set.seed(1)
-params_risks = select.parameters(3,(0:15)/200,x,divergence_Poisson,maxiter,5,.export = c('divergence_Poisson','divergence_Poisson'),force_nonincreasing = TRUE)
+```@example poisson1 
+vect_k = [3]
+vec_alpha = collect(0:15) ./ 200
+params_risks = select_parameters_nonincreasing(rng, [3], vec_alpha, x, poisson, maxiter, 5)
 
-params_risks$k = as.factor(params_risks$k)
-ggplot(params_risks, aes(x = alpha, y = risk, group = k, color = k))+   geom_line() +   geom_point()
-"""
+plot(vec_alpha, params_risks[1, :], markershape = :circle)
 ```
 
 On ne voit pas de changement radical de pente mais on voit que la
@@ -624,30 +588,19 @@ paramètre ``\alpha = 0.03``.
 Voici finalement le partitionnement obtenu après sélection des
 paramètres `k` et `alpha` selon l'heuristique.
 
-```julia
-R"""
-tB = Trimmed_Bregman_clustering(x,3,0.03,divergence_Poisson,maxiter,nstart)
-plot_clustering_dim1(x,tB_Poisson$cluster,tB_Poisson$centers)
-tB_Poisson$centers
-"""
+```@example poisson1
+k, alpha = 3, 0.03
+tb_poisson = trimmed_bregman_clustering( rng, x, k, alpha, poisson, maxiter, nstart )
+tb_poisson.centers
+```
+
+```@example poisson1
+plot( tb_poisson )
 ```
 
 ### Données de loi de Poisson en dimension 2
 
 #### Simulation des variables selon un mélange de lois de Poisson
-
-Pour afficher les données, nous pourrons utiliser la fonction suivante.
-
-```julia 
-R"""
-plot_clustering_dim2 <- function(x,labels,centers){
-  df = data.frame(x = x[,1], y =x[,2], Etiquettes = as.factor(labels))
-  gp = ggplot(df,aes(x,y,color = Etiquettes))+geom_point()
-for(i in 1:k){gp = gp + geom_point(x = centers[1,i],y = centers[2,i],color = "black",size = 2,pch = 17)}
-  return(gp)
-}
-"""
-```
 
 On génère un second échantillon de 950 points dans ``\mathcal{R}^2``.
 Les deux coordonnées de chaque point sont indépendantes, générées

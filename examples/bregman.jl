@@ -1,6 +1,7 @@
 using GeometricClusterAnalysis
 using Random
 using RCall
+import Clustering: mutualinfo
 
 R"""
 library(here)
@@ -42,12 +43,12 @@ rng = MersenneTwister(2022)
 distance = GeometricClusterAnalysis.euclidean
 results1 = trimmed_bregman_clustering(rng, x, k, α, distance, maxiter, nstart)
 println(sort(results1.centers, dims=2))
-println(mutualinfo(results1.cluster, labels, true))
+println(mutualinfo(results1.cluster, labels, normed=true))
 
 distance = GeometricClusterAnalysis.poisson
 results2 = trimmed_bregman_clustering(rng, x, k, α, distance, maxiter, nstart)
 println(sort(results2.centers, dims=2))
-println(mutualinfo(results2.cluster, labels, true))
+println(mutualinfo(results2.cluster, labels, normed=true))
 
 R"""
 

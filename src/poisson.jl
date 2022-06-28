@@ -1,6 +1,7 @@
 using Distributions
 using Random
 import StatsBase: sample, pweights
+import Clustering: mutualinfo
 
 
 """
@@ -50,7 +51,7 @@ function performance(n, n_outliers, k, alpha, sample_generator, outliers_generat
       x = hcat(points, outliers)
       labels_true = vcat(labels, zeros(Int,n_outliers))
       tbc = trimmed_bregman_clustering(rng, x, k, alpha, bregman, maxiter, nstart)
-      push!(nmi, mutualinfo(labels_true, tbc.cluster, true))
+      push!(nmi, mutualinfo(labels_true, tbc.cluster, normed = true))
 
     end
     

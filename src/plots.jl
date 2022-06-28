@@ -211,7 +211,7 @@ end
         ()
     end
 
-    title := "Trimmed Bregman Clustering"
+    title --> "Trimmed Bregman Clustering"
     label := :none
     ()
 

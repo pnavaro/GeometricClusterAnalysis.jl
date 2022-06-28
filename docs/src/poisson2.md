@@ -88,8 +88,9 @@ Bregman associée à la loi de Poisson), à l'aide de l'information
 mutuelle normalisée.
 
 ```@example poisson2 
-println("k-means : $(mutualinfo( tb_kmeans.cluster, labels_true, true ))")
-println("poisson : $(mutualinfo( tb_poisson.cluster, labels_true, true ))")
+import Clustering: mutualinfo
+println("k-means : $(mutualinfo( tb_kmeans.cluster, labels_true, normed = true ))")
+println("poisson : $(mutualinfo( tb_poisson.cluster, labels_true, normed = true ))")
 ```
 
 L'information mutuelle normalisée est supérieure pour la divergence

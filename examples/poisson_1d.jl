@@ -3,6 +3,7 @@ import GeometricClusterAnalysis: sample_poisson, sample_outliers, performance
 using Plots
 using Random
 using StatsPlots
+import Clustering: mutualinfo
 
 n = 1000 
 n_outliers = 50 
@@ -37,8 +38,8 @@ println("poisson : $(tb_poisson.centers)")
 
 scatter!( ones(k), tb_poisson.centers[1,:], markershape = :star, markercolor = :yellow, markersize = 5)
 
-println("k-means : $(mutualinfo( tb_kmeans.cluster, labels_true, true ))")
-println("poisson : $(mutualinfo( tb_poisson.cluster, labels_true, true ))")
+println("k-means : $(mutualinfo( tb_kmeans.cluster, labels_true, normed = true ))")
+println("poisson : $(mutualinfo( tb_poisson.cluster, labels_true, normed = true ))")
 
 sample_generator = (rng, n) -> sample_poisson(rng, n, d, lambdas, proba)
 outliers_generator = (rng, n) -> sample_outliers(rng, n, d; scale = 120)

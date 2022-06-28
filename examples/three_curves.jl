@@ -1,3 +1,4 @@
+import Clustering: mutualinfo
 using GeometricClusterAnalysis
 using LinearAlgebra
 using Plots
@@ -62,4 +63,4 @@ png("ellipsoids")
 a = data.colors[ data.colors .> 0 ]
 b = color_final[ color_final .> 0 ]
 
-mutualinfo( a, b, true )
+mutualinfo( a, b, normed = true )

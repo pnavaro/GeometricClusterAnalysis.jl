@@ -2,7 +2,7 @@ using GeometricClusterAnalysis
 import GeometricClusterAnalysis: sample_poisson, sample_outliers, performance
 using Plots
 using Random
-using StatsPlots
+import Clustering: mutualinfo
 
 n = 1000 
 n_outliers = 50 
@@ -19,23 +19,25 @@ labels_true = vcat(labels, zeros(Int, n_outliers))
 
 k = 3 
 α = 0.1 
-maxiter = 50 
-nstart = 50 
+maxiter = 100 
+nstart = 100 
 
-scatter( x[1,:], x[2,:], c = labels_true, palette = :rainbow)
 
-tb_kmeans = trimmed_bregman_clustering( rng, x, k, α, euclidean, maxiter, nstart )
-tb_poisson = trimmed_bregman_clustering( rng, x, k, α, poisson, maxiter, nstart )
+tb_k = trimmed_bregman_clustering( rng, x, k, α, euclidean, maxiter, nstart )
+tb_p = trimmed_bregman_clustering( rng, x, k, α, poisson, maxiter, nstart )
 
-println("k-means : $(tb_kmeans.centers)")
-println("poisson : $(tb_poisson.centers)")
+println("k-means : $(tb_k.centers)")
+println("poisson : $(tb_p.centers)")
 
-scatter!( tb_poisson.centers[1,:], tb_poisson.centers[2,:], 
-          markershape = :star, markercolor = :yellow, markersize = 5)
+println("k-means : $(mutualinfo( tb_k.cluster, labels_true, normed = true ))")
+println("poisson : $(mutualinfo( tb_p.cluster, labels_true, normed = true ))")
 
-println("k-means : $(mutualinfo( tb_kmeans.cluster, labels_true, true ))")
-println("poisson : $(mutualinfo( tb_poisson.cluster, labels_true, true ))")
+p = plot(layout=(1,3), size=(1200,300))
+plot!(p[1,1], x[1,:], x[2,:], c = labels_true, seriestype = :scatter, palette = :rainbow, title = "true")
+plot!(p[1,2], tb_p, title = "poisson")
+plot!(p[1,3], tb_k, title = "kmeans")
 
+#=
 sample_generator = (rng, n) -> sample_poisson(rng, n, d, lambdas, proba)
 outliers_generator = (rng, n) -> sample_outliers(rng, n, d; scale = 120)
 
@@ -70,3 +72,4 @@ tb = trimmed_bregman_clustering( rng, x, k, α, poisson, maxiter, nstart )
 
 scatter( x[1,:], x[2,:], c = tb.cluster, palette = :rainbow)
 scatter!( tb_poisson.centers[1,:], tb_poisson.centers[2,:], markershape = :star, markercolor = :yellow, markersize = 5)
+=#

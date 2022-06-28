@@ -12,11 +12,11 @@ function poisson(x, y)
         if x == 0 
            return y 
         else 
-           return x .* log.(x) .- x .+ y .- x .* log.(y)
+           return x * log(x) - x + y - x * log(y)
         end
     end
 
-    return sum(distance(x, y))
+    return sum(distance.(x, y))
 
 end
 
@@ -49,8 +49,7 @@ end
 export trimmed_bregman_clustering
 
 """
-    function trimmed_bregman_clustering(x, k; α = 0, 
-    divergence_bregman = euclidean_sq_distance, maxiter = 10, nstart = 1)
+    function trimmed_bregman_clustering(x, k, α, bregman, maxiter, nstart)
 
 - n : number of points
 - d : dimension
@@ -129,20 +128,21 @@ function trimmed_bregman_clustering(rng, x::Matrix{T}, k :: Int, α :: Float64,
         end 
         
         if risk <= opt_risk 
-            opt_centers = centers
-            opt_cluster_nonempty = cluster_nonempty
+            opt_centers .= centers
+            opt_cluster_nonempty .= cluster_nonempty
             opt_risk = risk
         end
 
     end
 
+    divergence = zeros(n)
     divergence_min = fill(Inf,n)
     opt_cluster = zeros(Int, n)
 
     for i in 1:k
         if opt_cluster_nonempty[i]
-            divergence = [bregman(p, opt_centers[i]) for p in eachcol(x)]
             for j in 1:n
+                divergence[j] = bregman(x[:,j], opt_centers[:,i])
                 if divergence[j] < divergence_min[j]
                     divergence_min[j] = divergence[j]
                     opt_cluster[j] = i

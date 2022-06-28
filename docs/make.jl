@@ -23,6 +23,7 @@ makedocs(bib,
     pages = ["Documentation" => "index.md",
              "Datasets" => "fake_data.md",
              "Three Curves" => "three_curves.md",
+             "Trimmed Bregman Clustering" => ["trimmed-bregman.md", "poisson1.md", "poisson2.md", "obama.md"],
              "Types"    => "types.md",
              "Functions" => "functions.md"],
 )

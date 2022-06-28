@@ -223,7 +223,7 @@ function trimmed_bregman_clustering(rng, x :: Matrix{T}, centers :: Matrix{Float
         
         divergence_min = fill(Inf,n)
         fill!(cluster, 0)
-        for i in eachindex(centers)
+        for i in 1:k
             if cluster_nonempty[i]
                 divergence = [bregman(p, centers[:,i]) for p in eachcol(x)]
                 for j in 1:n

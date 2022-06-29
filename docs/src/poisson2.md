@@ -109,7 +109,7 @@ Pour ce faire, nous appliquons l'algorithme [`trimmed_bregman_clustering`](@ref)
 sur `replications_nb` échantillons de taille ``n = 1000``, sur des
 données générées selon la même procédure que l'exemple précédent.
 
-La fonction `performance.measurement` permet de le faire. 
+La fonction [`performance`](@ref) permet de le faire. 
 
 ```@example poisson2
 sample_generator = (rng, n) -> sample_poisson(rng, n, d, lambdas, proba)

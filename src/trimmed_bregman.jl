@@ -359,13 +359,3 @@ function select_parameters(rng, vk, valpha, x, bregman, maxiter, nstart)
     results
 
 end
-
-export performance_measurement
-
-"""
-    performance_measurement
-"""
-function performance_measurement()
-
-end
-

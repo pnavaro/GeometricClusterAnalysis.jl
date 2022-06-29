@@ -74,8 +74,7 @@ comme [Cuesta-Albertos1997](@cite).  On voit trois groupes de même diamètre.
 Ce qui fait que le groupe centré en ``10`` contient aussi des points
 du groupe centré en ``20``. En particulier, les estimations
 `tB_kmeans.centers` des moyennes par les centres ne sont pas très
-bonnes. Les deux moyennes les plus faibles sont bien supérieures
-aux vraies moyennes ``10`` et ``20``.
+bonnes. Les moyennes sont supérieures aux vraies moyennes ``10``, ``20`` et ``40``.
 
 ```@example poisson1
 plot(tb_kmeans)
@@ -133,7 +132,7 @@ Pour ce faire, nous appliquons l'algorithme [`trimmed_bregman_clustering`](@ref)
 sur `replications` échantillons de taille ``n = 1000``, sur des
 données générées selon la même procédure que l'exemple précédent.
 
-La fonction [`performance_measurement`](@ref) permet de le faire. 
+La fonction [`performance`](@ref) permet de le faire. 
 
 
 ```@example poisson1

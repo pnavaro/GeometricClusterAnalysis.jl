@@ -12,7 +12,7 @@ function poisson(x, y)
         if x == 0
             return y
         else
-            return x * log(x/y) - (x - y)
+            return x * log(x) - (x - y) - x * log(y)
         end
     end
 
@@ -29,9 +29,9 @@ Euclidian sqaured distance
 """
 function euclidean(x, y)
 
-    distance = (x, y) -> (x .- y) .^ 2
+    distance(x, y) = (x - y)^2
 
-    return sum(distance(x, y))
+    return sum(distance.(x, y))
 
 end
 
@@ -51,22 +51,22 @@ export trimmed_bregman_clustering
 """
     function trimmed_bregman_clustering(x, k, α, bregman, maxiter, nstart)
 
-- n : number of points
-- d : dimension
+- `n` : number of points
+- `d` : dimension
 
 Input :
-- `x` : sample of n points in R^d - matrix of size n ``\\times`` d
-- `alpha` : proportion of eluted points, because considered as outliers. They are given the label 0
+- `x` : sample of `n` points in ``R^d`` - matrix of size `n` ``\\times`` `d`
+- `α` : proportion of eluted points, because considered as outliers. They are given the label 0
 - `k` : number of centers
-- `divergence_bregman` : function of two numbers or vectors named x and y, which reviews their Bregman divergence.
+- `bregman` : function of two numbers or vectors named x and y, which reviews their Bregman divergence.
 - `maxiter`: maximum number of iterations allowed.
 - `nstart`: if centers is a number, it is the number of different initializations of the algorithm. Only the best result is kept.
 
 Output :
 - `centers`: matrix of size dxk whose columns represent the centers of the clusters
-- `cluster`: vector of integers in `1:k` indicating the index of the cluster to which each point (line) of x is associated.
+- `cluster`: vector of integers in `1:k` indicating the index of the cluster to which each point (line) of `x` is associated.
 - `risk`: average of the divergences of the points of x at their associated center.
-- `divergence`: the vector of divergences of the points of x at their nearest center in centers, for `divergence_bregman`.
+- `divergence`: the vector of divergences of the points of x at their nearest center in centers.
 
 """
 function trimmed_bregman_clustering(
@@ -146,12 +146,6 @@ function trimmed_bregman_clustering(
 
     end
 
-    if nstep < maxiter
-        println("Clustering converged with $nstep iterations (risk = $opt_risk)")
-    else
-        println("Clustering terminated without convergence after $nstep iterations (risk = $opt_risk)")
-    end
-
     divergence = zeros(n)
     divergence_min = fill(Inf, n)
     opt_cluster = zeros(Int, n)
@@ -189,7 +183,7 @@ function trimmed_bregman_clustering(
         x,
         opt_cluster,
         opt_centers[:, opt_cluster_nonempty],
-        risk,
+        opt_risk,
         divergence_min,
     )
 

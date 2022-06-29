@@ -45,6 +45,7 @@ plot!(
 )
 plot!(p[1, 2], tb_p, title = "poisson")
 plot!(p[1, 3], tb_k, title = "kmeans")
+display(p)
 
 sample_generator = (rng, n) -> sample_poisson(rng, n, d, lambdas, proba)
 outliers_generator = (rng, n) -> sample_outliers(rng, n, d; scale = 120)

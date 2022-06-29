@@ -37,7 +37,7 @@ Pour partitionner les données, nous utiliserons les paramètres suivants.
 
 ```@example poisson2
 k = 3 
-α = 0.1 
+α = 0.03 
 maxiter = 50 
 nstart = 50 
 ```
@@ -119,7 +119,10 @@ nmi_kmeans, _, _ = performance(n, n_outliers, k, α, sample_generator, outliers_
 nmi_poisson, _, _ = performance(n, n_outliers, k, α, sample_generator, outliers_generator, poisson)
 ```
 
-Les boîtes à moustaches permettent de se faire une idée de la répartition des NMI pour les deux méthodes différentes. On voit que la méthode utilisant la divergence de Bregman associée à la loi de Poisson est la plus performante.
+Les boîtes à moustaches permettent de se faire une idée de la
+répartition des NMI pour les deux méthodes différentes. On voit que
+la méthode utilisant la divergence de Bregman associée à la loi de
+Poisson est la plus performante.
 
 ```@example poisson2
 using StatsPlots
@@ -171,7 +174,6 @@ params_risks = select_parameters_nonincreasing(rng, vec_k, vec_α, x, poisson, m
 
 plot(vec_α, params_risks[1, :], markershape = :circle)
 ```
-
 On ne voit pas de changement radical de pente mais on voit que la
 pente se stabilise après ``\alpha = 0.04``. Nous choisissons le
 paramètre ``\alpha = 0.04``.

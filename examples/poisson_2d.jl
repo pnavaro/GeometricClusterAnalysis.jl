@@ -1,6 +1,7 @@
 using GeometricClusterAnalysis
 import GeometricClusterAnalysis: sample_poisson, sample_outliers, performance
 using Plots
+using StatsPlots
 using Random
 import Clustering: mutualinfo
 
@@ -18,7 +19,7 @@ x = hcat(points, outliers)
 labels_true = vcat(labels, zeros(Int, n_outliers))
 
 k = 3
-α = 0.1
+α = 0.03
 maxiter = 100
 nstart = 100
 
@@ -45,7 +46,6 @@ plot!(
 plot!(p[1, 2], tb_p, title = "poisson")
 plot!(p[1, 3], tb_k, title = "kmeans")
 
-#=
 sample_generator = (rng, n) -> sample_poisson(rng, n, d, lambdas, proba)
 outliers_generator = (rng, n) -> sample_outliers(rng, n, d; scale = 120)
 
@@ -80,4 +80,3 @@ tb = trimmed_bregman_clustering( rng, x, k, α, poisson, maxiter, nstart )
 
 scatter( x[1,:], x[2,:], c = tb.cluster, palette = :rainbow)
 scatter!( tb_poisson.centers[1,:], tb_poisson.centers[2,:], markershape = :star, markercolor = :yellow, markersize = 5)
-=#

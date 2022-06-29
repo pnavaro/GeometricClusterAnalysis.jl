@@ -12,7 +12,7 @@ function poisson(x, y)
         if x == 0
             return y
         else
-            return x * log(x) - x + y - x * log(y)
+            return x * log(x/y) - (x - y)
         end
     end
 
@@ -85,13 +85,16 @@ function trimmed_bregman_clustering(
     risk = Inf
     opt_risk = risk
     opt_centers = zeros(d, k)
+    old_centers = zeros(d, k)
+    new_centers = zeros(d, k)
     opt_cluster_nonempty = trues(k)
+    nstep = 0
 
     for n_times = 1:nstart
 
         cluster = zeros(Int, n)
         cluster_nonempty = trues(k)
-        centers = x[:, first(randperm(rng, n), k)]
+        new_centers .= x[:, first(randperm(rng, n), k)]
 
         nstep = 1
         non_stopping = (nstep <= maxiter)
@@ -99,13 +102,13 @@ function trimmed_bregman_clustering(
         while non_stopping
 
             nstep += 1
-            centers_copy = copy(centers)
+            old_centers .= new_centers
 
             divergence_min = fill(Inf, n)
             fill!(cluster, 0)
             for i = 1:k
                 if cluster_nonempty[i]
-                    divergence = [bregman(p, centers[:, i]) for p in eachcol(x)]
+                    divergence = [bregman(p, old_centers[:, i]) for p in eachcol(x)]
                     #divergence[divergence .== Inf] .= typemax(Float64)/n 
                     for j = 1:n
                         if divergence[j] < divergence_min[j]
@@ -127,19 +130,26 @@ function trimmed_bregman_clustering(
             end
 
             for i = 1:k
-                centers[:, i] .= vec(mean(x[:, cluster.==i], dims = 2))
+                new_centers[:, i] .= vec(mean(x[:, cluster.==i], dims = 2))
             end
 
-            cluster_nonempty = [!(any(isinf.(center))) for center in eachcol(centers)]
-            non_stopping = (centers_copy ≈ centers && (nstep <= maxiter))
+            cluster_nonempty = [!(any(isinf.(center))) for center in eachcol(new_centers)]
+            non_stopping = (!(new_centers ≈ old_centers) && (nstep <= maxiter))
+
         end
 
         if risk <= opt_risk
-            opt_centers .= centers
+            opt_centers .= new_centers
             opt_cluster_nonempty .= cluster_nonempty
             opt_risk = risk
         end
 
+    end
+
+    if nstep < maxiter
+        println("Clustering converged with $nstep iterations (risk = $opt_risk)")
+    else
+        println("Clustering terminated without convergence after $nstep iterations (risk = $opt_risk)")
     end
 
     divergence = zeros(n)
@@ -219,9 +229,8 @@ function trimmed_bregman_clustering(
 
     risk = Inf
     opt_risk = risk
-    opt_centers = similar(centers)
     old_centers = similar(centers)
-    opt_cluster_nonempty = trues(k)
+    new_centers = copy(centers)
 
     cluster = zeros(Int, n)
     cluster_nonempty = trues(k)
@@ -229,17 +238,19 @@ function trimmed_bregman_clustering(
     nstep = 1
     non_stopping = (nstep <= maxiter)
 
+    divergence_min = fill(Inf, n)
+    divergence = similar(divergence)
+
     while non_stopping
 
         nstep += 1
-        old_centers .= centers
+        old_centers .= new_centers
 
-        divergence_min = fill(Inf, n)
         fill!(cluster, 0)
         for i = 1:k
             if cluster_nonempty[i]
-                divergence = [bregman(p, centers[:, i]) for p in eachcol(x)]
                 for j = 1:n
+                    divergence[j] = bregman(x[:,j], old_centers[:, i]) 
                     if divergence[j] < divergence_min[j]
                         divergence_min[j] = divergence[j]
                         cluster[j] = i
@@ -259,30 +270,24 @@ function trimmed_bregman_clustering(
         end
 
         for i = 1:k
-            centers[:, i] .= vec(mean(x[:, cluster.==i], dims = 2))
+            new_centers[:, i] .= vec(mean(x[:, cluster.==i], dims = 2))
         end
 
-        cluster_nonempty = [!(any(isinf.(center))) for center in eachcol(centers)]
-        non_stopping = (old_centers ≈ centers && (nstep <= maxiter))
+        cluster_nonempty = [!(any(isinf.(c))) for c in eachcol(new_centers)]
+        non_stopping = (!(old_centers ≈ new_centers) && (nstep <= maxiter))
 
     end
 
-    if risk <= opt_risk
-        opt_centers .= centers
-        opt_cluster_nonempty .= cluster_nonempty
-        opt_risk = risk
-    end
-
-    divergence_min = fill(Inf, n)
-    opt_cluster = zeros(Int, n)
+    fill!(divergence_min, Inf)
+    fill!(cluster, 0)
 
     for i = 1:k
-        if opt_cluster_nonempty[i]
-            divergence = [bregman(p, opt_centers[i]) for p in eachcol(x)]
+        if cluster_nonempty[i]
             for j = 1:n
+                divergence[j] = bregman(x[:,j], new_centers[i])
                 if divergence[j] < divergence_min[j]
                     divergence_min[j] = divergence[j]
-                    opt_cluster[j] = i
+                    cluster[j] = i
                 end
             end
         end
@@ -291,24 +296,24 @@ function trimmed_bregman_clustering(
     if a > 0
         ix = sortperm(divergence_min, rev = true)
         for i in ix[1:a]
-            opt_cluster[i] = 0
+            cluster[i] = 0
         end
-        opt_risk = mean(divergence_min[ix[(a+1):n]])
+        risk = mean(divergence_min[ix[(a+1):n]])
     else
-        opt_risk = mean(divergence_min)
+        risk = mean(divergence_min)
     end
 
-    opt_cluster_nonempty = [sum(opt_cluster .== i) > 0 for i = 1:k]
+    cluster_nonempty = [sum(cluster .== i) > 0 for i = 1:k]
 
-    new_labels = [0, cumsum(opt_cluster_nonempty)...]
-    for i in eachindex(opt_cluster)
-        opt_cluster[i] = new_labels[opt_cluster[i]+1]
+    new_labels = [0, cumsum(cluster_nonempty)...]
+    for i in eachindex(cluster)
+        cluster[i] = new_labels[cluster[i]+1]
     end
 
     return TrimmedBregmanResult{T}(
         x,
         cluster,
-        opt_centers[:, opt_cluster_nonempty],
+        new_centers[:, cluster_nonempty],
         risk,
         divergence_min,
     )
@@ -362,10 +367,10 @@ end
 """
     select_parameters(rng, k, alpha, x, bregman, maxiter=100)
 
-On utilise des centres initiaux aléatoire
+Initial centers are set randomly
 
-- k est un nombre ou un vecteur contenant les valeurs des differents k
-- alpha est un nombre ou un vecteur contenant les valeurs des differents alpha
+- `k`: numbers of centers
+- `α`: trimming values
 """
 function select_parameters(rng, vk, valpha, x, bregman, maxiter, nstart)
 

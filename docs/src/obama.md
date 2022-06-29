@@ -3,11 +3,12 @@
 Les données des textes d'auteurs sont enregistrées dans la variable `data`.
 Les commandes utilisées pour l'affichage étaient les suivantes.
 
-```julia
+```@example obama
 using DataFrames
 using DelimitedFiles
 using GeometricClusterAnalysis
 using NamedArrays
+using Plots
 using Random
 
 rng = MersenneTwister(2022)
@@ -29,20 +30,17 @@ true_labels = [sum(count.(author, names(df))) for author in authors]
 Afin de pouvoir représenter les données, nous utiliserons la fonction suivante.
 
 ```julia
-R"""
-plot_clustering <- function(axis1 = 1, axis2 = 2, labels, title = "Textes d'auteurs - Partitionnement"){
+function plot_clustering(axis1, axis2, labels, title = "Textes d'auteurs - Partitionnement")
   to_plot = data.frame(lda = lda$li, Etiquettes =  as.factor(labels), authors_names = as.factor(authors_names))
   ggplot(to_plot, aes(x = lda$li[,axis1], y =lda$li[,axis2],col = Etiquettes, shape = authors_names))+ xlab(paste("Axe ",axis1)) + ylab(paste("Axe ",axis2))+ 
   scale_shape_discrete(name="Auteur") + labs (title = title) + geom_point()}
-"""
-
 ```
 
 ## Partitionnement des données
 
 Pour partitionner les données, nous utiliserons les paramètres suivants.
 
-```julia
+```@example obama
 k = 4
 alpha = 20/209 # La vraie proportion de donnees aberrantes vaut : 20/209 car il y a 15+5 textes issus de la bible et du discours de Obama.
 maxiter = 50

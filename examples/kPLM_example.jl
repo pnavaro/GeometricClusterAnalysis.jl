@@ -12,8 +12,8 @@ data = infinity_symbol(rng, 500, 500, 0.05, 3, -5, 5)
 points = data.points
 colors = data.colors
 
-k = 20 
-c = 10 
+k = 20
+c = 10
 signal = 500
 iter_max = 10
 nstart = 1
@@ -39,7 +39,10 @@ function aux_dim_d(Σ, s2min, s2max, λmin, d_prim)
         S = mean(λ[1:(end-d_prim)])
         s2 =
             (S - s2min - s2max) * (s2min < S) * (S < s2max) +
-            (-s2max) * (S <= s2min) + (-s2min) * (S >= s2max) + s2min + s2max
+            (-s2max) * (S <= s2min) +
+            (-s2min) * (S >= s2max) +
+            s2min +
+            s2max
         new_λ[1:(end-d_prim)] .= s2
     end
 
@@ -55,7 +58,13 @@ end
 
 model = kplm(rng, points, k, c, signal, iter_max, nstart, f_Σ_dim_d)
 
-scatter(points[1,:], points[2,:], ms = 3,  
-    marker_z=model.colors, color=:lightrainbow, aspect_ratio=:equal )
-xlims!(-5,5)
-ylims!(-5,5)
+scatter(
+    points[1, :],
+    points[2, :],
+    ms = 3,
+    marker_z = model.colors,
+    color = :lightrainbow,
+    aspect_ratio = :equal,
+)
+xlims!(-5, 5)
+ylims!(-5, 5)

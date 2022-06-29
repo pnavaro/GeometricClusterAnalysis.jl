@@ -33,13 +33,16 @@ color = dist_func.colors
 
 hc = hierarchical_clustering_lem(mh)
 
-nb_means_removed = 5 
+nb_means_removed = 5
 
 lengthn = length(hc.Naissance)
 if nb_means_removed > 0
-    threshold = mean((hc.Naissance[lengthn - nb_means_removed],hc.Naissance[lengthn - nb_means_removed + 1]))
+    threshold = mean((
+        hc.Naissance[lengthn-nb_means_removed],
+        hc.Naissance[lengthn-nb_means_removed+1],
+    ))
 else
-  threshold = Inf
+    threshold = Inf
 end
 
 hc2 = hierarchical_clustering_lem(mh, Stop = Inf, Seuil = threshold)
@@ -49,18 +52,18 @@ png("persistence_diagram2")
 bd = birth_death(hc2)
 sort!(bd)
 lengthbd = length(bd)
-Stop = mean((bd[lengthbd - nb_clusters],bd[lengthbd - nb_clusters + 1]))
+Stop = mean((bd[lengthbd-nb_clusters], bd[lengthbd-nb_clusters+1]))
 
 sp_hc = hierarchical_clustering_lem(mh; Stop = Stop, Seuil = threshold)
 
-color_final = color_points_from_centers( data.points, k, nsignal, dist_func, sp_hc)
+color_final = color_points_from_centers(data.points, k, nsignal, dist_func, sp_hc)
 
 remain_indices = sp_hc.Indices_depart
 
-ellipsoids(data.points, remain_indices, color_final, dist_func, 0.0 )
+ellipsoids(data.points, remain_indices, color_final, dist_func, 0.0)
 png("ellipsoids")
 
-a = data.colors[ data.colors .> 0 ]
-b = color_final[ color_final .> 0 ]
+a = data.colors[data.colors.>0]
+b = color_final[color_final.>0]
 
-mutualinfo( a, b, normed = true )
+mutualinfo(a, b, normed = true)

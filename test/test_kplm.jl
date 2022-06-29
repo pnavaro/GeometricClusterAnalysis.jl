@@ -1,5 +1,5 @@
 const rng = MersenneTwister(1234)
-const signal = 500 
+const signal = 500
 const noise = 50
 const σ = 0.05
 const dimension = 3
@@ -37,7 +37,7 @@ P = collect(points')
 
     @time model = kplm(rng, points, k, c, signal, iter_max, nstart, f_Σ, 1:c)
 
-    for (i,σ) in enumerate(model.Σ)
+    for (i, σ) in enumerate(model.Σ)
         @test σ ≈ results[:Sigma][i]
     end
 
@@ -78,7 +78,7 @@ end
 
     @time model = kplm(rng, points, k, c, signal, iter_max, nstart, f_Σ_det1, 1:c)
 
-    for (i,σ) in enumerate(model.Σ)
+    for (i, σ) in enumerate(model.Σ)
         @test σ ≈ results[:Sigma][i]
     end
 
@@ -123,7 +123,10 @@ end
             S = mean(λ[1:(end-d_prim)])
             s2 =
                 (S - s2min - s2max) * (s2min < S) * (S < s2max) +
-                (-s2max) * (S <= s2min) + (-s2min) * (S >= s2max) + s2min + s2max
+                (-s2max) * (S <= s2min) +
+                (-s2min) * (S >= s2max) +
+                s2min +
+                s2max
             new_λ[1:(end-d_prim)] .= s2
         end
 
@@ -155,10 +158,11 @@ end
     }
     """
 
-    @test aux_dim_d(Q, s2min, s2max, lambdamin, d_prim) ≈ rcopy(R"aux_dim_d(Q, s2min, s2max, lambdamin, d_prim)")
+    @test aux_dim_d(Q, s2min, s2max, lambdamin, d_prim) ≈
+          rcopy(R"aux_dim_d(Q, s2min, s2max, lambdamin, d_prim)")
 
-    k = 10 
-    c = 5 
+    k = 10
+    c = 5
 
     function f_Σ_dim_d(Σ)
 
@@ -177,7 +181,7 @@ end
     source("colorize.R")
     source("kplm.R")
 
-    
+
     f_Sigma_dim_d <- function(Sigma){
       return(aux_dim_d(Sigma, s2min, s2max, lambdamin, d_prim))
     }
@@ -189,7 +193,7 @@ end
 
     @time model = kplm(rng, points, k, c, signal, iter_max, nstart, f_Σ_dim_d, 1:c)
 
-    for (i,σ) in enumerate(model.Σ)
+    for (i, σ) in enumerate(model.Σ)
         @test σ ≈ results[:Sigma][i]
     end
 

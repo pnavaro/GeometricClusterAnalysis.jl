@@ -1,45 +1,45 @@
 @testset "Colorize" begin
 
-import GeometricClusterAnalysis: colorize!
-using LinearAlgebra
+    import GeometricClusterAnalysis: colorize!
+    using LinearAlgebra
 
 
-R"""
-set.seed(0)
+    R"""
+    set.seed(0)
 
-source("infinity_symbol.R")
-source("colorize.R")
+    source("infinity_symbol.R")
+    source("colorize.R")
 
-N = 10
-Nnoise = 2
-sigma = 0.05
-d = 3
-k = 3 
-c = 2 
-signal = N 
+    N = 10
+    Nnoise = 2
+    sigma = 0.05
+    d = 3
+    k = 3 
+    c = 2 
+    signal = N 
 
-sample <- generate_infinity_symbol_noise(N, Nnoise, sigma, d)
-points <- sample$points
+    sample <- generate_infinity_symbol_noise(N, Nnoise, sigma, d)
+    points <- sample$points
 
-centers_indices <- sample(1:N, c, replace = FALSE)
-centers <- matrix(points[centers_indices,],c,d)
-Sigma <- rep(list(diag(1,d)),c)
+    centers_indices <- sample(1:N, c, replace = FALSE)
+    centers <- matrix(points[centers_indices,],c,d)
+    Sigma <- rep(list(diag(1,d)),c)
 
-results <- colorize(points, k, signal, centers, Sigma )
-"""
+    results <- colorize(points, k, signal, centers, Sigma )
+    """
     points_array = @rget points
 
-	points = collect(transpose(points_array))
+    points = collect(transpose(points_array))
 
     n_points = trunc(Int, rcopy(R" N + Nnoise"))
-    k = @rget k :: Int
-    n_centers = @rget c  :: Int
-    signal = @rget signal :: Int
-    dimension = @rget d :: Int
+    k = @rget k::Int
+    n_centers = @rget c::Int
+    signal = @rget signal::Int
+    dimension = @rget d::Int
 
     first_centers = @rget centers_indices
 
-    centers = [points[:,i] for i in first_centers]
+    centers = [points[:, i] for i in first_centers]
     Σ = [diagm(ones(dimension)) for i = 1:n_centers]
 
     colors = zeros(Int, n_points)

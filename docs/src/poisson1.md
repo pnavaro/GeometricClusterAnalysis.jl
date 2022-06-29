@@ -108,12 +108,12 @@ Pour le k-means elague :
 ```@example poisson1
 import Clustering: mutualinfo
 
-mutualinfo(labels_true,tb_kmeans.cluster, normed = true)
+println(mutualinfo(labels_true,tb_kmeans.cluster, normed = true))
 ```
 
 Pour le partitionnement elague avec divergence de Bregman associee a la loi de Poisson :
 ```@example poisson1
-mutualinfo(labels_true,tb_poisson.cluster, normed = true)
+println(mutualinfo(labels_true,tb_poisson.cluster, normed = true))
 ```
 
 L'information mutuelle normalisée est supérieure pour la divergence

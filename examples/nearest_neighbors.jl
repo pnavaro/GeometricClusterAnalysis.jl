@@ -35,17 +35,17 @@ data = infinity_symbol(rng, signal, noise, σ, dimension, noise_min, noise_max)
 points_matrix = data.points
 size(points_matrix)
 
-points = [points_matrix[:,i] for i in 1:size(points_matrix,2)]
+points = [points_matrix[:, i] for i = 1:size(points_matrix, 2)]
 
 # +
-function update_means_and_weights_1( points, k)
-    
+function update_means_and_weights_1(points, k)
+
     n_points = length(points)
     n_centers = 100
-    centers = [points[i] for i in 1:n_centers]
-    μ = [zeros(3) for i in 1:n_centers]
+    centers = [points[i] for i = 1:n_centers]
+    μ = [zeros(3) for i = 1:n_centers]
     weights = zeros(n_centers)
-    Σ = [diagm(ones(3)) for i in 1:n_centers]
+    Σ = [diagm(ones(3)) for i = 1:n_centers]
     dists = zeros(n_points)
     idxs = zeros(Int, n_points)
 
@@ -55,48 +55,50 @@ function update_means_and_weights_1( points, k)
         for (j, x) in enumerate(points)
             dists[j] = mahalanobis(x, μ[i], invΣ)
         end
-   
+
         idxs .= sortperm(dists)
         μ[i] .= mean(view(points, idxs[1:k]))
-        weights[i] = mean([mahalanobis(points[j], μ[i], inv(Σ[i])) for j in idxs[1:k]]) + log(det(Σ[i]))
+        weights[i] =
+            mean([mahalanobis(points[j], μ[i], inv(Σ[i])) for j in idxs[1:k]]) + log(det(Σ[i]))
 
     end
-    
+
     return μ, weights
-    
+
 end
 
 # -
 
-@time update_means_and_weights_1( points, 20);
+@time update_means_and_weights_1(points, 20);
 
 # +
-function update_means_and_weights_2( points_matrix, k)
-    
+function update_means_and_weights_2(points_matrix, k)
+
     @show dimension, n_points = size(points_matrix)
     n_centers = 100
-    centers = [points_matrix[:,i] for i in 1:n_centers]
-    μ = [zeros(3) for i in 1:n_centers]
+    centers = [points_matrix[:, i] for i = 1:n_centers]
+    μ = [zeros(3) for i = 1:n_centers]
     weights = zeros(n_centers)
-    Σ = [diagm(ones(3)) for i in 1:n_centers]
-    
+    Σ = [diagm(ones(3)) for i = 1:n_centers]
+
     for i = 1:n_centers
-        
+
         invΣ = inv(Σ[i])
         metric = Mahalanobis(invΣ)
         balltree = BallTree(points_matrix, metric)
         idxs, dists = knn(balltree, centers[i], k)
-        μ[i] .= vec(mean(points_matrix[:, idxs[1]], dims=2))
-        weights[i] = mean([sqmahalanobis(points[j], μ[i], invΣ) for j in idxs[1]]) + log(det(Σ[i]))
+        μ[i] .= vec(mean(points_matrix[:, idxs[1]], dims = 2))
+        weights[i] =
+            mean([sqmahalanobis(points[j], μ[i], invΣ) for j in idxs[1]]) + log(det(Σ[i]))
 
     end
-    
+
     return μ, weights
-    
+
 end
 # -
 
-@time update_means_and_weights_2( points_matrix, 20);
+@time update_means_and_weights_2(points_matrix, 20);
 
 # # Distances.jl
 #
@@ -115,17 +117,15 @@ Y = rand(3, n_centers)
 @btime r = pairwise(metric, X, Y);
 # -
 
-dists = zeros(n_points,n_centers)
-function with_loop!( dists, X, Y)
+dists = zeros(n_points, n_centers)
+function with_loop!(dists, X, Y)
     n_centers = size(Y)[2]
-    for i in 1:n_centers
-        center = Y[:,i]
-        dists[:,i] = [sqmahalanobis(x, center, Σ) for x in eachcol(X)]
+    for i = 1:n_centers
+        center = Y[:, i]
+        dists[:, i] = [sqmahalanobis(x, center, Σ) for x in eachcol(X)]
     end
     return dists
 end
-@btime with_loop!( dists, X, Y);
+@btime with_loop!(dists, X, Y);
 
 @btime pairwise!(dists, metric, X, Y)
-
-

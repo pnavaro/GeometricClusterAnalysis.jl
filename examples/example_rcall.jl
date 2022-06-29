@@ -41,7 +41,10 @@ function aux_dim_d(Σ, s2min, s2max, λmin, d_prim)
         S = mean(λ[1:(end-d_prim)])
         s2 =
             (S - s2min - s2max) * (s2min < S) * (S < s2max) +
-            (-s2max) * (S <= s2min) + (-s2min) * (S >= s2max) + s2min + s2max
+            (-s2max) * (S <= s2min) +
+            (-s2min) * (S >= s2max) +
+            s2min +
+            s2max
         new_λ[1:(end-d_prim)] .= s2
     end
 
@@ -54,15 +57,15 @@ lambdamin = 0.1
 s2min = 0.01
 s2max = 0.02
 
-function f_Σ_dim_d(Σ) 
+function f_Σ_dim_d(Σ)
     Σ .= aux_dim_d(Σ, s2min, s2max, lambdamin, d_prim)
 end
 
 nstart, iter_max = 1, 10
 c = 100
 
-@time centers, μ, weights, colors, Σ, cost = kplm( rng, points, k, c, 
-    signal, iter_max, nstart, f_Σ_dim_d)
+@time centers, μ, weights, colors, Σ, cost =
+    kplm(rng, points, k, c, signal, iter_max, nstart, f_Σ_dim_d)
 
 
 @rput d_prim

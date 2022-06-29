@@ -76,15 +76,15 @@ function k_witnessed_distance(points, k, c, sig, iter_max, nstart)
 
 end
 
-function kpdtm(rng, points, k, c, nsignal, iter_max, nstart )
+function kpdtm(rng, points, k, c, nsignal, iter_max, nstart)
 
     d, n = size(points)
     first_centers = first(randperm(rng, n), c)
-    kpdtm(rng, points, k, c, nsignal, iter_max, nstart, first_centers )
+    kpdtm(rng, points, k, c, nsignal, iter_max, nstart, first_centers)
 
 end
 
-function kpdtm(rng, points, k, c, nsignal, iter_max, nstart, first_centers )
+function kpdtm(rng, points, k, c, nsignal, iter_max, nstart, first_centers)
 
     d, n = size(points)
 

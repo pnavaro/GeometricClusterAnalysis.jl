@@ -4,27 +4,27 @@ using Plots
 using Random
 import Clustering: mutualinfo
 
-n = 1000 
-n_outliers = 50 
-d = 2 
+n = 1000
+n_outliers = 50
+d = 2
 
 rng = MersenneTwister(1)
-lambdas =  [10,20,40]
-proba = [1/3,1/3,1/3]
+lambdas = [10, 20, 40]
+proba = [1 / 3, 1 / 3, 1 / 3]
 points, labels = sample_poisson(rng, n - n_outliers, d, lambdas, proba)
 
-outliers = sample_outliers(rng, n_outliers, d; scale = 120) 
-x = hcat(points, outliers) 
+outliers = sample_outliers(rng, n_outliers, d; scale = 120)
+x = hcat(points, outliers)
 labels_true = vcat(labels, zeros(Int, n_outliers))
 
-k = 3 
-α = 0.1 
-maxiter = 100 
-nstart = 100 
+k = 3
+α = 0.1
+maxiter = 100
+nstart = 100
 
 
-tb_k = trimmed_bregman_clustering( rng, x, k, α, euclidean, maxiter, nstart )
-tb_p = trimmed_bregman_clustering( rng, x, k, α, poisson, maxiter, nstart )
+tb_k = trimmed_bregman_clustering(rng, x, k, α, euclidean, maxiter, nstart)
+tb_p = trimmed_bregman_clustering(rng, x, k, α, poisson, maxiter, nstart)
 
 println("k-means : $(tb_k.centers)")
 println("poisson : $(tb_p.centers)")
@@ -32,10 +32,18 @@ println("poisson : $(tb_p.centers)")
 println("k-means : $(mutualinfo( tb_k.cluster, labels_true, normed = true ))")
 println("poisson : $(mutualinfo( tb_p.cluster, labels_true, normed = true ))")
 
-p = plot(layout=(1,3), size=(1200,300))
-plot!(p[1,1], x[1,:], x[2,:], c = labels_true, seriestype = :scatter, palette = :rainbow, title = "true")
-plot!(p[1,2], tb_p, title = "poisson")
-plot!(p[1,3], tb_k, title = "kmeans")
+p = plot(layout = (1, 3), size = (1200, 300))
+plot!(
+    p[1, 1],
+    x[1, :],
+    x[2, :],
+    c = labels_true,
+    seriestype = :scatter,
+    palette = :rainbow,
+    title = "true",
+)
+plot!(p[1, 2], tb_p, title = "poisson")
+plot!(p[1, 3], tb_k, title = "kmeans")
 
 #=
 sample_generator = (rng, n) -> sample_poisson(rng, n, d, lambdas, proba)

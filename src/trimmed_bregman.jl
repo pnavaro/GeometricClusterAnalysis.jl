@@ -8,11 +8,11 @@ Bregman divergence associated with the Poisson distribution
 """
 function poisson(x, y)
 
-    function distance(x, y) 
-        if x == 0 
-           return y 
-        else 
-           return x * log(x) - x + y - x * log(y)
+    function distance(x, y)
+        if x == 0
+            return y
+        else
+            return x * log(x) - x + y - x * log(y)
         end
     end
 
@@ -27,9 +27,9 @@ export euclidean
 
 Euclidian sqaured distance
 """
-function euclidean(x, y) 
+function euclidean(x, y)
 
-    distance  = (x, y) -> (x .- y).^2
+    distance = (x, y) -> (x .- y) .^ 2
 
     return sum(distance(x, y))
 
@@ -69,38 +69,45 @@ Output :
 - `divergence`: the vector of divergences of the points of x at their nearest center in centers, for `divergence_bregman`.
 
 """
-function trimmed_bregman_clustering(rng, x::Matrix{T}, k :: Int, α :: Float64, 
-    bregman :: Function, maxiter :: Int, nstart :: Int) where {T}
+function trimmed_bregman_clustering(
+    rng,
+    x::Matrix{T},
+    k::Int,
+    α::Float64,
+    bregman::Function,
+    maxiter::Int,
+    nstart::Int,
+) where {T}
 
     d, n = size(x)
     a = floor(Int, n * α)
-    
-    risk = Inf 
-    opt_risk = risk 
-    opt_centers = zeros(d,k) 
-    opt_cluster_nonempty = trues(k) 
 
-    for n_times in 1:nstart
-    
-        cluster = zeros(Int,n) 
+    risk = Inf
+    opt_risk = risk
+    opt_centers = zeros(d, k)
+    opt_cluster_nonempty = trues(k)
+
+    for n_times = 1:nstart
+
+        cluster = zeros(Int, n)
         cluster_nonempty = trues(k)
         centers = x[:, first(randperm(rng, n), k)]
-        
+
         nstep = 1
-        non_stopping = (nstep<=maxiter)
-            
+        non_stopping = (nstep <= maxiter)
+
         while non_stopping
 
             nstep += 1
-            centers_copy = copy(centers) 
-            
-            divergence_min = fill(Inf,n)
+            centers_copy = copy(centers)
+
+            divergence_min = fill(Inf, n)
             fill!(cluster, 0)
-            for i in 1:k
+            for i = 1:k
                 if cluster_nonempty[i]
-                    divergence = [bregman(p, centers[:,i]) for p in eachcol(x)]
-	                #divergence[divergence .== Inf] .= typemax(Float64)/n 
-                    for j in 1:n
+                    divergence = [bregman(p, centers[:, i]) for p in eachcol(x)]
+                    #divergence[divergence .== Inf] .= typemax(Float64)/n 
+                    for j = 1:n
                         if divergence[j] < divergence_min[j]
                             divergence_min[j] = divergence[j]
                             cluster[j] = i
@@ -120,14 +127,14 @@ function trimmed_bregman_clustering(rng, x::Matrix{T}, k :: Int, α :: Float64,
             end
 
             for i = 1:k
-                centers[:,i] .= vec(mean(x[:,cluster .== i], dims=2))
+                centers[:, i] .= vec(mean(x[:, cluster.==i], dims = 2))
             end
 
             cluster_nonempty = [!(any(isinf.(center))) for center in eachcol(centers)]
-            non_stopping = ( centers_copy ≈ centers && (nstep<=maxiter) )
-        end 
-        
-        if risk <= opt_risk 
+            non_stopping = (centers_copy ≈ centers && (nstep <= maxiter))
+        end
+
+        if risk <= opt_risk
             opt_centers .= centers
             opt_cluster_nonempty .= cluster_nonempty
             opt_risk = risk
@@ -136,13 +143,13 @@ function trimmed_bregman_clustering(rng, x::Matrix{T}, k :: Int, α :: Float64,
     end
 
     divergence = zeros(n)
-    divergence_min = fill(Inf,n)
+    divergence_min = fill(Inf, n)
     opt_cluster = zeros(Int, n)
 
-    for i in 1:k
+    for i = 1:k
         if opt_cluster_nonempty[i]
-            for j in 1:n
-                divergence[j] = bregman(x[:,j], opt_centers[:,i])
+            for j = 1:n
+                divergence[j] = bregman(x[:, j], opt_centers[:, i])
                 if divergence[j] < divergence_min[j]
                     divergence_min[j] = divergence[j]
                     opt_cluster[j] = i
@@ -152,16 +159,16 @@ function trimmed_bregman_clustering(rng, x::Matrix{T}, k :: Int, α :: Float64,
     end
 
     if a > 0
-      ix = sortperm(divergence_min, rev = true)
-      for i in ix[1:a]
-          opt_cluster[i] = 0
-      end 
-      opt_risk = mean(divergence_min[ix[(a+1):n]])
+        ix = sortperm(divergence_min, rev = true)
+        for i in ix[1:a]
+            opt_cluster[i] = 0
+        end
+        opt_risk = mean(divergence_min[ix[(a+1):n]])
     else
-      opt_risk = mean(divergence_min)
+        opt_risk = mean(divergence_min)
     end
 
-    opt_cluster_nonempty = [sum(opt_cluster .== i) > 0 for i in 1:k]
+    opt_cluster_nonempty = [sum(opt_cluster .== i) > 0 for i = 1:k]
 
     new_labels = [0, cumsum(opt_cluster_nonempty)...]
     for i in eachindex(opt_cluster)
@@ -173,9 +180,9 @@ function trimmed_bregman_clustering(rng, x::Matrix{T}, k :: Int, α :: Float64,
         opt_cluster,
         opt_centers[:, opt_cluster_nonempty],
         risk,
-        divergence_min
+        divergence_min,
     )
-  
+
 end
 
 """
@@ -196,37 +203,43 @@ Output :
 - `risk`: average of the divergences of the points of x at their associated center.
 
 """
-function trimmed_bregman_clustering(rng, x :: Matrix{T}, centers :: Matrix{Float64}, α :: Float64, bregman :: Function, 
-             maxiter :: Int) where {T <: Float64}
+function trimmed_bregman_clustering(
+    rng,
+    x::Matrix{T},
+    centers::Matrix{Float64},
+    α::Float64,
+    bregman::Function,
+    maxiter::Int,
+) where {T<:Float64}
 
     d, n = size(x)
     a = floor(Int, n * α)
     k = size(centers, 2)
     @assert size(centers, 1) == d
-    
-    risk = Inf 
-    opt_risk = risk 
-    opt_centers = similar(centers) 
-    old_centers = similar(centers) 
-    opt_cluster_nonempty = trues(k) 
 
-    cluster = zeros(Int,n) 
+    risk = Inf
+    opt_risk = risk
+    opt_centers = similar(centers)
+    old_centers = similar(centers)
+    opt_cluster_nonempty = trues(k)
+
+    cluster = zeros(Int, n)
     cluster_nonempty = trues(k)
-    
+
     nstep = 1
-    non_stopping = (nstep<=maxiter)
-        
+    non_stopping = (nstep <= maxiter)
+
     while non_stopping
 
         nstep += 1
         old_centers .= centers
-        
-        divergence_min = fill(Inf,n)
+
+        divergence_min = fill(Inf, n)
         fill!(cluster, 0)
-        for i in 1:k
+        for i = 1:k
             if cluster_nonempty[i]
-                divergence = [bregman(p, centers[:,i]) for p in eachcol(x)]
-                for j in 1:n
+                divergence = [bregman(p, centers[:, i]) for p in eachcol(x)]
+                for j = 1:n
                     if divergence[j] < divergence_min[j]
                         divergence_min[j] = divergence[j]
                         cluster[j] = i
@@ -246,27 +259,27 @@ function trimmed_bregman_clustering(rng, x :: Matrix{T}, centers :: Matrix{Float
         end
 
         for i = 1:k
-            centers[:,i] .= vec(mean(x[:,cluster .== i], dims=2))
+            centers[:, i] .= vec(mean(x[:, cluster.==i], dims = 2))
         end
 
         cluster_nonempty = [!(any(isinf.(center))) for center in eachcol(centers)]
-        non_stopping = ( old_centers ≈ centers && (nstep<=maxiter) )
+        non_stopping = (old_centers ≈ centers && (nstep <= maxiter))
 
-    end 
-    
-    if risk <= opt_risk 
+    end
+
+    if risk <= opt_risk
         opt_centers .= centers
         opt_cluster_nonempty .= cluster_nonempty
         opt_risk = risk
     end
 
-    divergence_min = fill(Inf,n)
+    divergence_min = fill(Inf, n)
     opt_cluster = zeros(Int, n)
 
-    for i in 1:k
+    for i = 1:k
         if opt_cluster_nonempty[i]
             divergence = [bregman(p, opt_centers[i]) for p in eachcol(x)]
-            for j in 1:n
+            for j = 1:n
                 if divergence[j] < divergence_min[j]
                     divergence_min[j] = divergence[j]
                     opt_cluster[j] = i
@@ -276,16 +289,16 @@ function trimmed_bregman_clustering(rng, x :: Matrix{T}, centers :: Matrix{Float
     end
 
     if a > 0
-      ix = sortperm(divergence_min, rev = true)
-      for i in ix[1:a]
-          opt_cluster[i] = 0
-      end 
-      opt_risk = mean(divergence_min[ix[(a+1):n]])
+        ix = sortperm(divergence_min, rev = true)
+        for i in ix[1:a]
+            opt_cluster[i] = 0
+        end
+        opt_risk = mean(divergence_min[ix[(a+1):n]])
     else
-      opt_risk = mean(divergence_min)
+        opt_risk = mean(divergence_min)
     end
 
-    opt_cluster_nonempty = [sum(opt_cluster .== i) > 0 for i in 1:k]
+    opt_cluster_nonempty = [sum(opt_cluster .== i) > 0 for i = 1:k]
 
     new_labels = [0, cumsum(opt_cluster_nonempty)...]
     for i in eachindex(opt_cluster)
@@ -297,9 +310,9 @@ function trimmed_bregman_clustering(rng, x :: Matrix{T}, centers :: Matrix{Float
         cluster,
         opt_centers[:, opt_cluster_nonempty],
         risk,
-        divergence_min
+        divergence_min,
     )
-  
+
 end
 
 
@@ -315,15 +328,22 @@ Nous forcons la courbe de risque a etre decroissante en alpha, on utilise les ce
 - alpha est un nombre ou un vecteur contenant les valeurs des differents alpha
 - force_decreasing = false, tous les departs sont aléatoires.
 """
-function select_parameters_nonincreasing(rng, vk::Vector{Int}, valpha::Vector{Float64}, 
-x::Matrix{Float64}, bregman, maxiter::Int, nstart::Int)
+function select_parameters_nonincreasing(
+    rng,
+    vk::Vector{Int},
+    valpha::Vector{Float64},
+    x::Matrix{Float64},
+    bregman,
+    maxiter::Int,
+    nstart::Int,
+)
 
     n = size(x, 2)
     sort!(valpha)
     results = zeros(length(vk), length(valpha))
-    for (i,k) in enumerate(vk)
-        centers = x[:,first(randperm(rng, n), k)]
-        for (j,alpha) in enumerate(valpha)
+    for (i, k) in enumerate(vk)
+        centers = x[:, first(randperm(rng, n), k)]
+        for (j, alpha) in enumerate(valpha)
             tbc1 = trimmed_bregman_clustering(rng, x, k, alpha, bregman, maxiter, nstart)
             tbc2 = trimmed_bregman_clustering(rng, x, centers, alpha, bregman, maxiter)
             if tbc1.risk < tbc2.risk
@@ -351,7 +371,7 @@ function select_parameters(rng, vk, valpha, x, bregman, maxiter, nstart)
 
     sort!(valpha)
     results = zeros(length(vk), length(valpha))
-    for (i,k) in enumerate(vk), (j,alpha) in enumerate(valpha)
+    for (i, k) in enumerate(vk), (j, alpha) in enumerate(valpha)
         tbc = trimmed_bregman_clustering(rng, x, k, alpha, bregman, maxiter, nstart)
         results[i, j] = tbc.risk
     end

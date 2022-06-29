@@ -166,7 +166,7 @@ end
 @recipe function f(results::TrimmedBregmanResult)
 
     d, n = size(results.points)
-    k = size(results.centers,2)
+    k = size(results.centers, 2)
 
     palette --> :rainbow
 
@@ -178,14 +178,14 @@ end
         markersize := 3
         if d == 1
             x := 1:n
-            y := results.points[1,:]
+            y := results.points[1, :]
         elseif d == 2
-            x := results.points[1,:]
-            y := results.points[2,:]
-        else 
-            x := results.points[1,:]
-            y := results.points[2,:]
-            z := results.points[3,:]
+            x := results.points[1, :]
+            y := results.points[2, :]
+        else
+            x := results.points[1, :]
+            y := results.points[2, :]
+            z := results.points[3, :]
         end
         ()
 
@@ -199,14 +199,14 @@ end
         label := "centers"
         if d == 1
             x := 1:k
-            y := results.centers[1,:]
+            y := results.centers[1, :]
         elseif d == 2
-            x := results.centers[1,:]
-            y := results.centers[2,:]
+            x := results.centers[1, :]
+            y := results.centers[2, :]
         else
-            x := results.centers[1,:]
-            y := results.centers[2,:]
-            z := results.centers[3,:]
+            x := results.centers[1, :]
+            y := results.centers[2, :]
+            z := results.centers[3, :]
         end
         ()
     end
@@ -216,4 +216,3 @@ end
     ()
 
 end
-

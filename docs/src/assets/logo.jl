@@ -10,17 +10,17 @@ origin()
 n = 5000
 colors = [Luxor.julia_red, Luxor.julia_green, Luxor.julia_purple]
 r = 60
-centers = [(-2r*sin(π/3), r), (0,-2r), (2r*sin(π/3), r)]
+centers = [(-2r * sin(π / 3), r), (0, -2r), (2r * sin(π / 3), r)]
 data = Vector{Float64}[]
 a = 0.5
 b = 1.0
-alphas = [-π / 3, 0, π /3]
+alphas = [-π / 3, 0, π / 3]
 setopacity(0.7)
 for (center, color, α) in zip(centers, colors, alphas)
 
     for (x, y) in zip(r .* randn(n), r .* randn(n))
-        px = (a*x*cos(α)+b*y*sin(α)) + center[1] 
-        py = (a*x*sin(α)-b*y*cos(α)) + center[2] + 40
+        px = (a * x * cos(α) + b * y * sin(α)) + center[1]
+        py = (a * x * sin(α) - b * y * cos(α)) + center[2] + 40
         if abs(px) < 300 && abs(py) < 300
             sethue(color)
             circle(Point(px, py), 3, :fill)
@@ -29,13 +29,13 @@ for (center, color, α) in zip(centers, colors, alphas)
     end
 
 end
-points = hcat(data...) 
+points = hcat(data...)
 
 k = 10
 c = 3
 nsignal = size(points, 2)
 iter_max = 10
-nstart = 5 
+nstart = 5
 
 function f_Σ!(Σ) end
 
@@ -44,9 +44,13 @@ rng = MersenneTwister(123)
 df = kplm(rng, points, k, c, nsignal, iter_max, nstart, f_Σ!)
 
 mh = build_matrix(df)
-hc = hierarchical_clustering_lem(mh, Stop = Inf, Seuil = Inf, 
-                                 store_all_colors = true, 
-                                 store_all_step_time = true)
+hc = hierarchical_clustering_lem(
+    mh,
+    Stop = Inf,
+    Seuil = Inf,
+    store_all_colors = true,
+    store_all_step_time = true,
+)
 Col = hc.Couleurs
 Temps = hc.Temps_step
 remain_indices = hc.Indices_depart
@@ -84,8 +88,8 @@ for i in eachindex(centers)
     sethue("black")
     for (j1, j2) in zip(1:npoints-1, 2:npoints)
 
-        p1 = Point(μ[1]+A[1,j1], μ[2]+A[2,j1])
-        p2 = Point(μ[1]+A[1,j2], μ[2]+A[2,j2])
+        p1 = Point(μ[1] + A[1, j1], μ[2] + A[2, j1])
+        p2 = Point(μ[1] + A[1, j2], μ[2] + A[2, j2])
         line(p1, p2, :stroke)
         setline(4)
 
@@ -95,5 +99,3 @@ end
 
 finish()
 preview()
-
-

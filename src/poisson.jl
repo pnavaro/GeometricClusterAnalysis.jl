@@ -28,6 +28,8 @@ function sample_outliers(rng, n_outliers, d; scale = 1)
 
 end
 
+export performance
+
 """
     performance(n, n_outliers, k, alpha, generator, outliers_generator, 
                 bregman, maxiter = 100, nstart = 10, replications = 100)

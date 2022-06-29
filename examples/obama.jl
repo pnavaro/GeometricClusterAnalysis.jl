@@ -24,3 +24,5 @@ data = NamedArray(table[2:end, 2:end]', (names(df)[2:end], df.authors), ("Rows",
 authors = ["God", "Doyle", "Dickens", "Hawthorne", "Obama", "Twain"]
 authors_names = ["Bible", "Conan Doyle", "Dickens", "Hawthorne", "Obama", "Twain"]
 true_labels = [sum(count.(author, names(df))) for author in authors]
+
+data

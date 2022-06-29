@@ -239,7 +239,7 @@ function trimmed_bregman_clustering(
     non_stopping = (nstep <= maxiter)
 
     divergence_min = fill(Inf, n)
-    divergence = similar(divergence)
+    divergence = similar(divergence_min)
 
     while non_stopping
 

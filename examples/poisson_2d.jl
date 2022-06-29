@@ -77,6 +77,4 @@ plot(vec_α, params_risks[1, :], markershape = :circle)
 
 k, α = 3, 0.04
 tb = trimmed_bregman_clustering( rng, x, k, α, poisson, maxiter, nstart )
-
-scatter( x[1,:], x[2,:], c = tb.cluster, palette = :rainbow)
-scatter!( tb_poisson.centers[1,:], tb_poisson.centers[2,:], markershape = :star, markercolor = :yellow, markersize = 5)
+plot(tb; aspect_ratio = :equal)

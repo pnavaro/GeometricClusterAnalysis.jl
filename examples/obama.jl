@@ -2,7 +2,6 @@ using CategoricalArrays
 using DataFrames
 using DelimitedFiles
 using MultivariateStats
-using NamedArrays
 using Plots
 using Random
 
@@ -16,7 +15,6 @@ df = DataFrame(
     makeunique = true,
 )
 
-
 dft = DataFrame(
     [[names(df)[2:end]]; collect.(eachrow(df[:, 2:end]))],
     [:column; Symbol.(axes(df, 1))],
@@ -25,20 +23,16 @@ rename!(dft, String.(vcat("authors", values(df[:, 1]))))
 
 transform!(dft, "authors" => ByRow(x -> first(split(x, "_"))) => "labels")
 
-data = NamedArray(table[2:end, 2:end]', (names(df)[2:end], df.authors), ("Rows", "Cols"))
-
 authors = ["God", "Doyle", "Dickens", "Hawthorne", "Obama", "Twain"]
 authors_names = ["Bible", "Conan Doyle", "Dickens", "Hawthorne", "Obama", "Twain"]
 true_labels = [sum(count.(author, names(df))) for author in authors]
 println(true_labels)
 
 X = Matrix{Float64}(df[!, 2:end])
-@show size(X)
 X_labels = dft[!, :labels]
 
 pca = fit(PCA, X; maxoutdim = 20)
 Y = predict(pca, X)
-@show size(Y)
 
 y = recode(
     X_labels,
@@ -51,18 +45,16 @@ y = recode(
 )
 
 lda = fit(MulticlassLDA, 20, Y, y; outdim = 2)
-Y = predict(lda, Y)
-
+points = predict(lda, Y)
 
 axis = 1:2
-obama = Y[axis, y .== 1]
-god = Y[axis, y .== 2]
-twain = Y[axis, y .== 3]
-dickens = Y[axis, y .== 4]
-doyle = Y[axis, y .== 6]
-hawthorne = Y[axis, y .== 5]
+obama = points[axis, y .== 1]
+god = points[axis, y .== 2]
+twain = points[axis, y .== 3]
+dickens = points[axis, y .== 4]
+doyle = points[axis, y .== 6]
+hawthorne = points[axis, y .== 5]
 
-#p1 = scatter(god[1,:],god[2,:],marker=:circle,linewidth=0, label="God")
 p1 = scatter(god[1, :], god[2, :], marker = :circle, linewidth = 0, label = "God")
 scatter!(doyle[1, :], doyle[2, :], marker = :circle, linewidth = 0, label = "Doyle")
 scatter!(dickens[1, :], dickens[2, :], marker = :circle, linewidth = 0, label = "Dickens")

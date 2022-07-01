@@ -1,3 +1,4 @@
+using CategoricalArrays
 using DataFrames
 using DelimitedFiles
 using MultivariateStats
@@ -22,7 +23,7 @@ dft = DataFrame(
 )
 rename!(dft, String.(vcat("authors", values(df[:, 1]))))
 
-transform!(dft,"authors" => ByRow( x -> first(split(x,"_"))) => "labels")
+transform!(dft, "authors" => ByRow(x -> first(split(x, "_"))) => "labels")
 
 data = NamedArray(table[2:end, 2:end]', (names(df)[2:end], df.authors), ("Rows", "Cols"))
 
@@ -31,24 +32,47 @@ authors_names = ["Bible", "Conan Doyle", "Dickens", "Hawthorne", "Obama", "Twain
 true_labels = [sum(count.(author, names(df))) for author in authors]
 println(true_labels)
 
-X = Matrix{Float64}(data.array)' 
-X_labels = dft[!,:labels]
+X = Matrix{Float64}(df[!, 2:end])
+@show size(X)
+X_labels = dft[!, :labels]
 
-M = fit(PCA, X; maxoutdim = 2)
-Y = predict(M, X)
+pca = fit(PCA, X; maxoutdim = 20)
+Y = predict(pca, X)
+@show size(Y)
 
-god = Y[:,X_labels.=="God"]
-doyle = Y[:,X_labels.=="Sir Arthur Conan Doyle"]
-dickens = Y[:,X_labels.=="Charles Dickens"]
-hawthorne = Y[:,X_labels.=="Nathaniel Hawthorne"]
-obama = Y[:,X_labels.=="Obama"]
-twain = Y[:,X_labels.=="Mark Twain"]
+y = recode(
+    X_labels,
+    "Obama" => 1,
+    "God" => 2,
+    "Mark Twain" => 3,
+    "Charles Dickens" => 4,
+    "Nathaniel Hawthorne" => 5,
+    "Sir Arthur Conan Doyle" => 6,
+)
 
-p = scatter(god[1,:],god[2,:],marker=:circle,linewidth=0, label="God")
-scatter!(doyle[1,:],doyle[2,:],marker=:circle,linewidth=0, label="Doyle")
-scatter!(dickens[1,:],dickens[2,:],marker=:circle,linewidth=0, label="Dickens")
-scatter!(hawthorne[1,:],hawthorne[2,:],marker=:circle,linewidth=0, label="Hawthorne")
-scatter!(obama[1,:],obama[2,:],marker=:circle,linewidth=0, label="Obama")
-scatter!(twain[1,:],twain[2,:],marker=:circle,linewidth=0, label="Twain")
-plot!(p,xlabel="PC1",ylabel="PC2")
+lda = fit(MulticlassLDA, 20, Y, y; outdim = 2)
+Y = predict(lda, Y)
 
+
+axis = 1:2
+obama = Y[axis, y .== 1]
+god = Y[axis, y .== 2]
+twain = Y[axis, y .== 3]
+dickens = Y[axis, y .== 4]
+doyle = Y[axis, y .== 6]
+hawthorne = Y[axis, y .== 5]
+
+#p1 = scatter(god[1,:],god[2,:],marker=:circle,linewidth=0, label="God")
+p1 = scatter(god[1, :], god[2, :], marker = :circle, linewidth = 0, label = "God")
+scatter!(doyle[1, :], doyle[2, :], marker = :circle, linewidth = 0, label = "Doyle")
+scatter!(dickens[1, :], dickens[2, :], marker = :circle, linewidth = 0, label = "Dickens")
+scatter!(
+    hawthorne[1, :],
+    hawthorne[2, :],
+    marker = :circle,
+    linewidth = 0,
+    label = "Hawthorne",
+)
+scatter!(obama[1, :], obama[2, :], marker = :circle, linewidth = 0, label = "Obama")
+scatter!(twain[1, :], twain[2, :], marker = :circle, linewidth = 0, label = "Twain")
+plot!(p1, xlabel = "PC1", ylabel = "PC2")

@@ -4,12 +4,10 @@ using MultivariateStats
 using NamedArrays
 using Plots
 using Random
-using RDatasets
 
 rng = MersenneTwister(2022)
 
 table = readdlm(joinpath(@__DIR__, "..", "docs", "src", "assets", "textes.txt"))
-
 
 df = DataFrame(
     hcat(table[2:end, 1], table[2:end, 2:end]),
@@ -33,20 +31,11 @@ authors_names = ["Bible", "Conan Doyle", "Dickens", "Hawthorne", "Obama", "Twain
 true_labels = [sum(count.(author, names(df))) for author in authors]
 println(true_labels)
 
-
-# load iris dataset
-#iris = dataset("datasets", "iris")
-
-# split half to training set
-X = Matrix{Float64}(data.array)' |> collect #Matrix(iris[:,1:4])'
-@show size(dft)
-@show size(X)
-X_labels = getindex.(split.(names(data,1), '_'), 1) #Vector(iris[:,5])
-
+X = Matrix{Float64}(data.array)' 
+X_labels = dft[!,:labels]
 
 M = fit(PCA, X; maxoutdim = 2)
 Y = predict(M, X)
-@show size(Y)
 
 god = Y[:,X_labels.=="God"]
 doyle = Y[:,X_labels.=="Sir Arthur Conan Doyle"]

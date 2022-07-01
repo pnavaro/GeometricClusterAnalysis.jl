@@ -1,44 +1,112 @@
 # Application au partitionnement de textes d'auteurs
 
-Les données des textes d'auteurs sont enregistrées dans la variable `data`.
+Les données des textes d'auteurs sont enregistrées dans la variable `df`.
 Les commandes utilisées pour l'affichage étaient les suivantes.
 
 ```@example obama
+using CategoricalArrays
 using DataFrames
 using DelimitedFiles
 using GeometricClusterAnalysis
-using NamedArrays
+using MultivariateStats
 using Plots
 using Random
+import Clustering: mutualinfo
 
 rng = MersenneTwister(2022)
 
-table = readdlm(joinpath("assets","textes.txt"))
+table = readdlm(joinpath("assets", "textes.txt"))
 
-df = DataFrame( hcat(table[2:end,1], table[2:end,2:end]), vec(vcat("authors",table[1,1:end-1])), makeunique=true)
-
-dft = DataFrame([[names(df)[2:end]]; collect.(eachrow(df[:,2:end]))], [:column; Symbol.(axes(df, 1))])
-rename!(dft, String.(vcat("authors",values(df[:,1]))))
-
-data = NamedArray( table[2:end,2:end]', (names(df)[2:end], df.authors ), ("Rows", "Cols"))
-
-authors = ["God", "Doyle", "Dickens", "Hawthorne",  "Obama", "Twain"]
-authors_names = ["Bible",  "Conan Doyle", "Dickens", "Hawthorne", "Obama", "Twain"]
-true_labels = [sum(count.(author, names(df))) for author in authors]
+df = DataFrame(
+    hcat(table[2:end, 1], table[2:end, 2:end]),
+    vec(vcat("authors", table[1, 1:end-1])),
+    makeunique = true,
+)
+first(df, 10)
 ```
 
-Afin de pouvoir représenter les données, nous utiliserons la fonction suivante.
+La version transposée sera plus pratique
 
-```julia
-function plot_clustering(axis1, axis2, labels, title = "Textes d'auteurs - Partitionnement")
-  to_plot = data.frame(lda = lda$li, Etiquettes =  as.factor(labels), authors_names = as.factor(authors_names))
-  ggplot(to_plot, aes(x = lda$li[,axis1], y =lda$li[,axis2],col = Etiquettes, shape = authors_names))+ xlab(paste("Axe ",axis1)) + ylab(paste("Axe ",axis2))+ 
-  scale_shape_discrete(name="Auteur") + labs (title = title) + geom_point()}
+```@example obama
+dft = DataFrame(
+    [[names(df)[2:end]]; collect.(eachrow(df[:, 2:end]))],
+    [:column; Symbol.(axes(df, 1))],
+)
+rename!(dft, String.(vcat("authors", values(df[:, 1]))))
+first(dft, 10)
 ```
+
+On ajoute un colonne `labels` avec le nom des auteurs
+
+```@example obama
+transform!(dft, "authors" => ByRow(x -> first(split(x, "_"))) => "labels")
+first(dft, 10)
+```
+
+Calcul de l'ACP
+```@example obama
+X = Matrix{Float64}(df[!, 2:end])
+X_labels = dft[!, :labels]
+
+pca = fit(PCA, X; maxoutdim = 20)
+Y = predict(pca, X)
+```
+
+Recodage des `labels` pour l'analyse discriminante:
+```@example obama
+y = recode(
+    X_labels,
+    "Obama" => 1,
+    "God" => 2,
+    "Mark Twain" => 3,
+    "Charles Dickens" => 4,
+    "Nathaniel Hawthorne" => 5,
+    "Sir Arthur Conan Doyle" => 6,
+)
+
+lda = fit(MulticlassLDA, 20, Y, y; outdim = 2)
+points = predict(lda, Y)
+```
+
+Représentation des données:
+
+```@example obama
+function plot_clustering( points, labels; axis = 1:2)
+
+    obama = points[axis, labels .== 1]
+    god = points[axis, labels .== 2]
+    twain = points[axis, labels .== 3]
+    dickens = points[axis, labels .== 4]
+    doyle = points[axis, labels .== 6]
+    hawthorne = points[axis, labels .== 5]
+    
+    p = scatter(god[1, :], god[2, :], marker = :circle, linewidth = 0, label = "God")
+    scatter!(doyle[1, :], doyle[2, :], marker = :circle, linewidth = 0, label = "Doyle")
+    scatter!(dickens[1, :], dickens[2, :], marker = :circle, linewidth = 0, label = "Dickens")
+    scatter!(
+        hawthorne[1, :],
+        hawthorne[2, :],
+        marker = :circle,
+        linewidth = 0,
+        label = "Hawthorne",
+    )
+    scatter!(obama[1, :], obama[2, :], marker = :circle, linewidth = 0, label = "Obama")
+    scatter!(twain[1, :], twain[2, :], marker = :circle, linewidth = 0, label = "Twain")
+    plot!(p, xlabel = "PC1", ylabel = "PC2")
+    return p
+
+end
+
+plot_clustering( points, y)
+```
+
+
 
 ## Partitionnement des données
 
-Pour partitionner les données, nous utiliserons les paramètres suivants.
+Pour partitionner les données, nous utiliserons les paramètres
+suivants.  La vraie proportion de donnees aberrantes vaut : 20/209
+car il y a 15+5 textes issus de la bible et du discours de Obama.
 
 ```@example obama
 k = 4
@@ -47,23 +115,22 @@ maxiter = 50
 nstart = 50
 ```
 
-## Application de l'algorithme classique de ``k``-means élagué [@Cuesta-Albertos1997]
+## Application de l'algorithme classique de ``k``-means élagué 
 
-```julia
-tb_authors_kmeans = trimmed_bregman_clustering(rng, data, k, alpha, euclidean, maxiter, nstart)
+[Cuesta-Albertos1997](@cite)
 
-#plot_clustering(1,2,tB_authors_kmeans$cluster)
-#plot_clustering(3,4,tB_authors_kmeans$cluster)
+```@example obama
+tb_kmeans = trimmed_bregman_clustering(rng, points, k, alpha, euclidean, maxiter, nstart)
+
+plot_clustering(points, tb_kmeans.cluster)
 ```
 
 ## Choix de la divergence de Bregman associée à la loi de Poisson
 
 ```julia
-tb_authors_poisson = trimmed_bregman_clustering(rng, data, k, alpha, poisson, maxiter, nstart)
+tb_poisson = trimmed_bregman_clustering(rng, points, k, alpha, poisson, maxiter, nstart)
 
-#plot_clustering(1,2,tB_authors_Poisson$cluster)
-#plot_clustering(3,4,tB_authors_Poisson$cluster)
-"""
+plot_clustering(points, tb_poisson.cluster)
 ```
 
 En utilisant la divergence de Bregman associée à la loi de Poisson,
@@ -82,22 +149,19 @@ mutuelle normalisée.
 
 Vraies etiquettes ou les textes issus de la bible et du discours de Obama ont la meme etiquette :
 ```julia
-R"true_labels[true_labels == 5] = 1"
+true_labels = copy(y)
+true_labels[y .== 2] .= 1
 ```
 
 Pour le k-means elague :
 ```julia
-R"""
-NMI(true_labels,tB_authors_kmeans$cluster, variant="sqrt")
-"""
+mutualinfo(true_labels, tb_kmeans.cluster, normed = true)
 ```
 
 Pour le partitionnement elague avec divergence de Bregman associee a la loi de Poisson :
 
 ```julia
-R"""
-NMI(true_labels,tB_authors_Poisson$cluster, variant="sqrt")
-"""
+mutualinfo(true_labels, tb_poisson.cluster, normed = true)
 ```
 
 L'information mutuelle normalisée est bien supérieure pour la
@@ -121,17 +185,13 @@ car nous ne sommes pas sensés connaître le jeu de données, ni le
 nombre de données aberrantes.
 
 ```julia
-
-R"""
-vect_k = 1:6
-vect_alpha = c((1:5)/50,0.15,0.25,0.75,0.85,0.9)
+vect_k = collect(1:6)
+vect_alpha = [(1:5)./50;0.15,0.25,0.75,0.85,0.9]
 nstart = 20
-set.seed(1)
-params_risks = select.parameters(vect_k,vect_alpha,data,divergence_Poisson,maxiter,nstart,.export = c('divergence_Poisson','divergence_Poisson','data','nstart','maxiter'),force_nonincreasing = TRUE)
 
-params_risks$k = as.factor(params_risks$k)
-ggplot(params_risks, aes(x = alpha, y = risk, group = k, color = k))+   geom_line() +   geom_point()
-"""
+rng = MersenneTwister(20)
+
+params_risks = select_parameters(vect_k, vect_alpha, points, poisson, maxiter, nstart)
 ```
 
 Pour sélectionner les paramètres `k` et `alpha`, on va se concentrer
@@ -169,31 +229,24 @@ indicatives.
 Finalement, voici les trois partitionnements obtenus à l'aide des 3 choix de paires de paramètres. 
 
 ```julia
-R"""
-tB = Trimmed_Bregman_clustering(data,3,0.15,divergence_Poisson,maxiter = 50, nstart = 50)
-plot_clustering(1,2,tB$cluster)
-"""
-# -
+maxiter = 50
+nstart = 50
+tb = trimmed_bregman_clustering(points, 3, 0.15, poisson, maxiter, nstart)
+plot_clustering(points, tb.cluster)
 ```
 
 Les textes de Twain, de la bible et du discours de Obama sont considérées comme des données aberrantes.
 
 ```julia
-R"""
-tB = Trimmed_Bregman_clustering(data,4,0.1,divergence_Poisson,maxiter = 50, nstart = 50)
-plot_clustering(1,2,tB$cluster)
-"""
-# -
+tb = trimmed_bregman_clustering(points,4,0.1,poisson,maxiter, nstart)
+plot_clustering(points, tb.cluster)
 ```
 
 Les textes de la bible et du discours de Obama sont considérés comme des données aberrantes.
 
 ```julia
-R"""
-tB = Trimmed_Bregman_clustering(data,6,0,divergence_Poisson,maxiter = 50, nstart = 50)
-plot_clustering(1,2,tB$cluster)
-"""
-# -
+tb = trimmed_bregman_clustering(points, 6, 0, poisson, maxiter, nstart)
+plot_clustering(points, tb.cluster)
 ```
 
 On obtient 6 groupes correspondant aux textes des 4 auteurs différents,

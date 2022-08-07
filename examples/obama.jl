@@ -49,32 +49,25 @@ y = recode(
 lda = fit(MulticlassLDA, 20, Y, y; outdim = 2)
 points = predict(lda, Y)
 
-function plot_clustering( points, cluster; axis = 1:2)
+function plot_clustering( points, cluster, true_labels; axis = 1:2)
 
-    shape = Plots.supported_markers()[3:8]
+    pairs = Dict(1 => :rtriangle, 2 => :diamond, 3 => :square, 4 => :ltriangle,
+                  5 => :star, 6 => :pentagon)
 
-    obama = points[axis, cluster .== 1]
-    god = points[axis, cluster .== 2]
-    twain = points[axis, cluster .== 3]
-    dickens = points[axis, cluster .== 4]
-    doyle = points[axis, cluster .== 6]
-    hawthorne = points[axis, cluster .== 5]
-    outliers = points[axis, cluster .== 0]
+    shapes = replace(cluster, pairs...)
+
+    p = scatter(points[1, :], points[2, :]; markershape = shapes, 
+                markercolor = true_labels, label = "")
     
-    p = scatter(obama[1, :], obama[2, :]; markershape = shape[1], label = "")
-    scatter!(p, god[1, :], god[2, :], markershape = shape[2], linewidth = 0, label = "")
-    scatter!(doyle[1, :], doyle[2, :], markershape = shape[3], linewidth = 0, label = "")
-    scatter!(dickens[1, :], dickens[2, :], markershape = shape[4], linewidth = 0, label = "")
-    scatter!( hawthorne[1, :], hawthorne[2, :], markershape = shape[5], linewidth = 0, label = "",
-    )
-    scatter!(twain[1, :], twain[2, :], markershape = shape[6], linewidth = 0, label = "")
-    scatter!(outliers[1, :], outliers[2, :], marker = :x, linewidth = 0, label = "")
-
     authors = [ "Obama", "God", "Mark Twain", "Charles Dickens", 
                 "Nathaniel Hawthorne", "Sir Arthur Conan Doyle"]
 
-    for (s,a) in zip(shape,authors)
-        scatter!(1,1, markershape=s, markercolor = "blue", label=a)
+    xl, yl = xlims(p), ylims(p)
+    for (s,a) in zip(values(pairs),authors)
+        scatter!(p, [1], markershape=s, markercolor = "blue", label=a, xlims=xl, ylims=yl)
+    end
+    for c in keys(pairs)
+        scatter!(p, [1], markershape=:circle, markercolor = c, label = c, xlims=xl, ylims=yl)
     end
     plot!(p, xlabel = "PC1", ylabel = "PC2")
 
@@ -82,7 +75,7 @@ function plot_clustering( points, cluster; axis = 1:2)
 
 end
 
-plot_clustering( points, y)
+plot_clustering( points, y, y)
 
 #=
 k = 4

@@ -46,7 +46,7 @@ y = recode(
     "Sir Arthur Conan Doyle" => 6,
 )
 
-lda = fit(MulticlassLDA, 20, Y, y; outdim = 2)
+lda = fit(MulticlassLDA, Y, y)
 points = predict(lda, Y)
 
 function plot_clustering( points, cluster, true_labels; axis = 1:2)

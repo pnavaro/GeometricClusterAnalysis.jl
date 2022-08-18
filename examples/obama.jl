@@ -5,6 +5,8 @@ using GeometricClusterAnalysis
 using MultivariateStats
 using Plots
 using Random
+using Statistics
+
 import Clustering: mutualinfo
 
 rng = MersenneTwister(2022)
@@ -48,6 +50,7 @@ y = recode(
 
 lda = fit(MulticlassLDA, Y, y)
 points = predict(lda, Y)
+@show size(points)
 
 function plot_clustering( points, cluster, true_labels; axis = 1:2)
 
@@ -75,23 +78,25 @@ function plot_clustering( points, cluster, true_labels; axis = 1:2)
 
 end
 
-plot_clustering( points, y, y)
 
-#=
 k = 4
 α = 20/209 
 maxiter = 50
 nstart = 50
 tb_kmeans = trimmed_bregman_clustering(rng, points, k, α, euclidean, maxiter, nstart)
+@show tb_kmeans.cluster
 
-plot_clustering(tb_kmeans.points, tb_kmeans.cluster)
+plot_clustering(tb_kmeans.points, tb_kmeans.cluster .+1 , y)
 
-points[1,:] .+= (maximum(points[1,:]) - minimum(points[1,:])) 
-points[2,:] .+= (maximum(points[2,:]) - minimum(points[2,:])) 
+function standardize!( points )
+    points .-= minimum(points, dims=2)
+end
 
-tb_poisson = trimmed_bregman_clustering(rng, points, k, alpha, poisson, maxiter, nstart)
+standardize!(points)
 
-plot_clustering(points, tb_poisson.cluster)
+tb_poisson = trimmed_bregman_clustering(rng, points, k, α, poisson, maxiter, nstart)
+
+plot_clustering(points, tb_poisson.cluster .+ 1, y)
 
 true_labels = copy(y)
 true_labels[y .== 2] .= 1
@@ -115,15 +120,13 @@ end
 xlabel!("alpha")
 ylabel!("NMI")
 
-
 maxiter = 50
 nstart = 50
 tb = trimmed_bregman_clustering(rng, points, 3, 0.15, poisson, maxiter, nstart)
-plot_clustering(points, tb.cluster)
+plot_clustering(points, tb.cluster, y)
 
 tb = trimmed_bregman_clustering(rng, points, 4, 0.1, poisson, maxiter, nstart)
-plot_clustering(points, tb.cluster)
+plot_clustering(points, tb.cluster, y)
 
 tb = trimmed_bregman_clustering(rng, points, 6, 0.0, poisson, maxiter, nstart)
-plot_clustering(points, tb.cluster)
-=#
+plot_clustering(points, tb.cluster, y)

@@ -71,33 +71,32 @@ points = predict(lda, Y)
 Représentation des données:
 
 ```@example obama
-function plot_clustering( points, labels; axis = 1:2)
+function plot_clustering( points, cluster, true_labels; axis = 1:2)
 
-    obama = points[axis, labels .== 1]
-    god = points[axis, labels .== 2]
-    twain = points[axis, labels .== 3]
-    dickens = points[axis, labels .== 4]
-    doyle = points[axis, labels .== 6]
-    hawthorne = points[axis, labels .== 5]
+    pairs = Dict(1 => :rtriangle, 2 => :diamond, 3 => :square, 4 => :ltriangle,
+                  5 => :star, 6 => :pentagon)
+
+    shapes = replace(cluster, pairs...)
+
+    p = scatter(points[1, :], points[2, :]; markershape = shapes, 
+                markercolor = true_labels, label = "")
     
-    p = scatter(god[1, :], god[2, :], marker = :circle, linewidth = 0, label = "God")
-    scatter!(doyle[1, :], doyle[2, :], marker = :circle, linewidth = 0, label = "Doyle")
-    scatter!(dickens[1, :], dickens[2, :], marker = :circle, linewidth = 0, label = "Dickens")
-    scatter!(
-        hawthorne[1, :],
-        hawthorne[2, :],
-        marker = :circle,
-        linewidth = 0,
-        label = "Hawthorne",
-    )
-    scatter!(obama[1, :], obama[2, :], marker = :circle, linewidth = 0, label = "Obama")
-    scatter!(twain[1, :], twain[2, :], marker = :circle, linewidth = 0, label = "Twain")
+    authors = [ "Obama", "God", "Mark Twain", "Charles Dickens", 
+                "Nathaniel Hawthorne", "Sir Arthur Conan Doyle"]
+
+    xl, yl = xlims(p), ylims(p)
+    for (s,a) in zip(values(pairs),authors)
+        scatter!(p, [1], markershape=s, markercolor = "blue", label=a, xlims=xl, ylims=yl)
+    end
+    for c in keys(pairs)
+        scatter!(p, [1], markershape=:circle, markercolor = c, label = c, xlims=xl, ylims=yl)
+    end
     plot!(p, xlabel = "PC1", ylabel = "PC2")
+
     return p
 
 end
 
-plot_clustering( points, y)
 ```
 
 
@@ -122,15 +121,15 @@ nstart = 50
 ```@example obama
 tb_kmeans = trimmed_bregman_clustering(rng, points, k, alpha, euclidean, maxiter, nstart)
 
-plot_clustering(points, tb_kmeans.cluster)
+plot_clustering(tb_kmeans.points, tb_kmeans.cluster .+1 , y)
 ```
 
 ## Choix de la divergence de Bregman associée à la loi de Poisson
 
-```julia
+```@example obama
 tb_poisson = trimmed_bregman_clustering(rng, points, k, alpha, poisson, maxiter, nstart)
 
-plot_clustering(points, tb_poisson.cluster)
+plot_clustering(points, tb_poisson.cluster .+ 1, y)
 ```
 
 En utilisant la divergence de Bregman associée à la loi de Poisson,
@@ -148,19 +147,19 @@ Bregman associée à la loi de Poisson), à l'aide de l'information
 mutuelle normalisée.
 
 Vraies etiquettes ou les textes issus de la bible et du discours de Obama ont la meme etiquette :
-```julia
+```@example obama
 true_labels = copy(y)
 true_labels[y .== 2] .= 1
 ```
 
 Pour le k-means elague :
-```julia
+```@example obama
 mutualinfo(true_labels, tb_kmeans.cluster, normed = true)
 ```
 
 Pour le partitionnement elague avec divergence de Bregman associee a la loi de Poisson :
 
-```julia
+```@example obama
 mutualinfo(true_labels, tb_poisson.cluster, normed = true)
 ```
 
@@ -184,7 +183,7 @@ de ``\alpha`` pour voir si d'autres choix de paramètres auraient
 car nous ne sommes pas sensés connaître le jeu de données, ni le
 nombre de données aberrantes.
 
-```julia
+```@example obama
 vect_k = collect(1:6)
 vect_alpha = [(1:5)./50;0.15,0.25,0.75,0.85,0.9]
 nstart = 20
@@ -228,25 +227,25 @@ indicatives.
 
 Finalement, voici les trois partitionnements obtenus à l'aide des 3 choix de paires de paramètres. 
 
-```julia
+```@example obama
 maxiter = 50
 nstart = 50
 tb = trimmed_bregman_clustering(points, 3, 0.15, poisson, maxiter, nstart)
-plot_clustering(points, tb.cluster)
+plot_clustering(points, tb.cluster .+ 1, y)
 ```
 
 Les textes de Twain, de la bible et du discours de Obama sont considérées comme des données aberrantes.
 
-```julia
+```@example obama
 tb = trimmed_bregman_clustering(points,4,0.1,poisson,maxiter, nstart)
-plot_clustering(points, tb.cluster)
+plot_clustering(points, tb.cluster .+ 1, y)
 ```
 
 Les textes de la bible et du discours de Obama sont considérés comme des données aberrantes.
 
-```julia
+```@example obama
 tb = trimmed_bregman_clustering(points, 6, 0, poisson, maxiter, nstart)
-plot_clustering(points, tb.cluster)
+plot_clustering(points, tb.cluster .+ 1, y)
 ```
 
 On obtient 6 groupes correspondant aux textes des 4 auteurs différents,

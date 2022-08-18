@@ -109,10 +109,11 @@ car il y a 15+5 textes issus de la bible et du discours de Obama.
 
 ```@example obama
 k = 4
-alpha = 20/209 # La vraie proportion de donnees aberrantes vaut : 20/209 car il y a 15+5 textes issus de la bible et du discours de Obama.
+alpha = 20/209 
 maxiter = 50
 nstart = 50
 ```
+20/209 est la vraie proportion de donnees aberrantes vaut : 20/209 car il y a 15+5 textes issus de la bible et du discours de Obama.
 
 ## Application de l'algorithme classique de ``k``-means élagué 
 
@@ -125,6 +126,16 @@ plot_clustering(tb_kmeans.points, tb_kmeans.cluster .+1 , y)
 ```
 
 ## Choix de la divergence de Bregman associée à la loi de Poisson
+
+```@example obama
+function standardize!( points )
+    points .-= minimum(points, dims=2)
+end
+
+standardize!(points)
+```
+
+
 
 ```@example obama
 tb_poisson = trimmed_bregman_clustering(rng, points, k, alpha, poisson, maxiter, nstart)
@@ -185,12 +196,19 @@ nombre de données aberrantes.
 
 ```@example obama
 vect_k = collect(1:6)
-vect_alpha = [(1:5)./50;0.15,0.25,0.75,0.85,0.9]
+vect_alpha = [(1:5)./50; [0.15,0.25,0.75,0.85,0.9]]
 nstart = 20
 
 rng = MersenneTwister(20)
 
-params_risks = select_parameters(vect_k, vect_alpha, points, poisson, maxiter, nstart)
+params_risks = select_parameters(rng, vect_k, vect_alpha, points, poisson, maxiter, nstart)
+
+plot(; title = "select parameters")
+for (i,k) in enumerate(vect_k)
+   plot!( vect_alpha, params_risks[i, :], label ="k=$k", markershape = :circle )
+end
+xlabel!("alpha")
+ylabel!("NMI")
 ```
 
 Pour sélectionner les paramètres `k` et `alpha`, on va se concentrer
@@ -230,22 +248,22 @@ Finalement, voici les trois partitionnements obtenus à l'aide des 3 choix de pa
 ```@example obama
 maxiter = 50
 nstart = 50
-tb = trimmed_bregman_clustering(points, 3, 0.15, poisson, maxiter, nstart)
+tb = trimmed_bregman_clustering(rng, points, 3, 0.15, poisson, maxiter, nstart)
 plot_clustering(points, tb.cluster .+ 1, y)
 ```
 
 Les textes de Twain, de la bible et du discours de Obama sont considérées comme des données aberrantes.
 
 ```@example obama
-tb = trimmed_bregman_clustering(points,4,0.1,poisson,maxiter, nstart)
+tb = trimmed_bregman_clustering(rng, points, 4, 0.1, poisson, maxiter, nstart)
 plot_clustering(points, tb.cluster .+ 1, y)
 ```
 
 Les textes de la bible et du discours de Obama sont considérés comme des données aberrantes.
 
 ```@example obama
-tb = trimmed_bregman_clustering(points, 6, 0, poisson, maxiter, nstart)
-plot_clustering(points, tb.cluster .+ 1, y)
+tb = trimmed_bregman_clustering(rng, points, 6, 0.0, poisson, maxiter, nstart)
+plot_clustering(points, tb.cluster, y)
 ```
 
 On obtient 6 groupes correspondant aux textes des 4 auteurs différents,

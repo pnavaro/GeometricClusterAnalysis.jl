@@ -48,13 +48,13 @@ Calcul de l'ACP
 X = Matrix{Float64}(df[!, 2:end])
 X_labels = dft[!, :labels]
 
-pca = fit(PCA, X; maxoutdim = 20)
-Y = predict(pca, X)
+pca = fit(PCA, X; maxoutdim = 50)
+X_pca = predict(pca, X)
 ```
 
 Recodage des `labels` pour l'analyse discriminante:
 ```@example obama
-y = recode(
+Y_labels = recode(
     X_labels,
     "Obama" => 1,
     "God" => 2,
@@ -64,8 +64,8 @@ y = recode(
     "Sir Arthur Conan Doyle" => 6,
 )
 
-lda = fit(MulticlassLDA, 20, Y, y; outdim = 2)
-points = predict(lda, Y)
+lda = fit(MulticlassLDA, X_pca, Y_labels; outdim=20)
+points = predict(lda, X_pca)
 ```
 
 Représentation des données:
@@ -74,15 +74,15 @@ Représentation des données:
 function plot_clustering( points, cluster, true_labels; axis = 1:2)
 
     pairs = Dict(1 => :rtriangle, 2 => :diamond, 3 => :square, 4 => :ltriangle,
-                  5 => :star, 6 => :pentagon)
+                  5 => :star, 6 => :pentagon, 0 => :circle)
 
     shapes = replace(cluster, pairs...)
 
     p = scatter(points[1, :], points[2, :]; markershape = shapes, 
                 markercolor = true_labels, label = "")
     
-    authors = [ "Obama", "God", "Mark Twain", "Charles Dickens", 
-                "Nathaniel Hawthorne", "Sir Arthur Conan Doyle"]
+    authors = [ "Obama", "God", "Twain", "Dickens", 
+                "Hawthorne", "Conan Doyle"]
 
     xl, yl = xlims(p), ylims(p)
     for (s,a) in zip(values(pairs),authors)
@@ -91,12 +91,11 @@ function plot_clustering( points, cluster, true_labels; axis = 1:2)
     for c in keys(pairs)
         scatter!(p, [1], markershape=:circle, markercolor = c, label = c, xlims=xl, ylims=yl)
     end
-    plot!(p, xlabel = "PC1", ylabel = "PC2")
+    plot!(p, xlabel = "PC1", ylabel = "PC2", legend=:outertopright)
 
     return p
 
 end
-
 ```
 
 
@@ -122,7 +121,7 @@ nstart = 50
 ```@example obama
 tb_kmeans = trimmed_bregman_clustering(rng, points, k, alpha, euclidean, maxiter, nstart)
 
-plot_clustering(tb_kmeans.points, tb_kmeans.cluster .+1 , y)
+plot_clustering(tb_kmeans.points, tb_kmeans.cluster, Y_labels)
 ```
 
 ## Choix de la divergence de Bregman associée à la loi de Poisson
@@ -140,7 +139,7 @@ standardize!(points)
 ```@example obama
 tb_poisson = trimmed_bregman_clustering(rng, points, k, alpha, poisson, maxiter, nstart)
 
-plot_clustering(points, tb_poisson.cluster .+ 1, y)
+plot_clustering(points, tb_poisson.cluster, Y_labels)
 ```
 
 En utilisant la divergence de Bregman associée à la loi de Poisson,
@@ -249,21 +248,21 @@ Finalement, voici les trois partitionnements obtenus à l'aide des 3 choix de pa
 maxiter = 50
 nstart = 50
 tb = trimmed_bregman_clustering(rng, points, 3, 0.15, poisson, maxiter, nstart)
-plot_clustering(points, tb.cluster .+ 1, y)
+plot_clustering(points, tb.cluster, Y_labels)
 ```
 
 Les textes de Twain, de la bible et du discours de Obama sont considérées comme des données aberrantes.
 
 ```@example obama
 tb = trimmed_bregman_clustering(rng, points, 4, 0.1, poisson, maxiter, nstart)
-plot_clustering(points, tb.cluster .+ 1, y)
+plot_clustering(points, tb.cluster, Y_labels)
 ```
 
 Les textes de la bible et du discours de Obama sont considérés comme des données aberrantes.
 
 ```@example obama
 tb = trimmed_bregman_clustering(rng, points, 6, 0.0, poisson, maxiter, nstart)
-plot_clustering(points, tb.cluster, y)
+plot_clustering(points, tb.cluster, Y_labels)
 ```
 
 On obtient 6 groupes correspondant aux textes des 4 auteurs différents,

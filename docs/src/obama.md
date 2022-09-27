@@ -158,8 +158,8 @@ mutuelle normalisée.
 
 Vraies etiquettes ou les textes issus de la bible et du discours de Obama ont la meme etiquette :
 ```@example obama
-true_labels = copy(y)
-true_labels[y .== 2] .= 1
+true_labels = copy(Y_labels)
+true_labels[Y_labels .== 2] .= 1
 ```
 
 Pour le k-means elague :

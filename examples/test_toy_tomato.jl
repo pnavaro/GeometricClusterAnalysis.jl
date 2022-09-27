@@ -5,7 +5,7 @@ using GeometricClusterAnalysis
 
 options = ( ms = 1, aspect_ratio=:equal, markerstrokewidth=0.1, label="")
 
-toy = readdlm(joinpath("toy_example_w_o_density.txt"))
+toy = readdlm(joinpath(@__DIR__, "toy_example_w_o_density.txt"))
 X = toy'
 kdtree = KDTree(X)
 

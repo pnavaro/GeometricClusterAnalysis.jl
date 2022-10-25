@@ -1,11 +1,9 @@
-# Données de loi de Poisson en dimension 1
+# 1 dimensionnal data from the Poisson distribution
 
-## Simulation des variables selon un mélange de lois de Poisson
+## Generation variables from a mixture of Poisson distributions
 
-La fonction `sample_poisson` permet de simuler des variables
-aléatoires selon un mélange de ``k`` lois de Poisson en dimension
-``d``, de paramètres donnés par la matrice `lambdas` de taille
-``k\times d``. Les probabilités associées à chaque composante du
+The function `sample_poisson` generates random variables according to a mixture of ``k`` Poisson distributions in dimension
+``d``. The parameters  are given in the ``k\times d``-matrix `lambdas`. Les probabilités associées à chaque composante du
 mélange sont données dans le vecteur `proba`.
 
 La fonction `sample_outliers` permet de simuler des variables

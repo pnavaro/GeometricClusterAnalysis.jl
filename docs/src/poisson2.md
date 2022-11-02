@@ -1,13 +1,10 @@
-# Données de loi de Poisson en dimension 2
+# Two-dimensional data from the Poisson distribution
 
-## Simulation des variables selon un mélange de lois de Poisson
+## Generation of variables from a mixture of Poisson distributions
 
-On génère un second échantillon de 950 points dans ``\mathcal{R}^2``.
-Les deux coordonnées de chaque point sont indépendantes, générées
-avec probabilité ``\frac13`` selon une loi de Poisson de paramètre
-``10``, ``20`` ou bien ``40``. Puis un échantillon de 50 données
-aberrantes de loi uniforme sur ``[0,120]\times[0,120]`` est ajouté
-à l'échantillon. On note `x` l’échantillon ainsi obtenu.
+We generate a second sample of 950 points in ``\mathcal{R}^2``.
+The two coordinates of each point are independent. They are sampled according to a Poisson distribution with parameter 
+``10``, ``20`` or``40`` (for every point, the parameter is chosen with probability ``\frac13``). Then, a sample of 50 outliers is generated according to the Uniform distribution on ``[0,120]\times[0,120]``. We denote by `x` the sample containing these 1000 points. 
 
 ```@example poisson2
 using GeometricClusterAnalysis
@@ -31,9 +28,9 @@ labels_true = vcat(labels, zeros(Int, n_outliers))
 scatter( x[1,:], x[2,:], c = labels_true, palette = :rainbow)
 ```
 
-##  Partitionnement des données sur un exemple
+## Data clustering on an example
 
-Pour partitionner les données, nous utiliserons les paramètres suivants.
+In order to cluster the data, we will use the following parameters.
 
 ```@example poisson2
 k = 3 
@@ -42,34 +39,30 @@ maxiter = 50
 nstart = 50 
 ```
 
-## Application de l'algorithme classique de ``k``-means élagué 
+## Using the classical algorithm : Trimmed ``k``-means [Cuesta-Albertos1997](@cite)
 
 [Cuesta-Albertos1997](@cite)
 
-Dans un premier temps, nous utilisons notre algorithme [`trimmed_bregman_clustering`](@ref) 
-avec le carré de la norme Euclidienne `euclidean`.
+Firstly, we use our algorithm [`trimmed_bregman_clustering`](@ref) 
+with the squared Euclidean distance `euclidean`.
 
 ```@example poisson2
 tb_kmeans = trimmed_bregman_clustering( rng, x, k, α, euclidean, maxiter, nstart )
 println("k-means : $(tb_kmeans.centers)")
 ```
 
-On observe trois groupes de même diamètre. Ainsi, de nombreuses
-données aberrantes sont associées au groupe des points générés selon
-la loi de Poisson de paramètre ``(10,10)``. Ce groupe était sensé
-avoir un diamètre plus faible que les groupes de points issus des
-lois de Poisson de paramètres ``(20,20)`` et ``(40,40)``.
+We see three clusters with the same diameter.
+So, multiple outliers are assigned to a cluster of points associated to the mean ``(10,10)``. This cluster was actually supposted to have a diameter smaller than for points generated from Poisson distributions with means ``(20,20)`` and ``(40,40)``.
 
 ```@example poisson2
 plot(tb_kmeans)
 ```
 
-## Choix de la divergence de Bregman associée à la loi de Poisson
+## Bregman divergence selection for the Poisson distribution
 
-Lorsque l'on utilise la divergence de Bregman associée à la loi de
-Poisson, les groupes sont de diamètres variables et sont particulièrement
-adaptés aux données. En particulier, les estimations `tB_Poisson$centers`
-des moyennes par les centres sont bien meilleures.
+When using the Bregman divergence associated to the Poisson distribution, the clusters have various diameters.
+These diameters are well suited for the data.
+Moreover, the estimators `tB_Poisson$centers` of the means are better..
 
 ```@example poisson2
 tb_poisson = trimmed_bregman_clustering( rng, x, k, α, poisson, maxiter, nstart )
@@ -80,12 +73,9 @@ println("poisson : $(tb_poisson.centers)")
 plot(tb_poisson)
 ```
 
-## Comparaison des performances
+## Performance comparison
 
-Nous mesurons directement la performance des deux partitionnements
-(avec le carré de la norme Euclidienne, et avec la divergence de
-Bregman associée à la loi de Poisson), à l'aide de l'information
-mutuelle normalisée.
+We measure the performance of the two clustering methods (with the squared Euclidean distance and with the Bregman divergence associated to the Poisson distribution), using the normalised mutual information (NMI).
 
 ```@example poisson2 
 import Clustering: mutualinfo
@@ -93,23 +83,17 @@ println("k-means : $(mutualinfo( tb_kmeans.cluster, labels_true, normed = true )
 println("poisson : $(mutualinfo( tb_poisson.cluster, labels_true, normed = true ))")
 ```
 
-L'information mutuelle normalisée est supérieure pour la divergence
-de Bregman associée à la loi de Poisson. Ceci illustre le fait que
-sur cet exemple, l'utilisation de la bonne divergence permet
-d'améliorer le partitionnement, par rapport à un ``k``-means élagué
-basique.
+The normalised mutual information is larger for the Bregman divergence associated to the Poisson distribution.
+This illustrates the fact that, for this example, using the correct divergence improves the clustering : the performance is better than for a classical trimmed `k`-means.
 
-## Mesure de la performance
+## Performance measurement
 
-Afin de s'assurer que la méthode avec la bonne divergence de Bregman
-est la plus performante, nous répétons l'expérience précédente
-`replications_nb` fois.
+In order to ensure that the method with the correct Bregman divergence outperforms Trimmed `k`-means, we replicate the experiment `replications` times.
 
-Pour ce faire, nous appliquons l'algorithme [`trimmed_bregman_clustering`](@ref),
-sur `replications_nb` échantillons de taille ``n = 1000``, sur des
-données générées selon la même procédure que l'exemple précédent.
+In particular, we replicate the algorithm [`trimmed_bregman_clustering`](@ref),
+ `replications` times, on samples of size ``n = 1000``, on data generated according to the aforementionned procedure.
 
-La fonction [`performance`](@ref) permet de le faire. 
+The function [`performance`](@ref) does it.
 
 ```@example poisson2
 sample_generator = (rng, n) -> sample_poisson(rng, n, d, lambdas, proba)
@@ -119,10 +103,7 @@ nmi_kmeans, _, _ = performance(n, n_outliers, k, α, sample_generator, outliers_
 nmi_poisson, _, _ = performance(n, n_outliers, k, α, sample_generator, outliers_generator, poisson)
 ```
 
-Les boîtes à moustaches permettent de se faire une idée de la
-répartition des NMI pour les deux méthodes différentes. On voit que
-la méthode utilisant la divergence de Bregman associée à la loi de
-Poisson est la plus performante.
+The boxplots show the NMI on the two different methods. The method using the Bregman divergence associated to the Poisson distribution outperfoms the Trimmed `k`-means method.
 
 ```@example poisson2
 using StatsPlots
@@ -131,9 +112,9 @@ boxplot( ones(100), nmi_kmeans, label = "kmeans" )
 boxplot!( fill(2, 100), nmi_poisson, label = "poisson" )
 ```
 
-## Sélection des paramètres ``k`` et ``\alpha``
+## Selection of the parameters ``k`` and ``\alpha``
 
-On garde le même jeu de données `x`.
+We still use the dataset `x`.
 
 ```@example poisson2
 vect_k = collect(1:5)
@@ -152,20 +133,13 @@ xlabel!("alpha")
 ylabel!("NMI")
 ```
 
-D'après la courbe, on voit qu'on gagne beaucoup à passer de 1 à 2
-groupes, puis à passer de 2 à 3 groupes. Par contre, on gagne très
-peu, en termes de risque,  à passer de 3 à 4 groupes ou à passer
-de 4 ou 5 groupes, car les courbes associées aux paramètres ``k =
-3``, ``k = 4`` et ``k = 5`` sont très proches. Ainsi, on choisit
-de partitionner les données en ``k = 3`` groupes.
+According to the graph, the risk decreases from 1 to 2 clusters, and as well from 2 to 3 clusters.
+However, there is no gain in terms of risk from 3 to 4 clusters or from 4 to 5 clusters. Indeed, the curves with parameters ``k = 3``, ``k = 4`` and ``k = 5`` are very close.
+So we will cluster the data into ``k = 3`` clusters.
 
-La courbe associée au paramètre ``k = 3`` diminue fortement puis à
-une pente qui se stabilise aux alentours de ``\alpha = 0.04``.
+The curve with parameter ``k = 3`` strongly decreases, with a slope that is stable around ``\alpha = 0.04``.
 
-Pour plus de précisions concernant le choix du paramètre ``\alpha``,
-nous pouvons nous concentrer que la courbe ``k = 3`` en augmentant
-la valeur de `nstart` et en nous concentrant sur les petites valeurs
-de ``\alpha``.
+For more details about the selection of the parameter ``\alpha``, we may focus on the curve ``k = 3``. We may increase the `nstart` parameter and focus on small values of ``\alpha``.
 
 ```@example poisson2
 vec_k = [3]
@@ -174,9 +148,9 @@ params_risks = select_parameters_nonincreasing(rng, vec_k, vec_α, x, poisson, m
 
 plot(vec_α, params_risks[1, :], markershape = :circle)
 ```
-On ne voit pas de changement radical de pente mais on voit que la
-pente se stabilise après ``\alpha = 0.04``. Nous choisissons le
-paramètre ``\alpha = 0.04``.
+
+There is no strong modification of the slope. Although the slope is stable after ``\alpha = 0.04``.
+Therefore, we select the parameter ``\alpha = 0.04``.
 
 ```@example poisson2
 k, α = 3, 0.04

@@ -5,7 +5,7 @@
 The function `sample_poisson` generates random variables according to a mixture of ``k`` Poisson distributions in dimension
 ``d``. The parameters  are given in the ``k\times d``-matrix `lambdas`. The probabilities of the mixture components are given in the vector `proba`.
 
-Thu function `sample_outliers` generates random variable uniformly on the hypercube ``[0,L]^d``. This function will be used to generate outliers.
+The function `sample_outliers` generates random variable uniformly on the hypercube ``[0,L]^d``. This function will be used to generate outliers.
 
 ```@docs
 GeometricClusterAnalysis.sample_poisson
@@ -71,7 +71,7 @@ Therefore, the estimators `tB_kmeans.centers` of the three means are not that sa
 plot(tb_kmeans)
 ```
 
-### Selection of the Bregman divergence for the Poisson distribution
+### Bregman divergence selection for the Poisson distribution
 
 When using the Bregman divergence associated to the Poisson distribution, the clusters have various diameters.
 These diameters are well suited for the data.
@@ -165,7 +165,7 @@ According to the graph, the risk decreases from 1 to 2 clusters, and as well fro
 However, there is no gain in terms of risk from 3 to 4 clusters or from 4 to 5 clusters. Indeed, the curves with parameters ``k = 3``, ``k = 4`` and ``k = 5`` are very close.
 So we will cluster the data into ``k = 3`` clusters.
 
-The curve with parameter ``k = 3`` stringly decreases, with a slope that is stable around ``\alpha = 0.04``.
+The curve with parameter ``k = 3`` strongly decreases, with a slope that is stable around ``\alpha = 0.04``.
 
 For more details about the selection of the parameter ``\alpha``, we may focus on the curve ``k = 3``. We may increase the `nstart` parameter and focus on small values of ``\alpha``.
 

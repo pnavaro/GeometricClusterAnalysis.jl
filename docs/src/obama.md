@@ -1,7 +1,7 @@
-# Application au partitionnement de textes d'auteurs
+# Application to authors texts clustering
 
-Les données des textes d'auteurs sont enregistrées dans la variable `df`.
-Les commandes utilisées pour l'affichage étaient les suivantes.
+Data from texts are stored in some variable `df`.
+The commands used for displaying data are the following.
 
 ```@example obama
 using CategoricalArrays
@@ -25,7 +25,7 @@ df = DataFrame(
 first(df, 10)
 ```
 
-La version transposée sera plus pratique
+The following transposed version will be more convenient.
 
 ```@example obama
 dft = DataFrame(
@@ -36,14 +36,14 @@ rename!(dft, String.(vcat("authors", values(df[:, 1]))))
 first(dft, 10)
 ```
 
-On ajoute un colonne `labels` avec le nom des auteurs
+We add the `labels` column with the authors's names
 
 ```@example obama
 transform!(dft, "authors" => ByRow(x -> first(split(x, "_"))) => "labels")
 first(dft, 10)
 ```
 
-Calcul de l'ACP
+Computing the Principal Component Analysis (PCA).
 ```@example obama
 X = Matrix{Float64}(df[!, 2:end])
 X_labels = dft[!, :labels]
@@ -52,7 +52,7 @@ pca = fit(PCA, X; maxoutdim = 50)
 X_pca = predict(pca, X)
 ```
 
-Recodage des `labels` pour l'analyse discriminante:
+Recoding `labels` for the linear discriminant analysis:
 ```@example obama
 Y_labels = recode(
     X_labels,
@@ -68,7 +68,7 @@ lda = fit(MulticlassLDA, X_pca, Y_labels; outdim=20)
 points = predict(lda, X_pca)
 ```
 
-Représentation des données:
+Representation of data:
 
 ```@example obama
 function plot_clustering( points, cluster, true_labels; axis = 1:2)
@@ -98,13 +98,10 @@ function plot_clustering( points, cluster, true_labels; axis = 1:2)
 end
 ```
 
+## Data clustering
 
-
-## Partitionnement des données
-
-Pour partitionner les données, nous utiliserons les paramètres
-suivants.  La vraie proportion de donnees aberrantes vaut : 20/209
-car il y a 15+5 textes issus de la bible et du discours de Obama.
+To cluster the data, we will use the following parameters.
+The true proportion of outliers is 20/209 since 15+5 texts were extracted from the bible or a speech from Obama.
 
 ```@example obama
 k = 4
@@ -112,9 +109,8 @@ alpha = 20/209
 maxiter = 50
 nstart = 50
 ```
-20/209 est la vraie proportion de donnees aberrantes vaut : 20/209 car il y a 15+5 textes issus de la bible et du discours de Obama.
 
-## Application de l'algorithme classique de ``k``-means élagué 
+## Application of the classical trimmed ``k``-means algorithm.
 
 [Cuesta-Albertos1997](@cite)
 
@@ -124,7 +120,7 @@ tb_kmeans = trimmed_bregman_clustering(rng, points, k, alpha, euclidean, maxiter
 plot_clustering(tb_kmeans.points, tb_kmeans.cluster, Y_labels)
 ```
 
-## Choix de la divergence de Bregman associée à la loi de Poisson
+## Using the Bregman divergence associated to the Poisson distribution
 
 ```@example obama
 function standardize!( points )
@@ -134,64 +130,45 @@ end
 standardize!(points)
 ```
 
-
-
 ```@example obama
 tb_poisson = trimmed_bregman_clustering(rng, points, k, alpha, poisson, maxiter, nstart)
 
 plot_clustering(points, tb_poisson.cluster, Y_labels)
 ```
-
-En utilisant la divergence de Bregman associée à la loi de Poisson,
-nous voyons que notre méthode de partitionnement fonctionne très
-bien avec les paramètres `k = 4` et `alpha = 20/209`. En effet, les
-données aberrantes sont bien les textes de Obama et de la bible.
-Par ailleurs, les autres textes sont plutôt bien partitionnés.
+By using the Bregman divergence associated to the Poisson distribution, we see that the clustering method is performant with the parameters `k = 4` and `alpha = 20/209`.
+Indeed, the outliers are the texts from the bible and from the Obama speech.
+Moreover, the other texts are mostly well clustered.
 
 
-## Comparaison des performances
+## Performance comparison
 
-Nous mesurons directement la performance des deux partitionnements
-(avec le carré de la norme Euclidienne, et avec la divergence de
-Bregman associée à la loi de Poisson), à l'aide de l'information
-mutuelle normalisée.
+We measure the performance of two clustering methods (the one with the squared Euclidean distance and the one with the Bregman divergence associated to the Poisson distribution). For this, we use the normalised mutual information (NMI).
 
-Vraies etiquettes ou les textes issus de la bible et du discours de Obama ont la meme etiquette :
+True labelling for which the texts from the bible and the Obama speech do have the same label:
 ```@example obama
 true_labels = copy(Y_labels)
 true_labels[Y_labels .== 2] .= 1
 ```
 
-Pour le k-means elague :
+For trimmed k-means :
 ```@example obama
 mutualinfo(true_labels, tb_kmeans.cluster, normed = true)
 ```
 
-Pour le partitionnement elague avec divergence de Bregman associee a la loi de Poisson :
+For trimmed clustering with the Bregman divergence associated to the Poisson distribution :
 
 ```@example obama
 mutualinfo(true_labels, tb_poisson.cluster, normed = true)
 ```
 
-L'information mutuelle normalisée est bien supérieure pour la
-divergence de Bregman associée à la loi de Poisson. Ceci illustre
-le fait que l'utilisation de la bonne divergence permet d'améliorer
-le partitionnement, par rapport à un ``k``-means élagué basique.
-En effet, le nombre d'apparitions d'un mot dans un texte d'une
-longueur donnée, écrit par un même auteur, peut-être modélisé par
-une variable aléatoire de loi de Poisson. L'indépendance entre les
-nombres d'apparition des mots n'est pas forcément réaliste, mais
-on ne tient compte que d'une certaine proportion des mots (les 50
-les plus présents). On peut donc faire cette approximation. On
-pourra utiliser la divergence associée à la loi de Poisson.
+The mutualy normalised information is larger for the Bregman divergence associated to the Poisson distribution. This illustrates the fact that using the correct Bregman divergence helps improving the clustering, in comparison to the classical trimmed ``k``-means algorithm.
+Indeed, the number of appearance of a word in a text of a fixed number of words, written by the same author, can be modelled by a random variable of Poisson distribution.
+The independance between the number of appearance of the words is not realistic. However, since we do consider only some words (the 50 more frequent words), we make this approximation. We will use the Bregman divergence associated to the Poisson distribution.
 
-### Sélection des paramètres ``k`` et ``\alpha``
+### Selecting the parameters ``k`` and ``\alpha``
 
-Affichons maintenant les courbes de risque en fonction de ``k`` et
-de ``\alpha`` pour voir si d'autres choix de paramètres auraient
-été judicieux. En pratique, c'est important de réaliser cette étape,
-car nous ne sommes pas sensés connaître le jeu de données, ni le
-nombre de données aberrantes.
+We display the risks curves as a function of ``k`` and ``\alpha``.
+In practive, it is important to realise this step since we are not supposed to know the data set in advance, nor the number of outliers.
 
 ```@example obama
 vect_k = collect(1:6)
@@ -210,39 +187,18 @@ xlabel!("alpha")
 ylabel!("NMI")
 ```
 
-Pour sélectionner les paramètres `k` et `alpha`, on va se concentrer
-sur différents segments de valeurs de `alpha`. Pour `alpha` supérieur
-à 0.15, on voit qu'on gagne beaucoup à passer de 1 à 2 groupes,
-puis à passer de 2 à 3 groupes. On choisirait donc `k = 3` et
-`alpha`de l'ordre de ``0.15`` correspondant au changement de pente
-de la courbe `k = 3`.
+In order to select the parameters `k` and `alpha`, we will focus onf the different possible values for `alpha`. For `alpha` not smaller than 0.15, we see that we gain a lot going from 1 to 3 groups and from 2 to 3 groups. Therefore, we choose `k=3` and `alpha` of order `0.15` corresponding to the slope change, for the curve `k=3`.
 
-Pour `alpha` inférieur à 0.15, on voit qu'on gagne beaucoup à passer
-de 1 à 2 groupes, à passer de 2 à 3 groupes, puis à passer de 3 à
-4 groupes. Par contre, on gagne très peu, en termes de risque,  à
-passer de 4 à 5 groupes ou à passer de 5 ou 6 groupes, car les
-courbes associées aux paramètres ``k = 4``, ``k = 5`` et ``k = 6``
-sont très proches. Ainsi, on choisit de partitionner les données
-en ``k = 4`` groupes.
+For `alpha` smaller than 0.15, we see that we gain a lot going from 1 to 2 groups, from 2 to 3 groups and to 3 to 4 groups. However, we do not gain in terms of risk going from 4 to 5 groups or from 5 to 6 groups. Indeed, the curves associated to the parameters ``k = 4``, ``k = 5`` and ``k = 6`` are very close. So, we cluster the data in ``k = 4`` groups.
 
-La courbe associée au paramètre ``k = 4`` diminue fortement puis a
-une pente qui se stabilise aux alentours de ``\alpha = 0.1``.
+The curve associated to the parameter ``k = 4`` strongly decreases with a slope that stabilises around ``\alpha = 0.1``.
 
-Enfin, puisqu'il y a un saut avant la courbe ``k = 6``, nous pouvons
-aussi choisir le paramètre `k = 6`, auquel cas `alpha = 0`, nous
-ne considérons aucune donnée aberrante.
+Then, since there is a slope jump at that curve ``k = 6``, we can choose the parameter `k = 6`, with `alpha = 0`. We do not consider any outlier.
 
-Remarquons que le fait que notre méthode soit initialisée avec des
-centres aléatoires implique que les courbes représentant le risque
-en fonction des paramètres ``k`` et ``\alpha`` puissent varier,
-assez fortement, d'une fois à l'autre. En particulier, le commentaire,
-ne correspond peut-être pas complètement à la figure représentée.
-Pour plus de robustesse, il aurait fallu augmenter la valeur de
-`nstart` et donc aussi le temps d'exécution. Ces courbes pour
-sélectionner les paramètres `k` et `alpha` sont donc surtout
-indicatives.
+Note that the fact that our method is initialised by random centers implies that the curves representing the risk as a function of ``k`` and ``\alpha`` vary, quite strongly, from one time to another one.
+Consequently, the comment abovementionned does not necessarily corresponds to the figure. For more robustness, we should have increased the value of `nstart`, and so, the execution time. These curves for the selection of the parameters `k` and `alpha` are mostly indicative.
 
-Finalement, voici les trois partitionnements obtenus à l'aide des 3 choix de paires de paramètres. 
+Finaly, here are three clustering obtained after choosing 3 pairs of parameters.
 
 ```@example obama
 maxiter = 50
@@ -251,19 +207,18 @@ tb = trimmed_bregman_clustering(rng, points, 3, 0.15, poisson, maxiter, nstart)
 plot_clustering(points, tb.cluster, Y_labels)
 ```
 
-Les textes de Twain, de la bible et du discours de Obama sont considérées comme des données aberrantes.
+The texts of Twain, the bible and the Obama speech are considered as outliers.
 
 ```@example obama
 tb = trimmed_bregman_clustering(rng, points, 4, 0.1, poisson, maxiter, nstart)
 plot_clustering(points, tb.cluster, Y_labels)
 ```
 
-Les textes de la bible et du discours de Obama sont considérés comme des données aberrantes.
+The texts from the bible and the Obama speech are considered as outliers.
 
 ```@example obama
 tb = trimmed_bregman_clustering(rng, points, 6, 0.0, poisson, maxiter, nstart)
 plot_clustering(points, tb.cluster, Y_labels)
 ```
 
-On obtient 6 groupes correspondant aux textes des 4 auteurs différents,
-aux textes de la bible et au discours de Obama.
+We obtain 6 groups corresponding to the texts of the 4 authors and to the texts from the bible and from the Obama speech.

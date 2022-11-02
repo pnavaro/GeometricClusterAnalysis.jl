@@ -1,22 +1,22 @@
-# Les divergences de Bregman
+# Bregman divergences
 
-## Définition de base
+## Basic definition
 
-Les divergences de Bregman sont des mesures de différence entre
-deux points. Elles dépendent d'une fonction convexe. Le carré de
-la distance Euclidienne est une divergence de Bregman. Les divergences
-de Bregman ont été introduites par Bregman [Bregman](@cite).
 
-Soit ``\phi``, une fonction strictement convexe et ``\mathcal{C}^1`` à valeurs réelles, définie sur un sous ensemble convexe ``\Omega`` de ``\mathcal{R}^d``. La *divergence de Bregman* associée à la fonction ``\phi`` est la fonction ``\mathrm{d}_\phi`` définie sur ``\Omega\times\Omega`` par :
+Bregman divergences measure a difference between two points. The depend on a convex function.
+The squared Euclidean distance is a Bregman divergence.
+The Bregman divergence have been introduced by Bregman [Bregman](@cite).
+
+Let ``\phi`` be a ``\mathcal{C}^1`` strictly convex real-valued function, defined on a convex subset ``\Omega`` of ``\mathcal{R}^d``. The *Bregman divergence* associated to the function ``\phi`` is the function ``\mathrm{d}_\phi`` defined on ``\Omega\times\Omega`` by :
 ``\forall x,y\in\Omega,\,{\rm d\it}_\phi(x,y) = \phi(x) - \phi(y) - \langle\nabla\phi(y),x-y\rangle.``
 
-La divergence de Bregman associée au carré de la norme Euclidienne, ``\phi:x\in\mathcal{R}^d\mapsto\|x\|^2\in\mathcal{R}`` est égale au carré de la distance Euclidienne : 
+The Bregman divergence associated to the square of the Euclidean norm, ``\phi:x\in\mathcal{R}^d\mapsto\|x\|^2\in\mathcal{R}`` coincides with the square of the Euclidean distance :
 
 ```math
 \forall x,y\in\mathcal{R}^d, {\rm d\it}_\phi(x,y) = \|x-y\|^2.
 ```
 
-Soit ``x,y\in\mathcal{R}^d``,
+Let ``x,y\in\mathcal{R}^d``,
 
 ```math
 \begin{aligned}
@@ -27,33 +27,34 @@ Soit ``x,y\in\mathcal{R}^d``,
 \end{aligned}
 ```
 
-## Le lien avec certaines familles de lois
+## The relation with some families of distributions
 
-Pour certaines distributions de probabilité définies sur ``\mathcal{R}``, d'espérance ``\mu\in\mathcal{R}``, la densité ou la fonction de probabilité (pour les variables discrètes), ``x\mapsto p_{\phi,\mu,f}(x)``, s'exprime en fonction d'une divergence de Bregman [Banerjee2005](@cite) entre ``x`` et l'espérance ``\mu`` :
+For some probability distributions defined on ``\mathcal{R}``, with expectation ``\mu\in\mathcal{R}``, the density or the probability distribution (for discrete random variables), ``x\mapsto p_{\phi,\mu,f}(x)``, is a function of a Bregman divergence [Banerjee2005](@cite) between ``x`` and the expectation ``\mu``:
+
 ```math
 \begin{equation}
 p_{\phi,\mu,f}(x) = \exp(-\mathrm{d}_\phi(x,\mu))f(x). 
 \label{eq:familleBregman}
 \end{equation}
 ```
-Ici, ``\phi`` est une fonction strictement convexe et ``f`` est une fonction positive.
+Here, ``\phi`` is strictly convex and ``f`` is a non negative function.
 
-Certaines distributions sur ``\mathcal{R}^d`` satisfont cette même propriété. C'est en particulier le cas des distributions de vecteurs aléatoires dont les coordonnées sont des variables aléatoires indépendantes de lois sur ``\mathcal{R}`` du type \eqref(eq:familleBregman).
+Some distribution on ``\mathcal{R}^d`` satisfy this property. This is the case of distributions of random vectors, which coordinates are independent random variables of distribution on ``\mathcal{R}`` of type \eqref(eq:familleBregman).
 
-Soit ``Y = (X_1,X_2,\ldots,X_d)``, un ``d``-échantillon de variables aléatoires indépendantes, de lois respectives ``p_{\phi_1,\mu_1,f_1},p_{\phi_2,\mu_2,f_2},\ldots, p_{\phi_d,\mu_d,f_d}``.
+Let ``Y = (X_1,X_2,\ldots,X_d)``, a ``d``-sample of independent random variables, with respective distributions ``p_{\phi_1,\mu_1,f_1},p_{\phi_2,\mu_2,f_2},\ldots, p_{\phi_d,\mu_d,f_d}``.
 
-Alors, la loi de ``Y`` est aussi du type \eqref{eq:familleBregman}.
+Then, the distribution of ``Y`` is of type \eqref{eq:familleBregman}.
 
-La fonction convexe associée est 
+The corresponding convex function is:
 ```math
 (x_1,x_2,\ldots, x_d)\mapsto\sum_{i = 1}^d\phi_i(x_i).
 ```
-La divergence de Bregman est définie par :
+The Bregman divergence is:
 ```math
 ((x_1,x_2,\ldots,x_d),(\mu_1,\mu_2,\ldots,\mu_d))\mapsto\sum_{i = 1}^d\mathrm{d}_{\phi_i}(x_i,\mu_i).
 ```
 
-Soit ``X_1,X_2,\ldots,X_d`` des variables aléatoires telles que décrites dans le théorème. Ces variables sont indépendantes, donc la densité ou la fonction de probabilité en ``(x_1,x_2,\ldots, x_d)\in\mathcal{R}^d`` est donnée par :
+Let ``X_1,X_2,\ldots,X_d`` be random variables, as in the theorem. These variables are independent. So, the density or the probability function at ``(x_1,x_2,\ldots, x_d)\in\mathcal{R}^d`` is given by:
 
 ```math
 \begin{align*}
@@ -62,14 +63,14 @@ p(x_1,x_2,\ldots, x_d) & = \prod_{i = 1}^dp_{\phi_i,\mu_i,f_i}(x_i)\\
 \end{align*}
 ```
 
-Par ailleurs, ``((x_1,x_2,\ldots,x_d),(\mu_1,\mu_2,\ldots,\mu_d))\mapsto\sum_{i = 1}^d\mathrm{d}_{\phi_i}(x_i,\mu_i)``
-est bien la divergence de Bregman associée à la fonction
+Moreover, ``((x_1,x_2,\ldots,x_d),(\mu_1,\mu_2,\ldots,\mu_d))\mapsto\sum_{i = 1}^d\mathrm{d}_{\phi_i}(x_i,\mu_i)``
+is a Bregman divergence associated to the following function:
 ```math
 \tilde\phi: (x_1,x_2,\ldots, x_d)\mapsto\sum_{i = 1}^d\phi_i(x_i).
 ```
 
-En effet, puisque `` \nabla\tilde\phi(y_1,y_2,\ldots, y_d) = (\phi_1'(y_1),\phi_2'(y_2),\ldots,\phi_d'(y_d))^T,``
-la divergence de Bregman associée à ``\tilde\phi``s'écrit :
+Indeed, since `` \nabla\tilde\phi(y_1,y_2,\ldots, y_d) = (\phi_1'(y_1),\phi_2'(y_2),\ldots,\phi_d'(y_d))^T,``
+the Bregman divergence associated to ``\tilde\phi`` is:
 ```math
 \begin{align*}
 \tilde\phi & (x_1,x_2,\ldots, x_d) - \tilde\phi(y_1,y_2,\ldots, y_d) - \langle\nabla\tilde\phi(y_1,y_2,\ldots, y_d), (x_1-y_1,x_2-y_2,\ldots, x_d-y_d)^T\rangle\\
@@ -78,25 +79,24 @@ la divergence de Bregman associée à ``\tilde\phi``s'écrit :
 \end{align*}
 ```
 
-## La divergence associée à la loi de Poisson
+## Bregman divergence associated to the Poisson distribution
 
-La loi de Poisson est une distribution de probabilité sur ``\mathcal{R}`` du type \eqref{eq:familleBregman}.
+The Poisson distribution is the probability distribution on ``\mathcal{R}`` of type \eqref{eq:familleBregman}.
 
-Soit ``\mathcal{P}(\lambda)`` la loi de Poisson de paramètre ``\lambda>0``.
-Soit ``p_\lambda`` sa fonction de probabilité.
+Let ``\mathcal{P}(\lambda)`` be the Poisson distribution with parameter ``\lambda>0``.
+Let ``p_\lambda`` be its probability distribution.
 
-Cette fonction est du type \eqref{eq:familleBregman} pour la fonction convexe
+This function is of type \eqref{eq:familleBregman} for the convex function
 ```math
 \phi: x\in\mathcal{R}_+^*\mapsto x\ln(x)\in\mathcal{R}.
 ```
-La divergence de Bregman associée, ``\mathrm{d}_{\phi}``, est définie pour tous ``x,y\in\mathcal{R}_+^*`` par :
+The corresponding Bregman divergence, ``\mathrm{d}_{\phi}``, is defined for every ``x,y\in\mathcal{R}_+^*`` by:
 ```math
 \mathrm{d}_{\phi}(x,y) = x\ln\left(\frac{x}{y}\right) - (x-y).
 ```
 
-Soit ``\phi: x\in\mathcal{R}_+^*\mapsto x\ln(x)\in\mathcal{R}``.
-La fonction ``\phi`` est strictement convexe, et la divergence de 
-Bregman associée à ``\phi`` est définie pour tous ``x,y\in\mathcal{R}_+`` par :
+Let ``\phi: x\in\mathcal{R}_+^*\mapsto x\ln(x)\in\mathcal{R}``.
+The function ``\phi`` is strictly convex, and the Bregman divergence associated to ``\phi`` is defined at every ``x,y\in\mathcal{R}_+`` by:
 
 ```math
 \begin{align*}
@@ -106,7 +106,7 @@ Bregman associée à ``\phi`` est définie pour tous ``x,y\in\mathcal{R}_+`` par
 \end{align*}
 ```
 
-Par ailleurs, 
+Moreover, 
 ```math
 \begin{align*}
 p_\lambda(x) & = \frac{\lambda^x}{x!}\exp(-\lambda)\\
@@ -116,19 +116,17 @@ p_\lambda(x) & = \frac{\lambda^x}{x!}\exp(-\lambda)\\
 \end{align*}
 ```
 
-avec
+with
 
 ```math
 f(x) = \frac{\exp(x\left(\ln(x) - 1\right))}{x!}.
 ```
 
-Le paramètre ``\lambda`` correspond bien à l'espérance de la variable ``X`` de loi ``\mathcal{P}(\lambda)``.
+The parameter ``\lambda`` corresponds to the expectation of ``X`` with distribution ``\mathcal{P}(\lambda)``.
 
-Ainsi, d'après le Théorème \@ref(thm:loiBregmanmultidim), la
-divergence de Bregman associée à la loi d'un ``d``-échantillon
-``(X_1,X_2,\ldots,X_d)`` de ``d`` variables aléatoires indépendantes
-de lois de Poisson de paramètres respectifs
-``\lambda_1,\lambda_2,\ldots,\lambda_d`` est :
+So, according to Theorem \@ref(thm:loiBregmanmultidim), the Bregman divergence associated to the distribution of a ``d``-sample
+``(X_1,X_2,\ldots,X_d)`` of ``d`` independent random variables with Poisson distributions with respective parameters
+``\lambda_1,\lambda_2,\ldots,\lambda_d`` is:
 
 ```math
 \begin{equation}
@@ -137,84 +135,69 @@ de lois de Poisson de paramètres respectifs
 \end{equation}
 ```
 
-## Partitionner des données à l'aide de divergences de Bregman
+## Clustering data with a Bregman divergence
 
-Soit ``\mathbb{X} = \{X_1, X_2,\ldots, X_n\}`` un échantillon de ``n`` points dans ``\mathcal{R}^d``.
+Let ``\mathbb{X} = \{X_1, X_2,\ldots, X_n\}`` be a sample of ``n`` points in ``\mathcal{R}^d``.
 
-Partitionner ``\mathbb{X}`` en ``k`` groupes revient à associer une
-étiquette dans ``[\![1,k]\!]`` à chacun des ``n`` points. La méthode
-de partitionnement avec une divergence de Bregman [Banerjee2005](@cite)
-consiste en fait à associer à chaque point un centre dans un
-dictionnaire ``\mathbf{c} = (c_1, c_2,\ldots c_k)\in\mathcal{R}^{d\times
-k}``.  Pour chaque point, le choix sera fait de sorte à minimiser
-la divergence au centre.
+Clustering ``\mathbb{X}`` in ``k`` groups boils down assigning a label in 
+ ``[\![1,k]\!]`` to each of the``n`` points. The clustering method with a Bregman divergence
+ [Banerjee2005](@cite)
+consists in assigning to each point a center in some dictionnary 
+ ``\mathbf{c} = (c_1, c_2,\ldots c_k)\in\mathcal{R}^{d\times
+k}``. For each point, the center chosen is the one minimising the divergence to the center.
 
-Le dictionnaire ``\mathbf{c} = (c_1, c_2,\ldots c_k)`` choisi est celui qui minimise le risque empirique
+The dictionnary ``\mathbf{c} = (c_1, c_2,\ldots c_k)`` is the one minimising the empirical risk 
 ```math
 R_n:((c_1, c_2,\ldots c_k),\mathbb{X})\mapsto\frac1n\sum_{i = 1}^n\gamma_\phi(X_i,\mathbf{c}) = \frac1n\sum_{i = 1}^n\min_{l\in[\![1,k]\!]}\mathrm{d}_\phi(X_i,c_l).
 ```
-Lorsque ``\phi = \|\cdot\|^2``, ``R_n`` est le risque associé à la méthode de partitionnement des ``k``-means [lloyd](@cite).
+When ``\phi = \|\cdot\|^2``, ``R_n`` is the risk associated to the ``k``-means [lloyd](@cite) clustering.
 
-## L'élagage ou le "Trimming"
+## Trimming
 
-Dans [Cuesta-Albertos1997](@cite), Cuesta-Albertos et al. ont défini
-et étudié une version élaguée du critère des ``k``-means. Cette
-version permet de se débarrasser d'une certaine proportion ``\alpha``
-des données, celles que l'on considère comme des données aberrantes.
-Nous pouvons facilement généraliser cette version élaguée aux
-divergences de Bregman.
+In [Cuesta-Albertos1997](@cite), Cuesta-Albertos et al. defined and studied a trimmed version of ``k``-means. This version remove a proportion ``\alpha`` of the data: the data considered as outliers. We can generalise this trimmed version of ``k``-means to the version with Bregman divergences.
 
-Pour ``\alpha\in[0,1]``, et ``a = \lfloor\alpha n\rfloor``, la
-partie entière inférieure de ``\alpha n``, la version ``\alpha``-élaguée
-du risque empirique est définie par :
+For ``\alpha\in[0,1]``, and ``a = \lfloor\alpha n\rfloor``, the lower integer part ``\alpha n``, the ``\alpha``-trimmed version of the empirical risk is defined by:
 
 ```math
 R_{n,\alpha}:(\mathbf{c},\mathbb{X})\in\mathcal{R}^{d\times k}\times\mathcal{R}^{d\times n}\mapsto\inf_{\mathbb{X}_\alpha\subset \mathbb{X}, |\mathbb{X}_\alpha| = n-a}R_n(\mathbf{c},\mathbb{X}_\alpha).
 ```
-Ici,  ``|\mathbb{X}_\alpha|`` représente le cardinal de  ``\mathbb{X}_\alpha``.
+Here,  ``|\mathbb{X}_\alpha|`` denotes the cardinality of  ``\mathbb{X}_\alpha``.
 
-Minimiser le risque élagué ``R_{n,\alpha}(\cdot,\mathbb{X})`` revient
-à sélectionner le sous-ensemble de ``\mathbb{X}`` de ``n-a`` points
-pour lequel le critère empirique optimal est le plus faible. Cela
-revient à choisir le sous-ensemble de ``n-a`` points des données
-qui peut être le mieux résumé par un dictionnaire de ``k`` centres,
-pour la divergence de Bregman ``\mathrm{d}_\phi``.
+Minimising the trimmed risk ``R_{n,\alpha}(\cdot,\mathbb{X})`` boils down selecting the subset  of ``\mathbb{X}`` of ``n-a`` points for which the optimal empirical risk is the lowest.
+This boils down selecting a subset of ``n-a`` data points, that are well represented by a dictionnary of ``k`` centers,
+for the Bregman divergence ``\mathrm{d}_\phi``.
 
-On note ``\hat{\mathbf{c}}_{\alpha}`` un minimiseur de ``R_{n,\alpha}(\cdot,\mathbb{X})``.
+We denote by ``\hat{\mathbf{c}}_{\alpha}`` a minimiser of ``R_{n,\alpha}(\cdot,\mathbb{X})``.
 
 
-## Implémentation de la méthode de partitionnement élagué des données, avec des divergences de Bregman
+## Implementation of the trimmed clustering with Bregman divergences method on data
 
-### L'algorithme de partitionnement sans élagage
+### The clustering algorithm without trimming
 
-L'algorithme de [lloyd](@cite) consiste à chercher un minimum
-``\hat{\mathbf{c}}`` local du risque ``R_n(\cdot,\mathbb{X})`` pour
-le critère des ``k``-means (c'est-à-dire, lorsque ``\phi =
-\|\cdot\|^2``). Il s'adapte aux divergences de Bregman quelconques.
-Voici le fonctionnement de l'algorithme.
+The algorithm of [lloyd](@cite) consists in searching for a local minimiser
+``\hat{\mathbf{c}}`` of the risk``R_n(\cdot,\mathbb{X})`` for the ``k``-means criterion (that is, when ``\phi =
+\|\cdot\|^2``). It adapts to any Bregman divergence.
+The algorithm is as follows.
 
-Après avoir initialisé un ensemble de ``k`` centres ``\mathbf{c}_0``,
-nous alternons deux étapes. Lors de la ``t``-ième itération, nous
-partons d'un dictionnaire ``\mathbf{c}_t`` que nous mettons à jour
-de la façon suivante :
+After initialising a set of ``k`` centres ``\mathbf{c}_0``,
+we alternate two steps. At the ``t``-th step, we start with a dictionnary ``\mathbf{c}_t`` that we update as follows:
 
-- *Décomposition de l'échantillon ``\mathbb{X}`` selon les cellules de Bregman-Voronoï de ``\mathbf{c}_t``* : On associe à chaque point ``x`` de l'échantillon ``\mathbb{X}``, son centre ``c\in\mathbf{c}_t`` le plus proche, i.e., tel que ``\mathrm{d}_\phi(x,c)`` soit le plus faible. On obtient ainsi ``k`` cellules, chacune associée à un centre ;
-- *Mise à jour des centres* : On remplace les centres du dictionnaire ``\mathbf{c}_t`` par les barycentres des points des cellules, ce qui donne un nouveau dictionnaire : ``\mathbf{c}_{t+1}``.
+- *Splitting the sample ``\mathbb{X}`` according to the Bregman-Voronoï cells of ``\mathbf{c}_t``* : We associate each sample point ``x`` from ``\mathbb{X}``, to its closest center ``c\in\mathbf{c}_t``, i.e., the center such that ``\mathrm{d}_\phi(x,c)`` is the smallest. We obtain ``k`` cells, each one associated to a center;
+- *Updating centers* : We replace the dictionnary centers ``\mathbf{c}_t`` with the centroids of the cell's points. This provides a new dictionnary: ``\mathbf{c}_{t+1}``.
 
-Une telle procédure assure la décroissance de la suite ``(R_n(\mathbf{c}_t,\mathbb{X}))_{t\in\mathcal{N}}``.
+Such a process ensures that the sequence ``(R_n(\mathbf{c}_t,\mathbb{X}))_{t\in\mathcal{N}}``  is non increasing.
 
-Soit ``(\mathbf{c}_t)_{t\in\mathcal{N}}``, la suite définie ci-dessus.
-Alors, pour tout ``t\in\mathcal{N}``,
+Let ``(\mathbf{c}_t)_{t\in\mathcal{N}}``, be the aforedefined sequence. Then, for every ``t\in\mathcal{N}``,
 ```math
 R_n(\mathbf{c}_{t+1},\mathbb{X})\leq R_n(\mathbf{c}_t,\mathbb{X}).
 ```
 
-D'après [Banerjee2005b](@cite), pour toute divergence de Bregman ``\mathrm{d}_\phi`` et tout ensemble de points ``\mathbb{Y} = \{Y_1,Y_2,\ldots,Y_q\}``, ``\sum_{i = 1}^q\mathrm{d}_\phi(Y_i,c)`` est minimale en ``c = \frac{1}{q}\sum_{i = 1}^qY_i``.
+According to [Banerjee2005b](@cite), for every Bregman divergence ``\mathrm{d}_\phi`` and every set of points ``\mathbb{Y} = \{Y_1,Y_2,\ldots,Y_q\}``, ``\sum_{i = 1}^q\mathrm{d}_\phi(Y_i,c)`` is minimal at ``c = \frac{1}{q}\sum_{i = 1}^qY_i``.
 
-Soit ``l\in[\![1,k]\!]`` et ``t\in\mathcal{N}``, notons ``\mathcal{C}_{t,l} = \{x\in\mathbb{X}\mid \mathrm{d}_\phi(x,c_{t,l}) = \min_{l'\in [\![1,k]\!]}\mathrm{d}_\phi(x,c_{t,l'})\}``. 
+For ``l\in[\![1,k]\!]`` and ``t\in\mathcal{N}``, set ``\mathcal{C}_{t,l} = \{x\in\mathbb{X}\mid \mathrm{d}_\phi(x,c_{t,l}) = \min_{l'\in [\![1,k]\!]}\mathrm{d}_\phi(x,c_{t,l'})\}``. 
 
-Posons ``c_{t+1,l} = \frac{1}{|\mathcal{C}_{t,l}|}\sum_{x\in\mathcal{C}_{t,l}}x``.
-Avec ces notations,
+Set ``c_{t+1,l} = \frac{1}{|\mathcal{C}_{t,l}|}\sum_{x\in\mathcal{C}_{t,l}}x``.
+With these notations,
 
 ```math
 \begin{align*}
@@ -225,46 +208,44 @@ R_n(\mathbf{c}_{t+1},\mathbb{X}) & = \frac1n\sum_{i = 1}^n\min_{l\in[\![1,k]\!]}
 \end{align*}
 ```
 
-### L'algorithme de partitionnement avec élagage
+### The clustering algorithm with a trimming step
 
-Il est aussi possible d'adapter l'algorithme élagué des ``k``-means
-de [Cuesta-Albertos1997](@cite). Nous décrivons ainsi cet algorithme,
-permettant d'obtenir un minimum local du critère
-``R_{n,\alpha}(.,\mathbb{X})`` :
+It is also possible to adapt the trimmed ``k``-means algorithm
+of [Cuesta-Albertos1997](@cite). We describe the algorithm that gives a local minimum of the criterion ``R_{n,\alpha}(.,\mathbb{X})``:
 
 
 ``\qquad`` 
-**INPUT:**  ``\mathbb{X}`` un nuage de ``n`` points ; ``k\in[\![1,n]\!]`` ; ``a\in[\![0,n-1]\!]`` ;  
+**INPUT:**  ``\mathbb{X}`` a sample of ``n`` points ; ``k\in[\![1,n]\!]`` ; ``a\in[\![0,n-1]\!]`` ;  
 
 ``\qquad`` 
-Tirer uniformément et sans remise ``c_1``, ``c_2``, ``\ldots``, ``c_k`` de ``\mathbb{X}``.
+Draw uniformly without replacement ``c_1``, ``c_2``, ``\ldots``, ``c_k`` from ``\mathbb{X}``.
 
 ``\qquad`` 
-**WHILE** les ``c_i`` varient :
+**WHILE** the ``c_i`` vary:
 
 ``\qquad\qquad``     
-**FOR** ``i`` dans ``[\![1,k]\!]`` :
+**FOR** ``i`` in ``[\![1,k]\!]``:
 
 ``\qquad\qquad\qquad``         
-Poser ``\mathcal{C}(c_i)=\{\}`` ;
+Set ``\mathcal{C}(c_i)=\{\}`` ;
 
 ``\qquad\qquad``     
-**FOR** ``j`` dans ``[\![1,n]\!]`` :
+**FOR** ``j`` in ``[\![1,n]\!]`` :
 
 ``\qquad\qquad\qquad``         
-Ajouter ``X_j`` à la cellule ``\mathcal{C}(c_i)`` telle que ``\forall l\neq i,\,\mathrm{d}_{\phi}(X_j,c_i)\leq\mathrm{d}_\phi(X_j,c_l)\,`` ;
+Add ``X_j`` to the cell ``\mathcal{C}(c_i)`` such that ``\forall l\neq i,\,\mathrm{d}_{\phi}(X_j,c_i)\leq\mathrm{d}_\phi(X_j,c_l)\,`` ;
 
 ``\qquad\qquad\qquad``         
-Poser ``c(X) = c_i`` ;
+Set ``c(X) = c_i`` ;
 
 ``\qquad\qquad``     
-Trier ``(\gamma_\phi(X) = \mathrm{d}_\phi(X,c(X)))`` pour ``X\in \mathbb{X}`` ;
+Draw ``(\gamma_\phi(X) = \mathrm{d}_\phi(X,c(X)))`` for ``X\in \mathbb{X}`` ;
 
 ``\qquad\qquad``     
-Enlever les ``a`` points ``X`` associés aux ``a`` plus grandes valeurs de ``\gamma_\phi(X)``, de leur cellule ``\mathcal{C}(c(X))`` ;
+Remove the ``a`` points ``X`` associated to the ``a`` largest values for ``\gamma_\phi(X)``, from their cell ``\mathcal{C}(c(X))`` ;
 
 ``\qquad``     
-**FOR** ``i`` dans ``[\![1,k]\!]`` :
+**FOR** ``i`` in ``[\![1,k]\!]`` :
 
 ``\qquad\qquad``         
 ``c_i={{1}\over{|\mathcal{C}(c_i)|}}\sum_{X\in\mathcal{C}(c_i)}X`` ;
@@ -272,100 +253,83 @@ Enlever les ``a`` points ``X`` associés aux ``a`` plus grandes valeurs de ``\ga
 ``\qquad`` 
 **OUTPUT:** ``(c_1,c_2,\ldots,c_k)``;
 
-Ce code permet de calculer un minimum local du risque élagué ``R_{n,\alpha = \frac{a}{n}}(\cdot,\mathbb{X})``.
+This code is to compute a local minimiser of the trimmed risk ``R_{n,\alpha = \frac{a}{n}}(\cdot,\mathbb{X})``.
 
-En pratique, il faut ajouter quelques lignes dans le code pour :
+In practice, we need to add a few lines to the algorithm:
 
-- traiter le cas où des cellules se vident,
-- recalculer les étiquettes des points et leur risque associé, à partir des centres ``(c_1,c_2,\ldots,c_k)`` en sortie d'algorithme,
-- proposer la possibilité de plusieurs initialisations aléatoires et retourner le dictionnaire pour lequel le risque est minimal,
-- limiter le nombre d'itérations de la boucle **WHILE**,
-- proposer en entrée de l'algorithme un dictionnaire ``\mathbf{c}``, à la place de ``k``, pour une initialisation non aléatoire,
-- éventuellement paralléliser...
+- deal with empty cells,
+- recompute the labels of the points and their risk, from the centers ``(c_1,c_2,\ldots,c_k)`` at the end of the algorithm,
+- add the possibility of several different random initializations and send back a dictionnary for which the risk is minimal,
+- limit the number of iterations in the **WHILE** loop,
+- add a possible argument for the algorithm : a dictionnary ``\mathbf{c}``, instead of the number ``k`` used for a random initialization,
+- parallelize...
 
-## L'implémentation
+## Implementation
 
-### Quelques divergences de Bregman
+### Some Bregman divergences
 
-La fonction [`poisson`](@ref) calcule la divergence de
-Bregman associée à la loi de Poisson entre `x`et `y` en dimension
+The function [`poisson`](@ref) computes the Bregman divergence associated to the Poisson distribution, between `x` and `y` in dimension
 ``d\in^*``. \eqref(eq:divBregmanPoisson)
 
-La fonction [`euclidean`](@ref) calcule le carré de la norme Euclidienne entre `x` et `y` en dimension ``d\in\mathcal{N}^*``.
+The function [`euclidean`](@ref) computes the squared Euclidean norm between `x` and `y` in dimension ``d\in\mathcal{N}^*``.
 
-### Le code pour le partitionnement élagué avec divergence de Bregman
+### Code for Trimmed Bregman Clustering
 
-La méthode de partitionnement élagué avec une divergence de Bregman est codée dans la fonction suivante, 
-[`trimmed_bregman_clustering`](@ref), dont les arguments sont :
+The trimmed Bregman clustering method is as follows, 
+[`trimmed_bregman_clustering`](@ref), which arguments are:
 
-- `x` : une matrice de taille ``n\times d`` représentant les coordonnées des ``n`` points de dimension ``d`` à partitionner,
-- `centers` : un ensemble de centres ou un nombre ``k`` correspondant au nombre de groupes,
-- `alpha` : dans ``[0,1[``, la proportion de points de l'échantillon à retirer ; par défaut 0 (pas d'élagage),
-- `divergence_bregman` : la divergence à utiliser ; par défaut `euclidean`, le carré de la norme Euclidienne (on retrouve le k-means élagué de [Cuesta-Albertos1997](@cite), `tkmeans`),
-- `maxiter` : le nombre maximal d'itérations,
-- `nstart` : le nombre d'initialisations différentes de l'algorithme (on garde le meilleur résultat).
+- `x` : a ``n\times d``-matrix representing the coordinates of the ``n`` ``d``-dimensional points to cluster,
+- `centers` : a set of centers or a number ``k`` corresponding to the numbers of clusters,
+- `alpha` : in ``[0,1[``, the proportion of sample points to remove; default value is 0 (no trimming),
+- `divergence_bregman` : the divergence to be used ; default value is `euclidean`, the squared Euclidean norm (it coincides with Trimmed k-means [Cuesta-Albertos1997](@cite), `tkmeans`),
+- `maxiter` : maximal number of iterations,
+- `nstart` : number of initializations of the algorithm (we keep the best result at the end).
 
-La sortie de cette fonction est une liste dont les arguments sont :
 
-- `centers` : matrice de taille ``d\times k`` dont les ``k`` colonnes représentent les ``k`` centres des groupes,
-- `cluster` : vecteur d'entiers dans ``[\![0,k]\!]`` indiquant l'indice du groupe auquel chaque point (chaque ligne) de `x` est associé, l'étiquette ``0`` est assignée aux points considérés comme des données aberrantes,
-- `risk` : moyenne des divergences des points de `x` (non considérés comme des données aberrantes) à leur centre associé,
-- `divergence` : le vecteur des divergences des points de `x` à leur centre le plus proche dans `centers`, pour la divergence `divergence_bregman`.
+The output of this function is a list which arguments are:
+
+- `centers` : ``d\times k``-matrix which ``k`` columns represent the ``k`` centers of the groups,
+- `cluster` : a vector of integers in ``[\![0,k]\!]`` indicating the index of the group to which each point (each line) of `x` is associated. The label ``0`` is assigned to points considered as outliers,
+- `risk` : mean of the divergences of the points `x` (not considered as outliers) to their center,
+- `divergence` : the vector of divergences of the points `x` to their nearest center in  `centers`, for the divergence `divergence_bregman`.
 
 ```@docs
 trimmed_bregman_clustering
 ```
 
-### Sélection des paramètres ``k`` et ``\alpha``
+### Selecting the parameters ``k`` and ``\alpha``
 
-Le paramètre ``\alpha\in[0,1)`` représente la proportion de points
-des données à retirer. Nous considérons que ce sont des données
-aberrantes et leur attribuons l'étiquette ``0``.
+The parameter ``\alpha\in[0,1)`` represents the proportion of data points to remove. 
+We consider that these data are outliers and give them the label ``0``.
 
-Afin de sélectionner le meilleur paramètre ``\alpha``, il suffit,
-pour une famille de paramètres ``\alpha``, de calculer le coût
-optimal ``R_{n,\alpha}(\hat{\mathbf{c}}_\alpha)`` obtenu à partir
-du minimiseur local ``\hat{\mathbf{c}}_\alpha`` de ``R_{n,\alpha}``
-en sortie de l'algorithme [`trimmed_bregman_clustering`](@ref).
+In order to select the best parameter ``\alpha``, it suffices, for a set of parameters ``\alpha``, to compute the optimal cost ``R_{n,\alpha}(\hat{\mathbf{c}}_\alpha)`` obtained at a local minimum ``\hat{\mathbf{c}}_\alpha`` of ``R_{n,\alpha}``
+out of the algorithm [`trimmed_bregman_clustering`](@ref).
 
-Nous représentons ensuite ``R_{n,\alpha}(\hat{\mathbf{c}}_\alpha)``
-en fonction de ``\alpha`` sur un graphique. Nous pouvons représenter
-de telles courbes pour différents nombres de groupes, ``k``.  Une
-heuristique permettra de choisir les meilleurs paramètres ``k`` et
+Then, we represent ``R_{n,\alpha}(\hat{\mathbf{c}}_\alpha)``
+as a function of ``\alpha`` on a graphics. We can represent such curves for different number of clusters, ``k``.  A heuristic will be used to select the best parameters ``k`` and
 ``\alpha``.
 
-La fonction [`GeometricClusterAnalysis.select_parameters`](@ref), parallélisée, permet de calculer
-le critère optimal ``R_{n,\alpha}(\hat{\mathbf{c}}_\alpha)`` pour
-différentes valeurs de ``k`` et de ``\alpha``, sur les données `x`.
+The function [`GeometricClusterAnalysis.select_parameters`](@ref), is parallelised. It computes the optimal criterion ``R_{n,\alpha}(\hat{\mathbf{c}}_\alpha)`` for different values of ``k`` and ``\alpha``, on the data `x`.
 
 ```@docs
 GeometricClusterAnalysis.select_parameters
 ```
 
-## Mise en œuvre de l'algorithme
+## Application of the algorithm
 
-Nous étudions les performances de notre méthode de partitionnement
-de données élagué, avec divergence de Bregman, sur différents jeux
-de données. En particulier, nous comparons l'utilisation du carré
-de la norme Euclidienne et de la divergence de Bregman associée à
-la loi de Poisson. Rappelons que notre méthode avec le carré de la
-norme Euclidienne coïncide avec la méthode de "trimmed ``k``-means"
+We study the performances of the trimmed Bregman clustering method on several point clouds.
+In particular, we compare the use of the squared Euclidean norm and the Bregman divergence associated to the Poisson distribution.
+Recall that our method with the squared Euclidean norm coincides with "Trimmed
+``k``-means"
 [Cuesta-Albertos1997](@cite).
 
-Nous appliquons notre méthode à trois types de jeux de données :
+We apply this method to three different datasets:
 
-- Un mélange de trois lois de Poisson en dimension 1, de paramètres ``\lambda\in\{10,20,40\}``, corrompues par des points générés uniformément sur ``[0,120]`` ;
-- Un mélange de trois lois de Poisson en dimension 2 (c'est-à-dire, la loi d'un couple de deux variables aléatoires indépendantes de loi de Poisson), de paramètres ``(\lambda_1,\lambda_2)\in\{(10,10),(20,20),(40,40)\}``, corrompues par des points générés uniformément sur ``[0,120]\times[0,120]`` ;
-- Les données des textes d'auteurs.
+- A mixture of three 1-dimensional Poisson distributions, with parameters ``\lambda\in\{10,20,40\}``, corrupted with points uniformly sampled on ``[0,120]``;
+- A mixture of three 2-dimensional Poisson distributions (that is, the distribution of a couple of two independent random variables with Poisson distribution), with parameters ``(\lambda_1,\lambda_2)\in\{(10,10),(20,20),(40,40)\}``, corrupted with points uniformly sampled on ``[0,120]\times[0,120]``;
+- Authors texts.
 
-Les poids devant chaque composante des mélanges des lois de Poisson
-sont ``\frac13``, ``\frac13``, ``\frac13``. Ce qui signifie que
-chaque variable aléatoire a une chance sur trois d'avoir été générée
-selon chacune des trois lois de Poisson.
+The weights of the three components of the Poisson mixtures are all ``\frac13``. This means that each random variable has a probability ``\frac13`` to be generated according to each Poisson distribution.
 
-Nous allons donc comparer l'utilisation de la divergence de Bregman
-associée à la loi de Poisson à celle du carré de la norme Euclidienne,
-en particulier à l'aide de l'information mutuelle normalisée (NMI).
-Nous allons également appliquer une heuristique permettant de choisir
-les paramètres `k` (nombre de groupes) et `alpha` (proportion de
-données aberrantes) à partir d'un jeu de données.
+We will compare the use of the Bregman divergence associated to the Poisson distribution and the squared Euclidean distance. In particular, for this comparison, we will use the normalised mutual information (NMI). We will also provide some heuristic to choose the parameters 
+`k` (nomber of clusters) and `alpha` (proportion of outliers) from a dataset.

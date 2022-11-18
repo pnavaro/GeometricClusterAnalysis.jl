@@ -10,6 +10,7 @@ Julia implementation of data clustering using geometric methods.
 ## Installation
 
 ```julia
+import Pkg
 Pkg.add("https://github.com/pnavaro/GeometricClusterAnalysis.jl")
 ```
 

@@ -126,8 +126,6 @@ function graph_radius(P,r)
 end
 
 
-# MAIN
-
 function tomato(P, birth, graph, Stop=Inf, Seuil = Inf)
 
   n = size(P,1)

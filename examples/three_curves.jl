@@ -3,7 +3,6 @@ using GeometricClusterAnalysis
 using LinearAlgebra
 using Plots
 using Random
-using RCall
 using Statistics
 using Test
 
@@ -60,8 +59,7 @@ color_final = color_points_from_centers(data.points, k, nsignal, dist_func, sp_h
 
 remain_indices = sp_hc.Indices_depart
 
-ellipsoids(data.points, remain_indices, color_final, dist_func, 0.0)
-png("ellipsoids")
+ellipsoids(data.points, remain_indices, color_final, color_final, dist_func, 0 )
 
 a = data.colors[data.colors.>0]
 b = color_final[color_final.>0]

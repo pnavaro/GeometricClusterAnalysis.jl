@@ -2,7 +2,7 @@ using GeometricClusterAnalysis
 using LinearAlgebra
 using Plots
 using Random
-using RCall
+#using RCall
 using Statistics
 using Test
 

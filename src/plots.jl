@@ -34,15 +34,15 @@ end
 
 @recipe function f(e::Ellipsoids)
 
-    x, y, centers, col, colors, covariances, weights, α = _ellipsoids_args(e.args)
+    x, y, fillcolors, pointcolors, centers, weights, covariances, α = _ellipsoids_args(e.args)
+
+    title := @sprintf("time = %7.3f", α)
 
     @series begin
         seriestype := :scatter
-        x := x
-        y := y
-        color := colors
+        color := pointcolors
         label := "data"
-        ()
+        x, y
     end
 
     @series begin
@@ -56,7 +56,7 @@ end
 
     θ = range(0, 2π; length = 100)
 
-    for i in eachindex(weights)
+    for i in eachindex(centers)
 
         μ = centers[i]
         Σ = covariances[i]
@@ -68,17 +68,12 @@ end
 
         @series begin
             primary := false
-            fillcolor := col[i]
+            fillcolor := fillcolors[i]
             seriesalpha --> 0.3
             seriestype := :shape
             μ[1] .+ A[1, :], μ[2] .+ A[2, :]
         end
     end
-
-    title := @sprintf("time = %7.3f", α)
-    label := :none
-    ()
-
 
 end
 
@@ -86,28 +81,28 @@ function _ellipsoids_args(
     (
         points,
         indices,
-        col,
-        colors,
+        fillcolors,
+        pointcolors,
         dist_func,
         α,
     )::Tuple{Matrix{Float64},Vector{Int},Vector{Int},Vector{Int},KpResult,Real},
 )
 
-    pointsx = points[1, :]
-    pointsy = points[2, :]
-    centers = dist_func.centers
-    covariances = dist_func.Σ
-    weights = dist_func.weights
+    x = points[1, :]
+    y = points[2, :]
+    μ = dist_func.centers
+    ω = dist_func.weights
+    Σ = dist_func.Σ
 
-    pointsx, pointsy, centers, col, colors, covariances, weights, α
+    x, y, fillcolors, pointcolors, μ, ω, Σ, α
 
 end
 
 function _ellipsoids_args(
     (
         points,
-        col,
-        colors,
+        fillcolors,
+        pointcolors,
         μ,
         ω,
         Σ,
@@ -123,10 +118,10 @@ function _ellipsoids_args(
     },
 )
 
-    pointsx = points[1, :]
-    pointsy = points[2, :]
+    x = points[1, :]
+    y = points[2, :]
 
-    pointsx, pointsy, μ, col, colors, Σ, ω, α
+    x, y, fillcolors, pointcolors, μ, ω, Σ, α
 
 end
 

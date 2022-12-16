@@ -16,7 +16,7 @@ import Pkg
 Pkg.add("https://github.com/pnavaro/GeometricClusterAnalysis.jl")
 ```
 
-You can run the example [three curves](examples/three-curves.jl)
+You can run the example [three curves](https://github.com/pnavaro/GeometricClusterAnalysis.jl/examples/)
 
 ```julia
 include("three-curves.jl")

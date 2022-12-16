@@ -9,13 +9,20 @@ Julia implementation of data clustering using geometric methods.
 
 ## Installation
 
+Download [Julia](https://julialang.org/downloads/). Install the package with
+
 ```julia
+import Pkg
 Pkg.add("https://github.com/pnavaro/GeometricClusterAnalysis.jl")
 ```
 
+You can run the example [three curves](https://github.com/pnavaro/GeometricClusterAnalysis.jl/blob/master/examples/three_curves.jl)
+
 ```julia
-# import Pkg; Pkg.instantiate() ; using Pkg ; Pkg.activate(".")
+include("three-curves.jl")
 ```
+
+![](https://pnavaro.github.io/GeometricClusterAnalysis.jl/dev/assets/three-curves.gif)
 
 ## Clustering Algorithms
 

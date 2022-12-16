@@ -21,8 +21,8 @@ nnoise = 200     # number of outliers
 dim = 2          # dimension of the data
 sigma = 0.02     # standard deviation for the additive noise
 nb_clusters = 3  # number of clusters
-k = 10           # number of nearest neighbors
-c = 50           # number of ellipsoids
+k = 15           # number of nearest neighbors
+c = 30           # number of ellipsoids
 iter_max = 100   # maximum number of iterations of the algorithm kPLM
 nstart = 10      # number of initializations of the algorithm kPLM
 
@@ -73,7 +73,7 @@ color_final = color_points_from_centers( data.points, k, nsignal, df, sp_hc)
 
 remain_indices = sp_hc.Indices_depart
 
-ellipsoids(data.points, remain_indices, color_final, df, 0 )
+ellipsoids(data.points, remain_indices, color_final, color_final, df, 0 )
 ```
 
 
@@ -89,16 +89,7 @@ Temps = hc.Temps_step
 remain_indices = hc.Indices_depart
 length_ri = length(remain_indices)
 
-matrices = [df.Σ[i] for i in remain_indices]
-remain_centers = [df.centers[i] for i in remain_indices]
-
-color_points, μ, ω, dists = colorize( data.points, k, nsignal, remain_centers, matrices)
-
-c = length(ω)
-remain_indices_2 = vcat(remain_indices, zeros(Int, c + 1 - length(remain_indices)))
-color_points .+= (color_points.==0) .* (c + 1)
-color_points .= [remain_indices_2[c] for c in color_points]
-color_points .+= (color_points.==0) .* (c + 1)
+color_points, dists = subcolorize(data.points, nsignal, df, remain_indices)
 
 Colors = [return_color(color_points, col, remain_indices) for col in Col]
 
@@ -114,9 +105,9 @@ end
 
 ncolors = length(Colors)
 anim = @animate for i = [1:ncolors-1; Iterators.repeated(ncolors-1,30)...]
-    ellipsoids(data.points, Colors[i], μ, ω, Σ, Temps[i]; markersize=1)
-    xlims!(-2, 4)
-    ylims!(-2, 2)
+    ellipsoids(data.points, Col[i], Colors[i], μ, ω, Σ, Temps[i]; markersize=5)
+    xlims!(-2, 3)
+    ylims!(-2, 3)
 end
 
 gif(anim, "assets/three-curves.gif", fps = 10); nothing # hide

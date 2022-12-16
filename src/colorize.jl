@@ -154,8 +154,8 @@ distances tordues" de tous les points de P, à tous les centres dont les indices
 On leur associe le centre le plus proche.
 """
 function subcolorize(points, signal, result, Indices_depart)
-# To be used when some centers are removed, 
-# after using hierarchical_clustering_lem and before using return_color.
+    # To be used when some centers are removed, 
+    # after using hierarchical_clustering_lem and before using return_color.
     dimension, n_points = size(points)
     n_centers = length(result.centers)
 
@@ -172,7 +172,7 @@ function subcolorize(points, signal, result, Indices_depart)
 
     #ω[(1:n_centers) .∈ Ref(Indices_depart)] .= Inf
     not_removed = (1:n_centers) .∈ Ref(Indices_depart)
-    ω = [(not_removed[j] ? ω[j] : Inf) for j in 1:n_centers]
+    ω = [(not_removed[j] ? ω[j] : Inf) for j = 1:n_centers]
 
     # Update colors
 

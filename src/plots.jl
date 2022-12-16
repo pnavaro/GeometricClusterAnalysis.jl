@@ -34,14 +34,15 @@ end
 
 @recipe function f(e::Ellipsoids)
 
-    x, y, centers, col, colors, covariances, weights, α = _ellipsoids_args(e.args)
+    x, y, fillcolors, pointcolors, centers, weights, covariances, α = _ellipsoids_args(e.args)
+
+    title := @sprintf("time = %7.3f", α)
 
     @series begin
         seriestype := :scatter
-        x := x
-        y := y
-        color := colors
-        ()
+        color := pointcolors
+        label := "data"
+        x, y
     end
 
     @series begin
@@ -49,12 +50,13 @@ end
         markershape := :star
         markercolor := :yellow
         markersize := 5
+        label := "centers"
         getindex.(centers, 1), getindex.(centers, 2)
     end
 
     θ = range(0, 2π; length = 100)
 
-    for i in eachindex(weights)
+    for i in eachindex(centers)
 
         μ = centers[i]
         Σ = covariances[i]
@@ -66,17 +68,12 @@ end
 
         @series begin
             primary := false
-            fillcolor := col[i]
+            fillcolor := fillcolors[i]
             seriesalpha --> 0.3
             seriestype := :shape
             μ[1] .+ A[1, :], μ[2] .+ A[2, :]
         end
     end
-
-    title := @sprintf("time = %7.3f", α)
-    label := :none
-    ()
-
 
 end
 
@@ -84,28 +81,28 @@ function _ellipsoids_args(
     (
         points,
         indices,
-        col,
-        colors,
+        fillcolors,
+        pointcolors,
         dist_func,
         α,
     )::Tuple{Matrix{Float64},Vector{Int},Vector{Int},Vector{Int},KpResult,Real},
 )
 
-    pointsx = points[1, :]
-    pointsy = points[2, :]
-    centers = dist_func.centers
-    covariances = dist_func.Σ
-    weights = dist_func.weights
+    x = points[1, :]
+    y = points[2, :]
+    μ = dist_func.centers
+    ω = dist_func.weights
+    Σ = dist_func.Σ
 
-    pointsx, pointsy, centers, col, colors, covariances, weights, α
+    x, y, fillcolors, pointcolors, μ, ω, Σ, α
 
 end
 
 function _ellipsoids_args(
     (
         points,
-        col,
-        colors,
+        fillcolors,
+        pointcolors,
         μ,
         ω,
         Σ,
@@ -121,64 +118,12 @@ function _ellipsoids_args(
     },
 )
 
-    pointsx = points[1, :]
-    pointsy = points[2, :]
+    x = points[1, :]
+    y = points[2, :]
 
-    pointsx, pointsy, μ, col, colors, Σ, ω, α
+    x, y, fillcolors, pointcolors, μ, ω, Σ, α
 
 end
-
-"""
-     ellipsoids(points, indices, colors, dist_func, α)
-
-P a matrix with 2 columns.
-- color_is_numeric = true if color contains numerical values. (the colors of points are given by these values)
-- color_is_numeric = false if color contains integers : the cluster's label. (the points are colored according to their cluster)
-This corresponds to the SUBLEVEL SET ``f^{-1}(\\alpha)`` of the function
-
-```math
-  f:x \\rightarrow min_{i = 1..c} ( \\|x-centers_i\\|^2_{\\Sigma_i} + weights_i )
-```
-with ``\\|x\\|^2_{\\Sigma} = x^T \\Sigma^{-1} x``, the squared Mahalanobis norm of x.
-
-
-- fill = TRUE : ellipses are filled with the proper color
-- centers : matrix of size cx2
-- alpha : a numeric
-- weights : vector of numerics of size c
-- Sigma : list of c 2x2-matrices
-
-The ellipses are directed by the eigenvectors of the matrices in Sigma, with :
-  - semi-major axis : ``\\sqrt(beta*v1)``
-  - semi-minor axis : ``\\sqrt(beta*v2)``
-  - with v1 and v2 the largest and smallest eigenvalues of the matrices in Sigma
-  - beta = the positive part of alpha - weights
-"""
-#function plot_ellipsoids(data, indices, color, dist_func, α)
-#
-#  p = plot(size=(600,600), aspect_ratio = :equal, legend = false)
-#
-#  for (k,c) in enumerate(sort(unique(color)))
-#      color[ color .== c ] .= k-1
-#  end
-#  scatter!(p, data.points[1,:], data.points[2,:], c = color, 
-#           msw=0, msc=:white, palette = :darktest)
-#
-#  for i in indices
-#       c1, c2 = dist_func.centers[i]
-#       v2, v1 = eigvals(dist_func.Σ[i])
-#       w1, w2 = eigvecs(dist_func.Σ[i])[2,:]
-#       β = (α - dist_func.weights[i]) * (α - dist_func.weights[i] >= 0)
-#       plot!(p, ellipse( c1, c2, sqrt(β*v1), sqrt(β*v2), sign(w2)*acos(w1)), 
-#                fillalpha = 0, c = :blue)
-#  end
-#
-#  scatter!(p, getindex.(dist_func.centers,1), getindex.(dist_func.centers,2),
-#           markershape = :star, markercolor = :yellow, markersize = 5)
-#
-#  return p
-#  
-#end
 
 export color_points_from_centers
 
@@ -201,7 +146,6 @@ function color_points_from_centers(points, k, nsignal, model, hc)
         matrices,
     )
 
-
     c = length(model.weights)
     remain_indices_2 = vcat(remain_indices, zeros(Int, c + 1 - length(remain_indices)))
     color_points[color_points.==0] .= c + 1
@@ -210,5 +154,63 @@ function color_points_from_centers(points, k, nsignal, model, hc)
     color_final = return_color(color_points, hc.couleurs, remain_indices)
 
     return color_final
+
+end
+
+
+@recipe function f(results::TrimmedBregmanResult)
+
+    d, n = size(results.points)
+    k = size(results.centers, 2)
+
+    palette --> :rainbow
+    title --> "Trimmed Bregman Clustering"
+    label := :none
+
+    @series begin
+
+        seriestype := :scatter
+        color := results.cluster
+        label := "data"
+        markersize := 3
+        if d == 1
+            x = 1:n
+            y = results.points[1, :]
+            x, y
+        elseif d == 2
+            x = results.points[1, :]
+            y = results.points[2, :]
+            x, y
+        else
+            x = results.points[1, :]
+            y = results.points[2, :]
+            z = results.points[3, :]
+            x, y, z
+        end
+
+    end
+
+    @series begin
+        seriestype := :scatter
+        markershape := :star
+        markercolor := :yellow
+        markersize := 5
+        label := "centers"
+        if d == 1
+            x = 1:k
+            y = results.centers[1, :]
+            x, y
+        elseif d == 2
+            x = results.centers[1, :]
+            y = results.centers[2, :]
+            x, y
+        else
+            x = results.centers[1, :]
+            y = results.centers[2, :]
+            z = results.centers[3, :]
+            x, y, z
+        end
+    end
+
 
 end

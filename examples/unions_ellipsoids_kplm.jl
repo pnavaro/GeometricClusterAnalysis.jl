@@ -21,9 +21,13 @@ df = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
 
 mh = build_matrix(df)
 
-hc = hierarchical_clustering_lem(mh, Stop = Inf, Seuil = Inf, 
-                                 store_all_colors = true, 
-                                 store_all_step_time = true)
+hc = hierarchical_clustering_lem(
+    mh,
+    Stop = Inf,
+    Seuil = Inf,
+    store_all_colors = true,
+    store_all_step_time = true,
+)
 
 Col = hc.Couleurs
 Temps = hc.Temps_step
@@ -56,8 +60,8 @@ end
 Σ = [df.Σ[i] for i in remain_indices if i > 0]
 
 ncolors = length(Colors)
-anim = @animate for i = [1:ncolors-1; Iterators.repeated(ncolors-1,30)...]
-    ellipsoids(data.points, Col[i], Colors[i], μ, ω, Σ, Temps[i]; markersize=5)
+anim = @animate for i in [1:ncolors-1; Iterators.repeated(ncolors - 1, 30)...]
+    ellipsoids(data.points, Col[i], Colors[i], μ, ω, Σ, Temps[i]; markersize = 5)
     xlims!(-2, 4)
     ylims!(-2, 2)
 end

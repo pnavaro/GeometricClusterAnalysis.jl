@@ -64,6 +64,8 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!, first_
 
     dimension, n_points = size(points)
 
+    @assert signal <= n_points
+
     if !(1 < k <= n_points)
         @error "The number of nearest neighbours, k, should be in {2,...,N}."
     end
@@ -81,7 +83,11 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!, first_
     # Some arrays for nearest neighbors computation
 
     ntid = nthreads()
-    chunks = Iterators.partition(1:n_centers, n_centers ÷ ntid)
+    if n_centers > ntid
+        chunks = Iterators.partition(1:n_centers, n_centers ÷ ntid)
+    else
+        chunks = Iterators.partition(1:n_centers, n_centers)
+    end
     dists = [zeros(Float64, n_points) for _ = 1:ntid]
     idxs = [zeros(Int, k) for _ = 1:ntid]
 
@@ -94,7 +100,7 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!, first_
 
         centers_old = [fill(Inf, dimension) for i = 1:n_centers]
         Σ_old = [diagm(ones(dimension)) for i = 1:n_centers]
-        
+
         if n_times > 1
             first_centers = first(randperm(rng, n_points), n_centers)
         end

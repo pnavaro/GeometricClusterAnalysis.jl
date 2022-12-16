@@ -26,30 +26,33 @@ P = collect(data.points')
 mh = build_matrix(dist_func)
 hc = hierarchical_clustering_lem(mh)
 
-nb_means_removed = 5 
+nb_means_removed = 5
 
 lengthn = length(hc.Naissance)
 if nb_means_removed > 0
-    Seuil = mean((hc.Naissance[lengthn - nb_means_removed],hc.Naissance[lengthn - nb_means_removed + 1]))
+    Seuil = mean((
+        hc.Naissance[lengthn-nb_means_removed],
+        hc.Naissance[lengthn-nb_means_removed+1],
+    ))
 else
-  Seuil = Inf
+    Seuil = Inf
 end
 
 hc2 = hierarchical_clustering_lem(mh, Stop = Inf, Seuil = Seuil)
 
-plot(hc2, xlims = (-15,10))
+plot(hc2, xlims = (-15, 10))
 
 bd = birth_death(hc2)
 
 sort!(bd)
 lengthbd = length(bd)
-Stop = mean((bd[lengthbd - nb_clusters],bd[lengthbd - nb_clusters + 1]))
+Stop = mean((bd[lengthbd-nb_clusters], bd[lengthbd-nb_clusters+1]))
 
 sp_hc = hierarchical_clustering_lem(mh; Stop = Stop, Seuil = Seuil)
 
-color_final = color_points_from_centers( data.points, k, nsignal, dist_func, sp_hc)
+color_final = color_points_from_centers(data.points, k, nsignal, dist_func, sp_hc)
 
 remain_indices = sp_hc.Indices_depart
 
-ellipsoids(data.points, remain_indices, color_final, dist_func, 0.0 )
+ellipsoids(data.points, remain_indices, color_final, dist_func, 0.0)
 

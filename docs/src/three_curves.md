@@ -21,8 +21,8 @@ nnoise = 200     # number of outliers
 dim = 2          # dimension of the data
 sigma = 0.02     # standard deviation for the additive noise
 nb_clusters = 3  # number of clusters
-k = 10           # number of nearest neighbors
-c = 50           # number of ellipsoids
+k = 15           # number of nearest neighbors
+c = 30           # number of ellipsoids
 iter_max = 100   # maximum number of iterations of the algorithm kPLM
 nstart = 10      # number of initializations of the algorithm kPLM
 

@@ -164,6 +164,8 @@ end
     k = size(results.centers, 2)
 
     palette --> :rainbow
+    title --> "Trimmed Bregman Clustering"
+    label := :none
 
     @series begin
 
@@ -172,17 +174,19 @@ end
         label := "data"
         markersize := 3
         if d == 1
-            x := 1:n
-            y := results.points[1, :]
+            x = 1:n
+            y = results.points[1, :]
+            x, y
         elseif d == 2
-            x := results.points[1, :]
-            y := results.points[2, :]
+            x = results.points[1, :]
+            y = results.points[2, :]
+            x, y
         else
-            x := results.points[1, :]
-            y := results.points[2, :]
-            z := results.points[3, :]
+            x = results.points[1, :]
+            y = results.points[2, :]
+            z = results.points[3, :]
+            x, y, z
         end
-        ()
 
     end
 
@@ -193,21 +197,20 @@ end
         markersize := 5
         label := "centers"
         if d == 1
-            x := 1:k
-            y := results.centers[1, :]
+            x = 1:k
+            y = results.centers[1, :]
+            x, y
         elseif d == 2
-            x := results.centers[1, :]
-            y := results.centers[2, :]
+            x = results.centers[1, :]
+            y = results.centers[2, :]
+            x, y
         else
-            x := results.centers[1, :]
-            y := results.centers[2, :]
-            z := results.centers[3, :]
+            x = results.centers[1, :]
+            y = results.centers[2, :]
+            z = results.centers[3, :]
+            x, y, z
         end
-        ()
     end
 
-    title --> "Trimmed Bregman Clustering"
-    label := :none
-    ()
 
 end

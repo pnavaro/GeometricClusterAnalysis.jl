@@ -28,6 +28,7 @@ makedocs(
         "Documentation" => "index.md",
         "Datasets" => "fake_data.md",
         "Three Curves" => "three_curves.md",
+        "Two Spirals" => "two_spirals.md",
         "Trimmed Bregman Clustering" =>
             ["trimmed-bregman.md", "poisson1.md", "poisson2.md", "obama.md"],
         "ToMaTo" => "tomato.md",

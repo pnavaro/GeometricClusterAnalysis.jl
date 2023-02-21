@@ -5,6 +5,7 @@ ncol(M::Matrix) = size(M, 2)
 
 include("data.jl")
 include("noisy_three_curves.jl")
+include("noisy_nested_spirals.jl")
 include("infinity_symbol.jl")
 include("mahalanobis.jl")
 include("colorize.jl")

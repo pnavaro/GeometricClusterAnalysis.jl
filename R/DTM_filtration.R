@@ -7,7 +7,7 @@
 # Mickael Buchet, Frederic Chazal, Steve Oudot, Donald R Sheehy
 
 library(here)
-source(here("R", "hierarchical_clustering_complexes.R"))
+source(here("test", "hierarchical_clustering_complexes.R"))
 
 library("FNN")
 

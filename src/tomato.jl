@@ -47,9 +47,7 @@ function tomato_clustering(G::Array{Array{Int64,1},1}, f::Array, τ::Number)
     u = IntDisjointSets(n)
     for i = 1:n
         nGi = [j for j in pairs[i, 3] if j < i]
-        if length(nGi) == 0
-            #vertex is a peak of f within G
-        else
+        if length(nGi) > 0 # vertex is not a peak of f within G
             ff(i) = pairs[i, 1]
             g[i] = nGi[argmax(ff.(nGi))]
             ei = find_root(u, Int.(g[i]))

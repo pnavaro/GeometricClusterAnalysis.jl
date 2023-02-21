@@ -7,8 +7,8 @@
 library(here)
 source(here("R","DTM_filtration.R"))
 source(here("R","Tomato.R"))
-source(here("R","version_kPDTM.R"))
-source(here("R","versions_kPLM.R"))
+source(here("test","kpdtm.R"))
+source(here("test","kplm.R"))
 
 # Auxiliary function
 
@@ -94,7 +94,7 @@ compute_Seuil_Stop <- function(dist_func,matrice_hauteur,nb_means_removed,nb_clu
 clustering_PLM <- function(nb_clusters,P,k,c,sig,iter_max,nstart,nb_means_removed = 0,indexed_by_r2 = TRUE){
   f_Sigma <- function(Sigma){return(Sigma)}
   method = function(P,k,c,sig,iter_max,nstart){
-    return(LL_minimizer_multidim_trimmed_lem(P,k,c,sig,iter_max,nstart,f_Sigma))
+    return(kplm(P,k,c,sig,iter_max,nstart,f_Sigma))
   }
   dist_func = method(P,k,c,sig,iter_max,nstart)
   matrice_hauteur = build_matrice_hauteur(dist_func$means,dist_func$weights,dist_func$Sigma,indexed_by_r2 = TRUE)

@@ -40,84 +40,38 @@ df = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
 mh = build_distance_matrix(df)
 
 hc1 = hierarchical_clustering_lem(mh)
-plot(hc1, xlims = (-15, 10))
+
+lims = (min(minimum(hc1.birth), minimum(hc1.death)), 
+        max(maximum(hc1.birth), maximum(hc1.death[hc1.death .!= Inf]))+1)
+
+plot(hc1, xlims = lims, ylims = lims)
 ```
 
 ```@example three-curves
-nb_means_removed = 5 
+nb_means_removed = 2 
 
-lengthn = length(hc1.birth)
-
-if nb_means_removed > 0
-    threshold = mean((hc1.birth[lengthn - nb_means_removed],hc1.birth[lengthn - nb_means_removed + 1]))
-else
-  threshold = Inf
-end
+threshold = mean((hc1.birth[end - nb_means_removed],hc1.birth[end - nb_means_removed + 1]))
 
 hc2 = hierarchical_clustering_lem(mh, infinity = Inf, threshold = threshold)
 
-plot(hc2, xlims = (-15, 10))
+plot(hc2, xlims = lims, ylims = lims)
 ```
 
 ```@example three-curves
 bd = birth_death(hc2)
-
 sort!(bd)
-lengthbd = length(bd)
-infinity = mean((bd[lengthbd - nb_clusters],bd[lengthbd - nb_clusters + 1]))
+infinity = mean((bd[end - nb_clusters],bd[end - nb_clusters + 1]))
 
-sp_hc = hierarchical_clustering_lem(mh; infinity = 0, threshold = threshold)
+hc3 = hierarchical_clustering_lem(mh; infinity = infinity, threshold = threshold)
 
-plot(sp_hc, xlims = (-15, 10))
+plot(hc3, xlims = lims, ylims = lims)
 ```
 
 ```@example three-curves
-sp_hc = hierarchical_clustering_lem(mh; infinity = 0, threshold = threshold)
+color_final = color_points_from_centers( data.points, k, nsignal, df, hc3)
 
-plot(sp_hc, xlims = (-15, 10))
-```
-
-```@example three-curves
-color_final = color_points_from_centers( data.points, k, nsignal, df, sp_hc)
-
-remain_indices = sp_hc.startup_indices
+remain_indices = hc3.startup_indices
 
 ellipsoids(data.points, remain_indices, color_final, color_final, df, 0 )
 ```
 
-```@example three-curves
-hc = hierarchical_clustering_lem(mh, infinity = infinity, threshold = threshold, 
-                                 store_colors = true, 
-                                 store_timesteps = true)
-
-saved_colors = hc.saved_colors
-timesteps = hc.timesteps
-
-remain_indices = hc.startup_indices
-length_ri = length(remain_indices)
-
-color_points, distances = subcolorize(data.points, nsignal, df, remain_indices)
-
-returned_colors = [return_color(color_points, col, remain_indices) for col in saved_colors]
-
-for i = 1:length(saved_colors)
-    for j = 1:size(data.points)[2]
-        returned_colors[i][j] = returned_colors[i][j] * (distances[j] <= timesteps[i])
-    end
-end
-
-μ = [df.μ[i] for i in remain_indices if i > 0]
-ω = [df.weights[i] for i in remain_indices if i > 0]
-Σ = [df.Σ[i] for i in remain_indices if i > 0]
-
-ncolors = length(returned_colors)
-anim = @animate for i = [1:ncolors-1; Iterators.repeated(ncolors-1,30)...]
-    ellipsoids(data.points, saved_colors[i], returned_colors[i], μ, ω, Σ, timesteps[i]; markersize=5)
-    xlims!(-2, 3)
-    ylims!(-2, 3)
-end
-
-gif(anim, "assets/three-curves.gif", fps = 10); nothing # hide
-```
-
-![](assets/three-curves.gif)

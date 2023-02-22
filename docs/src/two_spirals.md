@@ -29,7 +29,7 @@ print("The dataset contains $npoints points, of dimension $dim .")
 ### Data display
 
 ```@example two-spirals
-scatter(data.points[1,:],data.points[2,:])
+plot(data)
 ```
 
 ## Computation of the union of ellipsoids with the kPLM function
@@ -108,10 +108,8 @@ hc = hierarchical_clustering_lem(mh, infinity = Inf, threshold = Inf,
                                  store_colors = false, 
                                  store_timesteps = false)
 
-lims = (min(min(hc.birth...),
-        min(hc.death...)),
-        max(max(hc.birth...),
-        max(hc.death[hc.death .!= Inf]...))+1)
+lims = (min(minimum(hc.birth), minimum(hc.death)),
+        max(maximum(hc.birth), maximum(hc.death[hc.death .!= Inf]))+1)
 
 plot(hc,xlims = lims, ylims = lims)
 ```
@@ -135,10 +133,8 @@ hc2 = hierarchical_clustering_lem(mh, infinity = Inf, threshold = 3,
                                  store_colors = false, 
                                  store_timesteps = false)
 
-lims2 = (min(min(hc2.birth...),
-         min(hc2.death...)),
-         max(max(hc2.birth...),
-         max(hc2.death[hc2.death .!= Inf]...))+1)
+lims2 = (min(minimum(hc2.birth), minimum(hc2.death)),
+         max(maximum(hc2.birth), maximum(hc2.death[hc2.death .!= Inf]))+1)
 
 plot(hc2,xlims = lims2, ylims = lims2)
 ```
@@ -235,7 +231,7 @@ let idx = 0
     next_sqtime = timesteps[idx+1]
     updated = false
     
-    for i = 1:length(sq_time)
+    for i in eachindex(sq_time)
         while sq_time[i] >= next_sqtime
             idx +=1
             next_sqtime = timesteps[idx+1]
@@ -253,7 +249,7 @@ let idx = 0
 end
 
 # If the cost of the point is smaller to the time : label 0 (not in the ellipsoid)
-for i = 1:length(saved_point_colors), j = 1:size(data.points)[2]
+for i in eachindex(saved_point_colors), j = 1:data.np
     saved_ellipsoid_colors[i][j] = saved_ellipsoid_colors[i][j] * (dists[j] <= sq_time[i])
 end
 

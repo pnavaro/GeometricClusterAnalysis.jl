@@ -145,7 +145,7 @@ export subcolorize
 
 """
 
-    subcolorize(points, signal, result, Indices_depart)
+    subcolorize(points, signal, result, startup_indices)
 
 Fonction auxiliaire qui, étant donnés le nuage de points,
 le nombre de points du signal, le résultat de kpdtm ou de kplm 
@@ -153,7 +153,7 @@ et les indices de départ de la méthode de hclust.jl, calcule les "nouvelles
 distances tordues" de tous les points de P, à tous les centres dont les indices sont dans les indices de départ.
 On leur associe le centre le plus proche.
 """
-function subcolorize(points, signal, result, Indices_depart)
+function subcolorize(points, signal, result, startup_indices)
     # To be used when some centers are removed, 
     # after using hierarchical_clustering_lem and before using return_color.
     dimension, n_points = size(points)
@@ -170,8 +170,8 @@ function subcolorize(points, signal, result, Indices_depart)
     # To ensure that no point has label associated to points not in Indice_depart, 
     # we put infinite weight to these points
 
-    #ω[(1:n_centers) .∈ Ref(Indices_depart)] .= Inf
-    not_removed = (1:n_centers) .∈ Ref(Indices_depart)
+    #ω[(1:n_centers) .∈ Ref(startup_indices)] .= Inf
+    not_removed = (1:n_centers) .∈ Ref(startup_indices)
     ω = [(not_removed[j] ? ω[j] : Inf) for j = 1:n_centers]
 
     # Update colors

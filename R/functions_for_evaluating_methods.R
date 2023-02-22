@@ -68,21 +68,21 @@ compute_bad_classif <- function(sampling_function,method,N,Nnoise,sigma = 0.01,d
 
 # Auxiliary function :
 
-compute_Seuil_Stop <- function(dist_func,matrice_hauteur,nb_means_removed,nb_clusters){
-  fp_hc = second_passage_hc(dist_func,matrice_hauteur,Stop=Inf,Seuil = Inf)
-  lengthn = length(fp_hc$hierarchical_clustering$Naissance)
+compute_threshold_infinity <- function(dist_func,distance_matrix,nb_means_removed,nb_clusters){
+  fp_hc = second_passage_hc(dist_func,distance_matrix,infinity=Inf,threshold = Inf)
+  lengthn = length(fp_hc$hierarchical_clustering$birth)
   if(nb_means_removed > 0){
-    Seuil = mean(c(fp_hc$hierarchical_clustering$Naissance[lengthn - nb_means_removed],fp_hc$hierarchical_clustering$Naissance[lengthn - nb_means_removed + 1]))
+    threshold = mean(c(fp_hc$hierarchical_clustering$birth[lengthn - nb_means_removed],fp_hc$hierarchical_clustering$birth[lengthn - nb_means_removed + 1]))
   }else{
-    Seuil = Inf
+    threshold = Inf
   }
   
-  fp_hc2 = second_passage_hc(dist_func,matrice_hauteur,Stop=Inf,Seuil = Seuil)
+  fp_hc2 = second_passage_hc(dist_func,distance_matrix,infinity=Inf,threshold = threshold)
   bd = plot_birth_death(fp_hc2$hierarchical_clustering,lim_min = -15,lim_max = -4,plot = FALSE)
   sort_bd = sort(bd)
   lengthbd = length(bd)
-  Stop = mean(c(sort_bd[lengthbd - nb_clusters],sort_bd[lengthbd - nb_clusters + 1]))
-  return(list(Seuil = Seuil, Stop = Stop,sort_bd = sort_bd))
+  infinity = mean(c(sort_bd[lengthbd - nb_clusters],sort_bd[lengthbd - nb_clusters + 1]))
+  return(list(threshold = threshold, infinity = infinity,sort_bd = sort_bd))
 }
 
 
@@ -97,11 +97,11 @@ clustering_PLM <- function(nb_clusters,P,k,c,sig,iter_max,nstart,nb_means_remove
     return(kplm(P,k,c,sig,iter_max,nstart,f_Sigma))
   }
   dist_func = method(P,k,c,sig,iter_max,nstart)
-  matrice_hauteur = build_matrice_hauteur(dist_func$means,dist_func$weights,dist_func$Sigma,indexed_by_r2 = TRUE)
+  distance_matrix = build_distance_matrix(dist_func$means,dist_func$weights,dist_func$Sigma,indexed_by_r2 = TRUE)
   
-  cSS = compute_Seuil_Stop(dist_func,matrice_hauteur,nb_means_removed,nb_clusters)
+  cSS = compute_threshold_infinity(dist_func,distance_matrix,nb_means_removed,nb_clusters)
     
-  sp_hc = second_passage_hc(dist_func,matrice_hauteur,Stop=cSS$Stop,Seuil = cSS$Seuil)
+  sp_hc = second_passage_hc(dist_func,distance_matrix,infinity=cSS$infinity,threshold = cSS$threshold)
   col = color_points_from_centers(P,k,sig,dist_func,sp_hc$hierarchical_clustering,plot = FALSE)
   
   return(list(label = col, lifetime = cSS$sort_bd[length(cSS$sort_bd):1]))
@@ -117,13 +117,13 @@ clustering_PLM <- function(nb_clusters,P,k,c,sig,iter_max,nstart,nb_means_remove
 clustering_witnessed <- function(nb_clusters,P,k,c,sig,iter_max,nstart,indexed_by_r2 = TRUE){
   method = k_witnessed_distance 
   dist_func = method(P,k,c,sig,iter_max,nstart)
-  matrice_hauteur = matrice_hauteur_Power_function_Buchet(sqrt(dist_func$weights),dist_func$means)
-  fp_hc = second_passage_hc(dist_func,matrice_hauteur,Stop=Inf,Seuil = Inf)
-  bd = fp_hc$hierarchical_clustering$Mort - fp_hc$hierarchical_clustering$Naissance  
+  distance_matrix = distance_matrix_Power_function_Buchet(sqrt(dist_func$weights),dist_func$means)
+  fp_hc = second_passage_hc(dist_func,distance_matrix,infinity=Inf,threshold = Inf)
+  bd = fp_hc$hierarchical_clustering$death - fp_hc$hierarchical_clustering$birth  
   sort_bd = sort(bd)
   lengthbd = length(bd)
-  Stop = mean(c(sort_bd[lengthbd - nb_clusters],sort_bd[lengthbd - nb_clusters + 1]))
-  sp_hc = second_passage_hc(dist_func,matrice_hauteur,Stop=Stop,Seuil = Inf)
+  infinity = mean(c(sort_bd[lengthbd - nb_clusters],sort_bd[lengthbd - nb_clusters + 1]))
+  sp_hc = second_passage_hc(dist_func,distance_matrix,infinity=infinity,threshold = Inf)
   return(list(label =sp_hc$color, lifetime = sort_bd[length(sort_bd):1]))
 }
 
@@ -135,10 +135,10 @@ clustering_witnessed <- function(nb_clusters,P,k,c,sig,iter_max,nstart,indexed_b
 clustering_PDTM <- function(nb_clusters,P,k,c,sig,iter_max,nstart,nb_means_removed = 0,indexed_by_r2 = TRUE){
   method = Trimmed_kPDTM
   dist_func = method(P,k,c,sig,iter_max,nstart)
-  matrice_hauteur = build_matrice_hauteur(dist_func$means,dist_func$weights,dist_func$Sigma,indexed_by_r2 = TRUE)
-  cSS = compute_Seuil_Stop(dist_func,matrice_hauteur,nb_means_removed,nb_clusters)
+  distance_matrix = build_distance_matrix(dist_func$means,dist_func$weights,dist_func$Sigma,indexed_by_r2 = TRUE)
+  cSS = compute_threshold_infinity(dist_func,distance_matrix,nb_means_removed,nb_clusters)
   
-  sp_hc = second_passage_hc(dist_func,matrice_hauteur,Stop=cSS$Stop,Seuil = cSS$Seuil)
+  sp_hc = second_passage_hc(dist_func,distance_matrix,infinity=cSS$infinity,threshold = cSS$threshold)
   col = color_points_from_centers(P,k,sig,dist_func,sp_hc$hierarchical_clustering,plot = FALSE)
   return(list(label = col, lifetime = cSS$sort_bd[length(cSS$sort_bd):1]))
 }
@@ -149,16 +149,16 @@ clustering_PDTM <- function(nb_clusters,P,k,c,sig,iter_max,nstart,nb_means_remov
 
 clustering_power_function <- function(nb_clusters,P,k,c,sig,iter_max,nstart,indexed_by_r2 = TRUE){
   m0 = k/nrow(P)
-  Naissance_function <- function(x){
+  birth_function <- function(x){
     return(TDA::dtm(P,x,m0))
   }
-  sort_dtm = sort(Naissance_function(P))
-  Seuil = sort_dtm[sig]
-  tom = Power_function_Buchet(P,Naissance_function,Stop=Inf,Seuil = Seuil)
-  sort_bd = sort(tom$hierarchical_clustering$Mort-tom$hierarchical_clustering$Naissance)
+  sort_dtm = sort(birth_function(P))
+  threshold = sort_dtm[sig]
+  tom = Power_function_Buchet(P,birth_function,infinity=Inf,threshold = threshold)
+  sort_bd = sort(tom$hierarchical_clustering$death-tom$hierarchical_clustering$birth)
   lengthbd = length(sort_bd)
-  Stop =  mean(c(sort_bd[lengthbd - nb_clusters],sort_bd[lengthbd - nb_clusters + 1]))
-  tom = Power_function_Buchet(P,Naissance_function,Stop=Stop,Seuil = Seuil)
+  infinity =  mean(c(sort_bd[lengthbd - nb_clusters],sort_bd[lengthbd - nb_clusters + 1]))
+  tom = Power_function_Buchet(P,birth_function,infinity=infinity,threshold = threshold)
   return(list(label =tom$color, lifetime = sort_bd[length(sort_bd):1]))
 }  
 
@@ -170,16 +170,16 @@ clustering_power_function <- function(nb_clusters,P,k,c,sig,iter_max,nstart,inde
 
 clustering_DTM_filtration <- function(nb_clusters,P,k,c,sig,iter_max,nstart,indexed_by_r2 = TRUE){
   m0 = k/nrow(P)
-  Naissance_function <- function(x){
+  birth_function <- function(x){
     return(TDA::dtm(P,x,m0))
   }
-  sort_dtm = sort(Naissance_function(P))
-  Seuil = sort_dtm[sig]
-  tom = DTM_filtration(P,Naissance_function,Stop=Inf,Seuil = Seuil)
-  sort_bd = sort(tom$hierarchical_clustering$Mort-tom$hierarchical_clustering$Naissance)
+  sort_dtm = sort(birth_function(P))
+  threshold = sort_dtm[sig]
+  tom = DTM_filtration(P,birth_function,infinity=Inf,threshold = threshold)
+  sort_bd = sort(tom$hierarchical_clustering$death-tom$hierarchical_clustering$birth)
   lengthbd = length(sort_bd)
-  Stop =  mean(c(sort_bd[lengthbd - nb_clusters],sort_bd[lengthbd - nb_clusters + 1]))
-  tom = DTM_filtration(P,Naissance_function,Stop=Stop,Seuil = Seuil)
+  infinity =  mean(c(sort_bd[lengthbd - nb_clusters],sort_bd[lengthbd - nb_clusters + 1]))
+  tom = DTM_filtration(P,birth_function,infinity=infinity,threshold = threshold)
   return(list(label =tom$color, lifetime = sort_bd[length(sort_bd):1]))
 }
 
@@ -192,16 +192,16 @@ clustering_DTM_filtration <- function(nb_clusters,P,k,c,sig,iter_max,nstart,inde
 clustering_Tomato <- function(nb_clusters,P,k,c,sig,r,iter_max,nstart,indexed_by_r2 = TRUE){
   graph = graph_radius(P,r)
   m0 = k/nrow(P)
-  Naissance_function <- function(x){
+  birth_function <- function(x){
     return(TDA::dtm(P,x,m0))
   }
-  sort_dtm = sort(Naissance_function(P))
-  Seuil = sort_dtm[sig]
-  tom = Tomato(P,Naissance_function,graph,Stop=Inf,Seuil = Seuil)
-  sort_bd = sort(tom$hierarchical_clustering$Mort-tom$hierarchical_clustering$Naissance)
+  sort_dtm = sort(birth_function(P))
+  threshold = sort_dtm[sig]
+  tom = Tomato(P,birth_function,graph,infinity=Inf,threshold = threshold)
+  sort_bd = sort(tom$hierarchical_clustering$death-tom$hierarchical_clustering$birth)
   lengthbd = length(sort_bd)
-  Stop =  mean(c(sort_bd[lengthbd - nb_clusters],sort_bd[lengthbd - nb_clusters + 1]))
-  tom = Tomato(P,Naissance_function,graph,Stop=Stop,Seuil = Seuil)
+  infinity =  mean(c(sort_bd[lengthbd - nb_clusters],sort_bd[lengthbd - nb_clusters + 1]))
+  tom = Tomato(P,birth_function,graph,infinity=infinity,threshold = threshold)
   return(list(label =tom$color, lifetime = sort_bd[length(sort_bd):1]))
 }
 

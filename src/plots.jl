@@ -5,12 +5,12 @@ using RecipesBase
 
     aspect_ratio := :equal
 
-    lim_min, lim_max = get(plotattributes, :xlims, extrema(hc.Naissance))
+    lim_min, lim_max = get(plotattributes, :xlims, extrema(hc.birth))
 
     @series begin
 
         seriestype := :scatter
-        hc.Naissance, min.(hc.Mort, lim_max)
+        hc.birth, min.(hc.death, lim_max)
 
     end
 
@@ -27,7 +27,7 @@ end
 export birth_death
 
 function birth_death(hc)
-    hc.Mort .- hc.Naissance
+    hc.death .- hc.birth
 end
 
 @userplot Ellipsoids
@@ -129,7 +129,7 @@ export color_points_from_centers
 
 function color_points_from_centers(points, k, nsignal, model, hc)
 
-    remain_indices = hc.Indices_depart
+    remain_indices = hc.startup_indices
 
     matrices = [model.Σ[i] for i in remain_indices]
     remain_centers = [model.centers[i] for i in remain_indices]

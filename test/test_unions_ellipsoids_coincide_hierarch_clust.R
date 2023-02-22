@@ -22,14 +22,14 @@ iter_max = 100
 nstart = 1
 
 
-plot_all_steps <- function(method,P,k,c,sig,iter_max,nstart,Stop = Inf,Seuil = Inf){
+plot_all_steps <- function(method,P,k,c,sig,iter_max,nstart,infinity = Inf, threshold = Inf){
   dist_func = method(P,k,c,sig,iter_max,nstart)
-  matrice_hauteur = build_matrice_hauteur(dist_func$means,dist_func$weights,dist_func$Sigma,indexed_by_r2 = TRUE)
-  fp_hc = second_passage_hc(dist_func,matrice_hauteur,Stop=Stop,Seuil = Seuil,indexed_by_r2 = TRUE,store_all_colors = TRUE,store_all_step_time = TRUE)
+  distance_matrix = build_distance_matrix(dist_func$means,dist_func$weights,dist_func$Sigma,indexed_by_r2 = TRUE)
+  fp_hc = second_passage_hc(dist_func,distance_matrix,infinity=infinity, threshold =  threshold,indexed_by_r2 = TRUE,store_all_colors = TRUE,store_all_step_time = TRUE)
   Col = fp_hc$hierarchical_clustering$Couleurs
   Temps = fp_hc$hierarchical_clustering$Temps_step
   res = dist_func
-  remain_indices = fp_hc$hierarchical_clustering$Indices_depart
+  remain_indices = fp_hc$hierarchical_clustering$startup_indices
   matrices = list()
   length_ri = length(remain_indices)
   for(i in 1:length_ri){
@@ -66,7 +66,7 @@ method = function(P,k,c,sig,iter_max,nstart){
   return(kplm(P,k,c,sig,iter_max,nstart,f_Sigma))
 }
 
-plot_all_steps(method,P,k,c,sig,iter_max,nstart,Stop = Inf,Seuil = Inf)
+plot_all_steps(method,P,k,c,sig,iter_max,nstart,infinity = Inf, threshold = Inf)
 
 ## With the k-PDTM
 #
@@ -74,5 +74,5 @@ plot_all_steps(method,P,k,c,sig,iter_max,nstart,Stop = Inf,Seuil = Inf)
 #  return(kpdtm(P,k,c,sig,iter_max,nstart))
 #}
 #
-#plot_all_steps(method,P,k,c,sig,iter_max,nstart,Stop = Inf,Seuil = 5)
+#plot_all_steps(method,P,k,c,sig,iter_max,nstart,infinity = Inf, threshold = 5)
 

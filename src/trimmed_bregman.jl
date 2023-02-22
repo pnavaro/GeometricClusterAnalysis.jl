@@ -1,7 +1,7 @@
 export poisson
 
 """
-    poisson(x, y)
+$(SIGNATURES)
 
 Bregman divergence associated with the Poisson distribution
 
@@ -23,7 +23,7 @@ end
 export euclidean
 
 """
-    euclidean(x, y) 
+$(SIGNATURES)
 
 Euclidian sqaured distance
 """
@@ -36,6 +36,9 @@ function euclidean(x, y)
 end
 
 
+"""
+$(TYPEDEF)
+"""
 struct TrimmedBregmanResult{T}
 
     points::Matrix{T}
@@ -49,7 +52,7 @@ end
 export trimmed_bregman_clustering
 
 """
-    function trimmed_bregman_clustering(x, k, α, bregman, maxiter, nstart)
+$(SIGNATURES)
 
 - `n` : number of points
 - `d` : dimension
@@ -190,7 +193,7 @@ function trimmed_bregman_clustering(
 end
 
 """
-    function trimmed_bregman_clustering(x, centers, α, bregman, maxiter)
+$(SIGNATURES)
 
 - n : number of points
 - d : dimension
@@ -319,7 +322,7 @@ export select_parameters_nonincreasing
 export select_parameters
 
 """
-    select_parameters_nonincreasing(rng, k, alpha, x, Bregman_divergence, maxiter=100)
+$(SIGNATURES)
 
 Nous forcons la courbe de risque a etre decroissante en alpha, on utilise les centres optimaux du alpha precedent. 
 
@@ -359,7 +362,7 @@ function select_parameters_nonincreasing(
 end
 
 """
-    select_parameters(rng, k, alpha, x, bregman, maxiter=100)
+$(SIGNATURES)
 
 Initial centers are set randomly
 

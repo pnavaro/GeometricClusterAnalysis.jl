@@ -56,7 +56,7 @@ sig = N
 iter_max = 50 
 nstart = 1
 nb_means_removed = 0
-Seuil = Inf
+threshold = Inf
 indexed_by_r2 = TRUE
 
 
@@ -97,7 +97,7 @@ dist_func = method(P,k,c,sig,iter_max,nstart)
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-matrice_hauteur = build_matrice_hauteur(dist_func$means,dist_func$weights,dist_func$Sigma,indexed_by_r2 = TRUE)
+distance_matrix = build_distance_matrix(dist_func$means,dist_func$weights,dist_func$Sigma,indexed_by_r2 = TRUE)
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -107,7 +107,7 @@ matrice_hauteur = build_matrice_hauteur(dist_func$means,dist_func$weights,dist_f
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-fp_hc = second_passage_hc(dist_func,matrice_hauteur,Stop=Inf,Seuil = Inf)
+fp_hc = second_passage_hc(dist_func,distance_matrix,infinity=Inf,threshold = Inf)
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -128,12 +128,12 @@ bd = plot_birth_death(fp_hc$hierarchical_clustering,lim_min = -10,lim_max = 30,f
 nb_clusters = 2
 sort_bd = sort(bd)
 lengthbd = length(bd)
-Stop = mean(c(sort_bd[lengthbd - nb_clusters],sort_bd[lengthbd - nb_clusters + 1]))
+infinity = mean(c(sort_bd[lengthbd - nb_clusters],sort_bd[lengthbd - nb_clusters + 1]))
 
-sp_hc = second_passage_hc(dist_func,matrice_hauteur,Stop=Stop,Seuil = Seuil)
+sp_hc = second_passage_hc(dist_func,distance_matrix,infinity=infinity,threshold = threshold)
 
 rec = recolorize(dataset,nrow(dataset),dist_func$means,dist_func$weights,dist_func$Sigma)
-color_points = return_color(rec$color,sp_hc$hierarchical_clustering$color,sp_hc$hierarchical_clustering$Indices_depart)
+color_points = return_color(rec$color,sp_hc$hierarchical_clustering$color,sp_hc$hierarchical_clustering$startup_indices)
 
 threshold = sort(rec$cost)[12630]
 color_points_trimmed = color_points*(rec$cost<=threshold)
@@ -154,12 +154,12 @@ ggsave(filename = "earthquake_pointset_clustered_2clusters_12630.pdf",path = pat
 nb_clusters = 4
 sort_bd = sort(bd)
 lengthbd = length(bd)
-Stop = mean(c(sort_bd[lengthbd - nb_clusters],sort_bd[lengthbd - nb_clusters + 1]))
+infinity = mean(c(sort_bd[lengthbd - nb_clusters],sort_bd[lengthbd - nb_clusters + 1]))
 
-sp_hc = second_passage_hc(dist_func,matrice_hauteur,Stop=Stop,Seuil = Seuil)
+sp_hc = second_passage_hc(dist_func,distance_matrix,infinity=infinity,threshold = threshold)
 
 rec = recolorize(dataset,nrow(dataset),dist_func$means,dist_func$weights,dist_func$Sigma)
-color_points = return_color(rec$color,sp_hc$hierarchical_clustering$color,sp_hc$hierarchical_clustering$Indices_depart)
+color_points = return_color(rec$color,sp_hc$hierarchical_clustering$color,sp_hc$hierarchical_clustering$startup_indices)
 
 threshold = sort(rec$cost)[12630]
 color_points_trimmed = color_points*(rec$cost<=threshold)

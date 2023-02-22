@@ -21,24 +21,24 @@ mh = build_matrix(df)
 
 hc = hierarchical_clustering_lem(
     mh,
-    Stop = Inf,
-    Seuil = Inf,
+    infinity = Inf,
+    threshold = Inf,
     store_all_colors = false,
     store_all_step_time = false,
 )
 
 
-# Tracer le diagramme de persistance (pour sélectionner Stop et Seuil, puis relancer) :
+# Tracer le diagramme de persistance (pour sélectionner infinity et threshold, puis relancer) :
 lims = (
-    min(min(hc.Naissance...), min(hc.Mort...)),
-    max(max(hc.Naissance...), max(hc.Mort[hc.Mort.!=Inf]...)),
+    min(min(hc.birth...), min(hc.death...)),
+    max(max(hc.birth...), max(hc.death[hc.death.!=Inf]...)),
 )
 plot(hc, xlims = lims, ylims = lims)
 
 hc = hierarchical_clustering_lem(
     mh,
-    Stop = 0.025,
-    Seuil = 0.1,
+    infinity = 0.025,
+    threshold = 0.1,
     store_all_colors = true,
     store_all_step_time = true,
 )
@@ -47,7 +47,7 @@ hc = hierarchical_clustering_lem(
 Col = hc.Couleurs
 Temps = hc.Temps_step
 
-remain_indices = hc.Indices_depart
+remain_indices = hc.startup_indices
 length_ri = length(remain_indices)
 
 color_points, dists = subcolorize(data.points, nsignal, df, remain_indices)

@@ -46,15 +46,15 @@ plot(hc1, xlims = (-15, 10))
 ```@example three-curves
 nb_means_removed = 5 
 
-lengthn = length(hc1.Naissance)
+lengthn = length(hc1.birth)
 
 if nb_means_removed > 0
-    Seuil = mean((hc1.Naissance[lengthn - nb_means_removed],hc1.Naissance[lengthn - nb_means_removed + 1]))
+    threshold = mean((hc1.birth[lengthn - nb_means_removed],hc1.birth[lengthn - nb_means_removed + 1]))
 else
-  Seuil = Inf
+  threshold = Inf
 end
 
-hc2 = hierarchical_clustering_lem(mh, Stop = Inf, Seuil = Seuil)
+hc2 = hierarchical_clustering_lem(mh, infinity = Inf, threshold = threshold)
 
 plot(hc2, xlims = (-15, 10))
 ```
@@ -64,15 +64,15 @@ bd = birth_death(hc2)
 
 sort!(bd)
 lengthbd = length(bd)
-Stop = mean((bd[lengthbd - nb_clusters],bd[lengthbd - nb_clusters + 1]))
+infinity = mean((bd[lengthbd - nb_clusters],bd[lengthbd - nb_clusters + 1]))
 
-sp_hc = hierarchical_clustering_lem(mh; Stop = 0, Seuil = Seuil)
+sp_hc = hierarchical_clustering_lem(mh; infinity = 0, threshold = threshold)
 
 plot(sp_hc, xlims = (-15, 10))
 ```
 
 ```@example three-curves
-sp_hc = hierarchical_clustering_lem(mh; Stop = 0, Seuil = Seuil)
+sp_hc = hierarchical_clustering_lem(mh; infinity = 0, threshold = threshold)
 
 plot(sp_hc, xlims = (-15, 10))
 ```
@@ -80,20 +80,20 @@ plot(sp_hc, xlims = (-15, 10))
 ```@example three-curves
 color_final = color_points_from_centers( data.points, k, nsignal, df, sp_hc)
 
-remain_indices = sp_hc.Indices_depart
+remain_indices = sp_hc.startup_indices
 
 ellipsoids(data.points, remain_indices, color_final, color_final, df, 0 )
 ```
 
 ```@example three-curves
-hc = hierarchical_clustering_lem(mh, Stop = Stop, Seuil = Seuil, 
+hc = hierarchical_clustering_lem(mh, infinity = infinity, threshold = threshold, 
                                  store_all_colors = true, 
                                  store_all_step_time = true)
 
 Col = hc.Couleurs
 Temps = hc.Temps_step
 
-remain_indices = hc.Indices_depart
+remain_indices = hc.startup_indices
 length_ri = length(remain_indices)
 
 color_points, dists = subcolorize(data.points, nsignal, df, remain_indices)

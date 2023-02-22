@@ -2,6 +2,9 @@ export kpdtm
 
 using NearestNeighbors
 
+"""
+$(SIGNATURES)
+"""
 function meanvar!(μ, ω, points::Matrix{Float64}, centers, k::Int)
 
     d, n = size(points)
@@ -24,6 +27,9 @@ function meanvar!(μ, ω, points::Matrix{Float64}, centers, k::Int)
 end
 
 
+"""
+$(SIGNATURES)
+"""
 function recolor(points, centers, k, nsignal)
 
     d, n = size(points)
@@ -67,6 +73,9 @@ function recolor(points, centers, k, nsignal)
 
 end
 
+"""
+$(SIGNATURES)
+"""
 function k_witnessed_distance(points, k, c, sig, iter_max, nstart)
 
     μ, ω, colors = recolor(points, centers, k, sig)
@@ -76,6 +85,9 @@ function k_witnessed_distance(points, k, c, sig, iter_max, nstart)
 
 end
 
+"""
+$(SIGNATURES)
+"""
 function kpdtm(rng, points, k, c, nsignal, iter_max, nstart)
 
     d, n = size(points)
@@ -84,6 +96,9 @@ function kpdtm(rng, points, k, c, nsignal, iter_max, nstart)
 
 end
 
+"""
+$(SIGNATURES)
+"""
 function kpdtm(rng, points, k, c, nsignal, iter_max, nstart, first_centers)
 
     d, n = size(points)

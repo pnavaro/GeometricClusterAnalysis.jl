@@ -3,32 +3,32 @@
 # Auxiliary function - Important !!!
 
 
-hierarchical_clustering_lem <- function(matrice_hauteur,Stop = Inf,Seuil = Inf,store_all_colors = FALSE,store_all_step_time = FALSE){
-  # matrice_hauteur : (r_{i,j})_{i,j} r_{i,j} : time r when components i and j merge
+hierarchical_clustering_lem <- function(distance_matrix,infinity = Inf, threshold = Inf,store_all_colors = FALSE,store_all_step_time = FALSE){
+  # distance_matrix : (r_{i,j})_{i,j} r_{i,j} : time r when components i and j merge
   # r_{i,i} : birth time of component i.
   # c : number of components
-  # Stop : components whose lifetime is larger than Stop never die
-  # Seuil : centers born after Seuil are removed
-  # It is possible to select Stop and Seuil after running the algorithm with Stop = Inf and Seuil = Inf
+  # infinity : components whose lifetime is larger than infinity never die
+  #  threshold : centers born after  threshold are removed
+  # It is possible to select infinity and  threshold after running the algorithm with infinity = Inf and  threshold = Inf
   # For this, we look at the persistence diagram of the components : (x-axis Birth ; y-axis Death)
   # store_all_colors = TRUE : in the list Couleurs, we store all configurations of colors, for every step.
   # Thresholding :
   
   # Matrice_hauteur is modified such that diagonal elements are non-decreasing
-  mh_sort = sort(diag(matrice_hauteur),index.return = TRUE)
-  c = sum(mh_sort$x<=Seuil)
+  mh_sort = sort(diag(distance_matrix),index.return = TRUE)
+  c = sum(mh_sort$x<= threshold)
 
   if(c == 0){
-    return(list(color = c(),Naissance = c(),Mort = c(),Indices_depart = c()))
+    return(list(color = c(),birth = c(),death = c(),startup_indices = c()))
   }
   
   if(c == 1){
-    return(list(color = c(1),Naissance = c(mh_sort$x[1]),Mort = c(Inf),Indices_depart = c(mh_sort$ix[1])))
+    return(list(color = c(1),birth = c(mh_sort$x[1]),death = c(Inf),startup_indices = c(mh_sort$ix[1])))
   }
   
-  Indices_depart = mh_sort$ix[1:c] # Initial indices of the centers born at time mh_sort$x
-  Naissance = mh_sort$x[1:c]
-  Mort = rep(Inf,c) # Arbitrary 
+  startup_indices = mh_sort$ix[1:c] # Initial indices of the centers born at time mh_sort$x
+  birth = mh_sort$x[1:c]
+  death = rep(Inf,c) # Arbitrary 
   couleurs = rep(0,c)
   Couleurs = NULL
   Temps_step = NULL
@@ -36,14 +36,14 @@ hierarchical_clustering_lem <- function(matrice_hauteur,Stop = Inf,Seuil = Inf,s
     Couleurs = list(couleurs) # list of the different vectors of couleurs for the different loops of the algorithm
   }
   step = 1
-  matrice_dist = matrix(data = Inf,nrow = c,ncol = c) # The new matrice_hauteur
+  matrice_dist = matrix(data = Inf,nrow = c,ncol = c) # The new distance_matrix
   
   for(i in 1:c){
-    matrice_dist[i,i] = Naissance[i]
+    matrice_dist[i,i] = birth[i]
   }
   for(i in 2:c){
     for(j in 1:(i-1)){
-      matrice_dist[i,j] = min(matrice_hauteur[Indices_depart[i],Indices_depart[j]],matrice_hauteur[Indices_depart[j],Indices_depart[i]])
+      matrice_dist[i,j] = min(distance_matrix[startup_indices[i],startup_indices[j]],distance_matrix[startup_indices[j],startup_indices[i]])
     } # i>j : component i appears after component j, they dont merge before i appears
   }
   
@@ -55,14 +55,14 @@ hierarchical_clustering_lem <- function(matrice_hauteur,Stop = Inf,Seuil = Inf,s
   indice_hauteur = which.min(matrice_dist[1:indice,])
   ihj = (indice_hauteur-1) %/% c + 1
   ihi = indice_hauteur - (ihj-1) * c
-  temps_step = matrice_dist[ihi,ihj] # Next time when something appends (a component get born or two components merge)
+  timestep = matrice_dist[ihi,ihj] # Next time when something appends (a component get born or two components merge)
   if(store_all_step_time){
-    Temps_step = list(temps_step)
+    Temps_step = list(timestep)
   }
   # ihi >= ihj since the matrix is triangular inferior with infinity value above the diagonal
   
   while(continu){
-    if(temps_step == matrice_dist[ihi,ihi]){# Component ihi birth
+    if(timestep == matrice_dist[ihi,ihi]){# Component ihi birth
       couleurs[ihi] = ihi
       matrice_dist[ihi,ihi] = Inf # No need to get born any more
       indice = indice + 1
@@ -71,7 +71,7 @@ hierarchical_clustering_lem <- function(matrice_hauteur,Stop = Inf,Seuil = Inf,s
       colj0 = couleurs[ihj]
       coli = max(coli0,colj0)
       colj = min(coli0,colj0)
-      if(temps_step - Naissance[coli] <= Stop){ # coli and colj merge
+      if(timestep - birth[coli] <= infinity){ # coli and colj merge
         for(i in 1:min(indice,c)){# NB ihi<=indice, so couleurs[ihi] = couleurs[ihj]
           if(couleurs[i] == coli){
             couleurs[i] = colj
@@ -83,15 +83,15 @@ hierarchical_clustering_lem <- function(matrice_hauteur,Stop = Inf,Seuil = Inf,s
             }
           }
         }
-        Mort[coli] = temps_step
+        death[coli] = timestep
       }
-      else{# Component coli dont die, since lives longer than Stop.
+      else{# Component coli dont die, since lives longer than infinity.
         for(i in 1:min(indice,c)){# NB ihi<=indice, so couleurs[ihi] = couleurs[ihj]
           if(couleurs[i] == coli){
             for(j in 1:min(indice,c)){
               if(couleurs[j] == colj){
                 matrice_dist[i,j] = Inf
-                matrice_dist[j,i] = Inf # We will always have temps_step - Naissance[coli] > Stop, so they will never merge...
+                matrice_dist[j,i] = Inf # We will always have timestep - birth[coli] > infinity, so they will never merge...
               }
             }
           }
@@ -101,20 +101,20 @@ hierarchical_clustering_lem <- function(matrice_hauteur,Stop = Inf,Seuil = Inf,s
     indice_hauteur = which.min(matrice_dist[1:min(indice,c),])
     ihj = (indice_hauteur-1) %/% min(indice,c) + 1
     ihi = indice_hauteur - (ihj-1) * min(indice,c)
-    temps_step = matrice_dist[ihi,ihj]
-    continu = (temps_step != Inf)
+    timestep = matrice_dist[ihi,ihj]
+    continu = (timestep != Inf)
     step = step + 1
     if(store_all_colors){
       Couleurs[[step]] = couleurs
     }
     if(store_all_step_time){
-      Temps_step[[step]] = temps_step
+      Temps_step[[step]] = timestep
     }
   }
-  return(list(color = couleurs,Couleurs = Couleurs,Temps_step = Temps_step,Naissance = Naissance,Mort = Mort,Indices_depart = Indices_depart))
+  return(list(color = couleurs,Couleurs = Couleurs,Temps_step = Temps_step,birth = birth,death = death,startup_indices = startup_indices))
 }
 
-build_matrice_hauteur <- function(means,weights,cov_matrices,indexed_by_r2 = TRUE){
+build_distance_matrix <- function(means,weights,cov_matrices,indexed_by_r2 = TRUE){
   # means: matrix of size cxd
   # weights: vector of size c
   # cov_matrices: list of c symmetric matrices of size dxd
@@ -122,7 +122,7 @@ build_matrice_hauteur <- function(means,weights,cov_matrices,indexed_by_r2 = TRU
   # indexed_by_r2 = FALSE for the sub-level set of the square-root of non-negative power functions : the k-PDTM or the k-PLM (when determinant of matrices are forced to be 1)
   c = nrow(means)
   if(c!=length(weights)){return("The number of rows of means should be equal to the length of weights")}
-  matrice_hauteur = matrix(data = Inf,c,c)
+  distance_matrix = matrix(data = Inf,c,c)
   if(c==1){
     if(indexed_by_r2 == TRUE){
       return(c(weights[1]))
@@ -132,29 +132,29 @@ build_matrice_hauteur <- function(means,weights,cov_matrices,indexed_by_r2 = TRU
     }
   }
   for (i in 1:c){
-    matrice_hauteur[i,i] = weights[i]
+    distance_matrix[i,i] = weights[i]
   }
   for(i in 2:c){
     for(j in 1:(i-1)){
-      matrice_hauteur[i,j] = intersection_radius(cov_matrices[[i]],cov_matrices[[j]],means[i,],means[j,],weights[i],weights[j])
+      distance_matrix[i,j] = intersection_radius(cov_matrices[[i]],cov_matrices[[j]],means[i,],means[j,],weights[i],weights[j])
     } 
   }
   if(indexed_by_r2 == TRUE){
-    return(matrice_hauteur)
+    return(distance_matrix)
   }
   else{
-    return(sqrt(matrice_hauteur))
+    return(sqrt(distance_matrix))
   }
 }
 
 
 
-return_color<- function(centre,couleurs,Indices_depart){
+return_color<- function(centre,couleurs,startup_indices){
   # centre : vector of integers such that centre[i] is the label of the center associated to the i-th point
   # couleurs[1] : label of the center that is born first, i.e. for the Indice_depart[1]-th center
   color = rep(0,length(centre))
-  for (i in 1:length(Indices_depart)){
-    color[centre==Indices_depart[i]]=couleurs[i]
+  for (i in 1:length(startup_indices)){
+    color[centre==startup_indices[i]]=couleurs[i]
   }
   return(color)
 }
@@ -188,17 +188,17 @@ recolorize <- function(P,sig,means,weights,Sigma){
 }
 
 
-second_passage_hc <- function(dist_func,matrice_hauteur,Stop=Inf,Seuil = Inf,indexed_by_r2 = TRUE,store_all_colors = FALSE,store_all_step_time = FALSE){
+second_passage_hc <- function(dist_func,distance_matrix,infinity=Inf, threshold = Inf,indexed_by_r2 = TRUE,store_all_colors = FALSE,store_all_step_time = FALSE){
   # Starting the hierarchical clustering algorithm
-  hc = hierarchical_clustering_lem(matrice_hauteur,Stop = Stop,Seuil = Seuil,store_all_colors,store_all_step_time)
+  hc = hierarchical_clustering_lem(distance_matrix,infinity = infinity, threshold =  threshold,store_all_colors,store_all_step_time)
   # Transforming colors # Problem : color contains less than sig signal points...
-  color = return_color(dist_func$color,hc$color,hc$Indices_depart)
+  color = return_color(dist_func$color,hc$color,hc$startup_indices)
   return(list(color = color,hierarchical_clustering = hc))
 }
 
 color_points_from_centers <- function(P,k,sig,dist_func,hc,plot = FALSE){
   Col = hc$color
-  remain_indices = hc$Indices_depart
+  remain_indices = hc$startup_indices
   matrices = list()
   for(i in 1:length(remain_indices)){
     matrices[[i]] = dist_func$Sigma[[remain_indices[i]]]
@@ -218,7 +218,7 @@ color_points_from_centers <- function(P,k,sig,dist_func,hc,plot = FALSE){
 
 color_points_from_centers_2 <- function(P,k,sig,centers, Sigma, means, weights, hc,plot = FALSE){
   Col = hc$color
-  remain_indices = hc$Indices_depart
+  remain_indices = hc$startup_indices
   matrices = list()
   for(i in 1:length(remain_indices)){
     matrices[[i]] = Sigma[[remain_indices[i]]]
@@ -237,15 +237,15 @@ color_points_from_centers_2 <- function(P,k,sig,centers, Sigma, means, weights, 
 
 plot_birth_death <- function(hierarchical_clustering,lim_min = 0,lim_max = 1,filename="persistence_diagram.pdf",path="results/",plot = TRUE){
   lim = c(lim_min,lim_max)
-  hcMort = hierarchical_clustering$Mort
-  hcMort[hcMort > lim_max] = lim_max
+  hcdeath = hierarchical_clustering$death
+  hcdeath[hcdeath > lim_max] = lim_max
   grid = seq(lim[1],lim[2],by = 0.01)
-  Birth = hierarchical_clustering$Naissance
-  Death = hcMort
+  Birth = hierarchical_clustering$birth
+  Death = hcdeath
   if(plot){
     gp = ggplot() + geom_point(aes(x = Birth,y = Death),col = "black") + geom_line(aes(grid,grid))
     print(gp)
     ggsave(plot = gp,filename = filename,path= path)
   }
-  return(hierarchical_clustering$Mort-hierarchical_clustering$Naissance)
+  return(hierarchical_clustering$death-hierarchical_clustering$birth)
 }

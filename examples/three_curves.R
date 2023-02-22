@@ -66,7 +66,7 @@ dist_func = method(P,k,c,sig,iter_max,nstart)
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-matrice_hauteur = build_matrice_hauteur(dist_func$means,dist_func$weights,dist_func$Sigma,indexed_by_r2 = TRUE)
+distance_matrix = build_distance_matrix(dist_func$means,dist_func$weights,dist_func$Sigma,indexed_by_r2 = TRUE)
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -76,12 +76,12 @@ matrice_hauteur = build_matrice_hauteur(dist_func$means,dist_func$weights,dist_f
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-fp_hc = second_passage_hc(dist_func,matrice_hauteur,Stop=Inf,Seuil = Inf)
+fp_hc = second_passage_hc(dist_func,distance_matrix,infinity=Inf,threshold = Inf)
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-# Persistence diagram to select : the number of means to remove : Seuil and the number of clusters
+# Persistence diagram to select : the number of means to remove : threshold and the number of clusters
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -90,20 +90,20 @@ plot_birth_death(fp_hc$hierarchical_clustering,lim_min = -15,lim_max = -4,filena
 
 nb_means_removed = 5 # To choose, for the paper example : 5
 
-lengthn = length(fp_hc$hierarchical_clustering$Naissance)
+lengthn = length(fp_hc$hierarchical_clustering$birth)
 if(nb_means_removed > 0){
-  Seuil = mean(c(fp_hc$hierarchical_clustering$Naissance[lengthn - nb_means_removed],fp_hc$hierarchical_clustering$Naissance[lengthn - nb_means_removed + 1]))
+  threshold = mean(c(fp_hc$hierarchical_clustering$birth[lengthn - nb_means_removed],fp_hc$hierarchical_clustering$birth[lengthn - nb_means_removed + 1]))
 }else{
-  Seuil = Inf
+  threshold = Inf
 }
 
-fp_hc2 = second_passage_hc(dist_func,matrice_hauteur,Stop=Inf,Seuil = Seuil)
+fp_hc2 = second_passage_hc(dist_func,distance_matrix,infinity=Inf,threshold = threshold)
 filename = "persistence_diagram2.pdf"
 
 bd = plot_birth_death(fp_hc2$hierarchical_clustering,lim_min = -15,lim_max = 10,filename=filename,path=path)
 sort_bd = sort(bd)
 lengthbd = length(bd)
-Stop = mean(c(sort_bd[lengthbd - nb_clusters],sort_bd[lengthbd - nb_clusters + 1]))
+infinity = mean(c(sort_bd[lengthbd - nb_clusters],sort_bd[lengthbd - nb_clusters + 1]))
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -114,7 +114,7 @@ Stop = mean(c(sort_bd[lengthbd - nb_clusters],sort_bd[lengthbd - nb_clusters + 1
 
 
 
-sp_hc = second_passage_hc(dist_func,matrice_hauteur,Stop=Stop,Seuil = Seuil)
+sp_hc = second_passage_hc(dist_func,distance_matrix,infinity=infinity,threshold = threshold)
 
 col = color_points_from_centers(P,k,sig,dist_func,sp_hc$hierarchical_clustering,plot = TRUE)
 
@@ -154,16 +154,16 @@ FDR = sum(non_outliers*considered_outliers)/N
 
 nb_means_removed = 0 # To choose, for the paper example : 5
 
-fp_hc_bis = second_passage_hc(dist_func,matrice_hauteur,Stop=Inf,Seuil = Inf)
+fp_hc_bis = second_passage_hc(dist_func,distance_matrix,infinity=Inf,threshold = Inf)
 
 filename = "without_thresholding.pdf"
 bd_bis = plot_birth_death(fp_hc_bis$hierarchical_clustering,lim_min = -15,lim_max = 10,filename=filename,path=path)
 sort_bd_bis = sort(bd_bis)
 lengthbd_bis = length(bd_bis)
-Stop_bis = mean(c(sort_bd_bis[lengthbd_bis - nb_clusters],sort_bd_bis[lengthbd_bis - nb_clusters + 1]))
+infinity_bis = mean(c(sort_bd_bis[lengthbd_bis - nb_clusters],sort_bd_bis[lengthbd_bis - nb_clusters + 1]))
 
 
-sp_hc_bis = second_passage_hc(dist_func,matrice_hauteur,Stop=Stop_bis,Seuil = Inf)
+sp_hc_bis = second_passage_hc(dist_func,distance_matrix,infinity=infinity_bis,threshold = Inf)
 
 col = color_points_from_centers(P,k,sig,dist_func,sp_hc_bis$hierarchical_clustering,plot = TRUE)
 

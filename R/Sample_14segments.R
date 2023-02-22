@@ -8,10 +8,10 @@ generate_noise <- function(N,dim,m,M){
 L = sqrt((1-cos(2*pi/7))^2+sin(2*pi/7)^2)
 long = 7*(1+L)
 
-seuil = rep(0,13)
-seuil[1:7] = 1:7
-seuil[8:13] = 7+(1:6)*L
-seuil = seuil/long
+threshold = rep(0,13)
+threshold[1:7] = 1:7
+threshold[8:13] = 7+(1:6)*L
+threshold = threshold/long
 
 generate_14segments <- function(N,sigma = 0,dim = 2){
   P = matrix(sigma*rnorm(N*dim),N,dim)
@@ -21,79 +21,79 @@ generate_14segments <- function(N,sigma = 0,dim = 2){
   for(i in 1:N){
     U = vectU[i]
     V = vectV[i]
-    if(U<=seuil[1]){
+    if(U<=threshold[1]){
       col[i] = 1
       P[i,1] = P[i,1] + V*cos(2*pi/7)
       P[i,2] = P[i,2] + V*sin(2*pi/7)
     }
     else{
-      if(U<=seuil[2]){
+      if(U<=threshold[2]){
         col[i] = 2
         P[i,1] = P[i,1] + V*cos(4*pi/7)
         P[i,2] = P[i,2] + V*sin(4*pi/7)
       }
       else{
-        if(U<=seuil[3]){
+        if(U<=threshold[3]){
           col[i] = 3
           P[i,1] = P[i,1] + V*cos(6*pi/7)
           P[i,2] = P[i,2] + V*sin(6*pi/7)
         }
         else{
-          if(U<=seuil[4]){
+          if(U<=threshold[4]){
             col[i] = 4
             P[i,1] = P[i,1] + V*cos(8*pi/7)
             P[i,2] = P[i,2] + V*sin(8*pi/7)
           }
           else{
-            if(U<=seuil[5]){
+            if(U<=threshold[5]){
               col[i] = 5
               P[i,1] = P[i,1] + V*cos(10*pi/7)
               P[i,2] = P[i,2] + V*sin(10*pi/7)
             }
             else{
-              if(U<=seuil[6]){
+              if(U<=threshold[6]){
                 col[i] = 6
                 P[i,1] = P[i,1] + V*cos(12*pi/7)
                 P[i,2] = P[i,2] + V*sin(12*pi/7)
               }
               else{
-                if(U<=seuil[7]){
+                if(U<=threshold[7]){
                   col[i] = 7
                   P[i,1] = P[i,1] + V*cos(14*pi/7)
                   P[i,2] = P[i,2] + V*sin(14*pi/7)
                 }
                 else{
-                  if(U<=seuil[8]){
+                  if(U<=threshold[8]){
                     col[i] = 8
                     P[i,1] = P[i,1] + V*cos(2*pi/7) + (1-V)*cos(4*pi/7)
                     P[i,2] = P[i,2] + V*sin(2*pi/7) + (1-V)*sin(4*pi/7)
                   }
                   else{
-                    if(U<=seuil[9]){
+                    if(U<=threshold[9]){
                       col[i] = 9
                       P[i,1] = P[i,1] + V*cos(4*pi/7) + (1-V)*cos(6*pi/7)
                       P[i,2] = P[i,2] + V*sin(4*pi/7) + (1-V)*sin(6*pi/7)
                     }
                     else{
-                      if(U<=seuil[10]){
+                      if(U<=threshold[10]){
                         col[i] = 10
                         P[i,1] = P[i,1] + V*cos(6*pi/7) + (1-V)*cos(8*pi/7)
                         P[i,2] = P[i,2] + V*sin(6*pi/7) + (1-V)*sin(8*pi/7)
                       }
                       else{
-                        if(U<=seuil[11]){
+                        if(U<=threshold[11]){
                           col[i] = 11
                           P[i,1] = P[i,1] + V*cos(8*pi/7) + (1-V)*cos(10*pi/7)
                           P[i,2] = P[i,2] + V*sin(8*pi/7) + (1-V)*sin(10*pi/7)
                         }
                         else{
-                          if(U<=seuil[12]){
+                          if(U<=threshold[12]){
                             col[i] = 12
                             P[i,1] = P[i,1] + V*cos(10*pi/7) + (1-V)*cos(12*pi/7)
                             P[i,2] = P[i,2] + V*sin(10*pi/7) + (1-V)*sin(12*pi/7)
                           }
                           else{
-                            if(U<=seuil[13]){
+                            if(U<=threshold[13]){
                               col[i] = 13
                               P[i,1] = P[i,1] + V*cos(12*pi/7) + (1-V)*cos(14*pi/7)
                               P[i,2] = P[i,2] + V*sin(12*pi/7) + (1-V)*sin(14*pi/7)

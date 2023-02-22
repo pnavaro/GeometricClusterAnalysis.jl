@@ -3,6 +3,9 @@ import DataStructures: IntDisjointSets, find_root, in_same_set
 export tomato_density, tomato_clustering
 
 
+"""
+$(SIGNATURES)
+"""
 function tomato_density(kdtree, X::AbstractMatrix, k)
     k = k + 1
     dim, n = size(X)
@@ -25,7 +28,7 @@ function tomato_density(kdtree, X::AbstractMatrix, k)
 end
 
 """
-    tomato_clustering(G, f, τ)
+$(SIGNATURES)
 
 function originally written by [twMisc](https://github.com/twMisc/Clustering-ToMaTo)
 
@@ -79,20 +82,24 @@ function tomato_clustering(G::Array{Array{Int64,1},1}, f::Array, τ::Number)
 end
 
 
+"""
+$(SIGNATURES)
+"""
 function hmatrix_tomato(graph, birth)
   # graph : Matrix that contains 0 and 1, graph_i,j = 1 iff i and j are neighbours
   c = size(graph,1)
-  matrice_hauteur = fill(Inf,c,c)
+  distance_matrix = fill(Inf,c,c)
   if c != length(birth)
     @error "graph should be of size lxl with l the length of birth"
   end
   for i in 1:c, j in 1:i
-      matrice_hauteur[i,j] = max(birth[i],birth[j])*1/graph[i,j]
+      distance_matrix[i,j] = max(birth[i],birth[j])*1/graph[i,j]
   end
-  return matrice_hauteur
+  return distance_matrix
 end
 
 """
+$(SIGNATURES)
   - k - Nearest neighbours graph
   - k number of nearest neighbours to link to
 """
@@ -112,6 +119,8 @@ function graph_nn(P,k)
 end
 
 """
+$(SIGNATURES)
+
 Rips graph with radius r
 """
 function graph_radius(P,r)
@@ -124,18 +133,21 @@ function graph_radius(P,r)
 end
 
 
-function tomato(P, birth, graph, Stop=Inf, Seuil = Inf)
+"""
+$(SIGNATURES)
+"""
+function tomato(P, birth, graph, infinity=Inf, threshold = Inf)
 
   n = size(P,1)
   birth = birth_function(P)
   # Computing matrix
   hmatrix = hmatrix_tomato(graph, birth)
   # Starting the hierarchical clustering algorithm
-  hc = hierarchical_clustering_lem(hmatrix, Stop = Stop, Seuil = Seuil, store_all_colors = true ,store_all_step_time = true)
+  hc = hierarchical_clustering_lem(hmatrix, infinity = infinity, threshold = threshold, store_all_colors = true ,store_all_step_time = true)
   # Transforming colors
-  color = return_color(1:n, hc.color, hc.Indices_depart)
+  color = return_color(1:n, hc.color, hc.startup_indices)
   for i in 1:length(hc.couleurs)
-    colors[i] = return_color(1:n, hc.Couleurs[i], hc.Indices_depart)
+    colors[i] = return_color(1:n, hc.Couleurs[i], hc.startup_indices)
   end
   return color, colors, hc
 end

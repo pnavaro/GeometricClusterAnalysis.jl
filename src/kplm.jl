@@ -5,17 +5,18 @@ import Base.Threads: @threads, @sync, @spawn, nthreads, threadid
 export kplm
 
 """
-    KpResult
+$(TYPEDEF)
 
-Object resulting from kplm or kpdtm algorithm that contains the number of clusters, 
-centroids, means, weights, covariance matrices, costs
-"""
+Object resulting from kplm or kpdtm algorithm that contains the
+number of clusters, centroids, means, weights, covariance matrices,
+costs 
+""" 
 struct KpResult{T<:AbstractFloat}
-    k::Int
-    centers::Vector{Vector{T}}
+    k::Int 
+    centers::Vector{Vector{T}} 
     μ::Vector{Vector{T}}
-    weights::Vector{T}
-    colors::Vector{Int}
+    weights::Vector{T} 
+    colors::Vector{Int} 
     Σ::Vector{Matrix{T}}
     cost::T
 end
@@ -39,6 +40,9 @@ end
 
 Base.show(io::IO, model::KpResult) = print(io, model)
 
+"""
+$(SIGNATURES)
+"""
 function compute_dists!(dists, center, points, Σ)
 
     invΣ = inv(Σ)
@@ -50,6 +54,10 @@ function compute_dists!(dists, center, points, Σ)
 
 end
 
+
+"""
+$(SIGNATURES)
+"""
 function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
     n = size(points, 2)
@@ -58,6 +66,9 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!)
 
 end
 
+"""
+$(SIGNATURES)
+"""
 function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!, first_centers)
 
     # Initialisation

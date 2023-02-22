@@ -170,7 +170,7 @@ for the Bregman divergence ``\mathrm{d}_\phi``.
 We denote by ``\hat{\mathbf{c}}_{\alpha}`` a minimiser of ``R_{n,\alpha}(\cdot,\mathbb{X})``.
 
 
-## Implementation of the trimmed clustering with Bregman divergences method on data
+## Implementation 
 
 ### The clustering algorithm without trimming
 
@@ -263,8 +263,6 @@ In practice, we need to add a few lines to the algorithm:
 - limit the number of iterations in the **WHILE** loop,
 - add a possible argument for the algorithm : a dictionnary ``\mathbf{c}``, instead of the number ``k`` used for a random initialization,
 - parallelize...
-
-## Implementation
 
 ### Some Bregman divergences
 

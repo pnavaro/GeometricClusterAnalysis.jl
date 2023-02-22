@@ -59,14 +59,14 @@ using Test
     mh = build_matrix(df)
 
     R"""
-    matrice_hauteur = build_matrice_hauteur(dist_func$means,dist_func$weights,dist_func$Sigma,indexed_by_r2 = TRUE)
+    distance_matrix = build_distance_matrix(dist_func$means,dist_func$weights,dist_func$Sigma,indexed_by_r2 = TRUE)
     """
 
-    matrice_hauteur = @rget matrice_hauteur
-    @test mh ≈ matrice_hauteur
+    distance_matrix = @rget distance_matrix
+    @test mh ≈ distance_matrix
 
     R"""
-    hc = hierarchical_clustering_lem(matrice_hauteur, Stop = Inf, Seuil = Inf, 
+    hc = hierarchical_clustering_lem(distance_matrix, infinity = Inf, threshold = Inf, 
                                      store_all_colors = TRUE, store_all_step_time = TRUE)
 
     """
@@ -75,8 +75,8 @@ using Test
 
     hc = hierarchical_clustering_lem(
         mh,
-        Stop = Inf,
-        Seuil = Inf,
+        infinity = Inf,
+        threshold = Inf,
         store_all_colors = true,
         store_all_step_time = true,
     )
@@ -92,9 +92,9 @@ using Test
 
     @test Temps ≈ hc_r[:Temps_step]
 
-    remain_indices = hc.Indices_depart
+    remain_indices = hc.startup_indices
 
-    @test remain_indices ≈ Int.(hc_r[:Indices_depart])
+    @test remain_indices ≈ Int.(hc_r[:startup_indices])
 
     length_ri = length(remain_indices)
 
@@ -105,7 +105,7 @@ using Test
 
     R"""
     res = dist_func
-    remain_indices = hc$Indices_depart
+    remain_indices = hc$startup_indices
     matrices = list()
     length_ri = length(remain_indices)
     for(i in 1:length_ri){

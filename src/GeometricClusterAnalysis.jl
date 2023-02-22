@@ -1,5 +1,7 @@
 module GeometricClusterAnalysis
 
+using DocStringExtensions
+
 nrow(M::Matrix) = size(M, 1)
 ncol(M::Matrix) = size(M, 2)
 

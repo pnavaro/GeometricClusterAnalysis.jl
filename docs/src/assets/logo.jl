@@ -46,14 +46,14 @@ df = kplm(rng, points, k, c, nsignal, iter_max, nstart, f_Σ!)
 mh = build_matrix(df)
 hc = hierarchical_clustering_lem(
     mh,
-    Stop = Inf,
-    Seuil = Inf,
+    infinity = Inf,
+    threshold = Inf,
     store_all_colors = true,
     store_all_step_time = true,
 )
 Col = hc.Couleurs
 Temps = hc.Temps_step
-remain_indices = hc.Indices_depart
+remain_indices = hc.startup_indices
 length_ri = length(remain_indices)
 color_points, dists = subcolorize(points, nsignal, df, remain_indices)
 Colors = [return_color(color_points, col, remain_indices) for col in Col]

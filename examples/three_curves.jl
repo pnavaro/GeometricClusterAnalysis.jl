@@ -34,30 +34,30 @@ hc = hierarchical_clustering_lem(mh)
 
 nb_means_removed = 5
 
-lengthn = length(hc.Naissance)
+lengthn = length(hc.birth)
 if nb_means_removed > 0
     threshold = mean((
-        hc.Naissance[lengthn-nb_means_removed],
-        hc.Naissance[lengthn-nb_means_removed+1],
+        hc.birth[lengthn-nb_means_removed],
+        hc.birth[lengthn-nb_means_removed+1],
     ))
 else
     threshold = Inf
 end
 
-hc2 = hierarchical_clustering_lem(mh, Stop = Inf, Seuil = threshold)
+hc2 = hierarchical_clustering_lem(mh, infinity = Inf, threshold = threshold)
 
 plot(hc2, xlims = (-15, 10))
 png("persistence_diagram2")
 bd = birth_death(hc2)
 sort!(bd)
 lengthbd = length(bd)
-Stop = mean((bd[lengthbd-nb_clusters], bd[lengthbd-nb_clusters+1]))
+infinity = mean((bd[lengthbd-nb_clusters], bd[lengthbd-nb_clusters+1]))
 
-sp_hc = hierarchical_clustering_lem(mh; Stop = Stop, Seuil = threshold)
+sp_hc = hierarchical_clustering_lem(mh; infinity = infinity, threshold = threshold)
 
 color_final = color_points_from_centers(data.points, k, nsignal, dist_func, sp_hc)
 
-remain_indices = sp_hc.Indices_depart
+remain_indices = sp_hc.startup_indices
 
 
 a = data.colors[data.colors.>0]

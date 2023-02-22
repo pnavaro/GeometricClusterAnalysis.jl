@@ -5,12 +5,12 @@ export infinity_symbol
 function infinity_symbol(rng, n_points, n_noise, σ, dimension, noise_min, noise_max)
 
     long = (3π / 2 + 2) * (sqrt(2) + sqrt(9 / 8))
-    seuil = zeros(5)
-    seuil[1] = 3π / 2 * sqrt(2) / long
-    seuil[2] = seuil[1] + 3π / 2 * sqrt(9 / 8) / long
-    seuil[3] = seuil[2] + sqrt(2) / long
-    seuil[4] = seuil[3] + sqrt(2) / long
-    seuil[5] = seuil[4] + sqrt(9 / 8) / long
+    threshold = zeros(5)
+    threshold[1] = 3π / 2 * sqrt(2) / long
+    threshold[2] = threshold[1] + 3π / 2 * sqrt(9 / 8) / long
+    threshold[3] = threshold[2] + sqrt(2) / long
+    threshold[4] = threshold[3] + sqrt(2) / long
+    threshold[5] = threshold[4] + sqrt(9 / 8) / long
 
     p = σ .* randn(rng, n_points, dimension)
 
@@ -26,7 +26,7 @@ function infinity_symbol(rng, n_points, n_noise, σ, dimension, noise_min, noise
         u = vect_u[i]
         v = vect_v[i]
 
-        if u <= seuil[1]
+        if u <= threshold[1]
 
             θ = 6π / 4 * v + π / 4
             p[i, 1] += sqrt(2) * cos(θ)
@@ -34,7 +34,7 @@ function infinity_symbol(rng, n_points, n_noise, σ, dimension, noise_min, noise
 
         else
 
-            if u <= seuil[2]
+            if u <= threshold[2]
 
                 θ = 6π / 4 * v - 3π / 4
                 p[i, 1] += sqrt(9 / 8) * cos(θ) + 14 / 4
@@ -42,21 +42,21 @@ function infinity_symbol(rng, n_points, n_noise, σ, dimension, noise_min, noise
 
             else
 
-                if u <= seuil[3]
+                if u <= threshold[3]
 
                     p[i, 1] += 1 + v
                     p[i, 2] += 1 - v
 
                 else
 
-                    if u <= seuil[4]
+                    if u <= threshold[4]
 
                         p[i, 1] = p[i, 1] + 1 + v
                         p[i, 2] = p[i, 2] - 1 + v
 
                     else
 
-                        if u <= seuil[5]
+                        if u <= threshold[5]
                             p[i, 1] = p[i, 1] + 2 + 3 / 4 * v
                             p[i, 2] = p[i, 2] - v * 3 / 4
                         else

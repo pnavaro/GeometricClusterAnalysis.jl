@@ -5,9 +5,9 @@ struct HClust
     couleurs::Vector{Int}
     Couleurs::Vector{Vector{Int}}
     Temps_step::Vector{Float64}
-    Naissance::Vector{Float64}
-    Mort::Vector{Float64}
-    Indices_depart::Vector{Int}
+    birth::Vector{Float64}
+    death::Vector{Float64}
+    startup_indices::Vector{Int}
 
 end
 
@@ -133,30 +133,32 @@ end
 export hierarchical_clustering_lem
 
 """
-- matrice_hauteur : ``(r_{i,j})_{i,j} r_{i,j}`` : time ``r`` when components ``i`` and ``j`` merge
+$(SIGNATURES)
+
+- distance_matrix : ``(r_{i,j})_{i,j} r_{i,j}`` : time ``r`` when components ``i`` and ``j`` merge
 - ``r_{i,i}`` : birth time of component ``i``.
 - c : number of components
-- Stop : components whose lifetime is larger than Stop never die
-- Seuil : centers born after Seuil are removed
-- It is possible to select Stop and Seuil after running the algorithm with Stop = Inf and Seuil = Inf
+- infinity : components whose lifetime is larger than infinity never die
+- `threshold` : centers born after `threshold` are removed
+- It is possible to select infinity and `threshold` after running the algorithm with infinity = Inf and `threshold` = Inf
 - For this, we look at the persistence diagram of the components : (x-axis Birth ; y-axis Death)
 - store_all_colors = TRUE : in the list Couleurs, we store all configurations of colors, for every step.
 - Thresholding
 """
 function hierarchical_clustering_lem(
-    matrice_hauteur;
-    Stop = Inf,
-    Seuil = Inf,
+    distance_matrix;
+    infinity = Inf,
+    threshold = Inf,
     store_all_colors = false,
     store_all_step_time = false,
 )
 
     # Matrice_hauteur is modified such that diagonal elements are non-decreasing
 
-    ix = sortperm(diag(matrice_hauteur))
-    x = sort(diag(matrice_hauteur))
+    ix = sortperm(diag(distance_matrix))
+    x = sort(diag(distance_matrix))
 
-    c = sum(x .<= Seuil)
+    c = sum(x .<= threshold)
 
     if c == 0
         return [], [], [], []
@@ -164,26 +166,26 @@ function hierarchical_clustering_lem(
         return [1], x[1], [Inf], ix[1]
     end
 
-    Indices_depart = ix[1:c] # Initial indices of the centers born at time mh_sort$x
+    startup_indices = ix[1:c] # Initial indices of the centers born at time mh_sort$x
 
-    Naissance = x[1:c]
-    Mort = fill(Inf, c)
+    birth = x[1:c]
+    death = fill(Inf, c)
     couleurs = zeros(Int, c)
     Temps_step = Float64[]
     Couleurs = Vector{Int}[] # list of the different vectors of couleurs for the different loops of the algorithm
     push!(Couleurs, copy(couleurs))
     step = 1
-    matrice_dist = fill(Inf, c, c) # The new matrice_hauteur
+    matrice_dist = fill(Inf, c, c) # The new distance_matrix
 
     for i = 1:c
-        matrice_dist[i, i] = Naissance[i]
+        matrice_dist[i, i] = birth[i]
     end
 
     for i = 2:c
         for j = 1:(i-1)
             matrice_dist[i, j] = min(
-                matrice_hauteur[Indices_depart[i], Indices_depart[j]],
-                matrice_hauteur[Indices_depart[j], Indices_depart[i]],
+                distance_matrix[startup_indices[i], startup_indices[j]],
+                distance_matrix[startup_indices[j], startup_indices[i]],
             )
         end # i>j : component i appears after component j, they dont merge before i appears
     end
@@ -197,14 +199,14 @@ function hierarchical_clustering_lem(
     ihi = indice_hauteur[1]
     ihj = indice_hauteur[2]
     # Next time when something appends (a component get born or two components merge)
-    temps_step = matrice_dist[indice_hauteur]
-    store_all_step_time && push!(Temps_step, temps_step)
+    timestep = matrice_dist[indice_hauteur]
+    store_all_step_time && push!(Temps_step, timestep)
 
     # ihi >= ihj since the matrix is triangular inferior with infinity value above the diagonal
 
     while (continu)
 
-        if temps_step == matrice_dist[ihi, ihi] # Component ihi birth
+        if timestep == matrice_dist[ihi, ihi] # Component ihi birth
             couleurs[ihi] = ihi
             matrice_dist[ihi, ihi] = Inf # No need to get born any more
             indice += 1
@@ -213,7 +215,7 @@ function hierarchical_clustering_lem(
             colj0 = couleurs[ihj]
             coli = max(coli0, colj0)
             colj = min(coli0, colj0)
-            if temps_step - Naissance[coli] <= Stop # coli and colj merge
+            if timestep - birth[coli] <= infinity # coli and colj merge
                 for i = 1:min(indice, c) # NB ihi<=indice, so couleurs[ihi] = couleurs[ihj]
                     if couleurs[i] == coli
                         couleurs[i] = colj
@@ -225,14 +227,14 @@ function hierarchical_clustering_lem(
                         end
                     end
                 end
-                Mort[coli] = temps_step
-            else # Component coli dont die, since lives longer than Stop.
+                death[coli] = timestep
+            else # Component coli dont die, since lives longer than infinity.
                 for i = 1:min(indice, c) # NB ihi<=indice, so couleurs[ihi] = couleurs[ihj]
                     if couleurs[i] == coli
                         for j = 1:min(indice, c)
                             if couleurs[j] == colj
                                 matrice_dist[i, j] = Inf
-                                matrice_dist[j, i] = Inf # We will always have temps_step - Naissance[coli] > Stop, so they will never merge...
+                                matrice_dist[j, i] = Inf # We will always have timestep - birth[coli] > infinity, so they will never merge...
                             end
                         end
                     end
@@ -243,16 +245,16 @@ function hierarchical_clustering_lem(
         indice_hauteur = argmin(matrice_dist[1:min(indice, c), :])
         ihi = indice_hauteur[1]
         ihj = indice_hauteur[2]
-        temps_step = matrice_dist[indice_hauteur]
-        continu = (temps_step != Inf)
+        timestep = matrice_dist[indice_hauteur]
+        continu = (timestep != Inf)
         step = step + 1
 
         store_all_colors && push!(Couleurs, copy(couleurs))
-        store_all_step_time && push!(Temps_step, temps_step)
+        store_all_step_time && push!(Temps_step, timestep)
 
     end
 
-    HClust(couleurs, Couleurs, Temps_step, Naissance, Mort, Indices_depart)
+    HClust(couleurs, Couleurs, Temps_step, birth, death, startup_indices)
 
 end
 
@@ -260,7 +262,7 @@ export return_color
 
 
 """
-    return_color(centre, couleurs, Indices_depart)
+    return_color(centre, couleurs, startup_indices)
 
 - centre : vector of integers such that centre[i] is the label of the center associated to the i-th point
 - couleurs[1] : label of the center that is born first, i.e. for the Indice_depart[1]-th center
@@ -270,10 +272,10 @@ export return_color
 # si label_points[j] = 3, alors on cherche le centre dont l'indice de départ vaut 3
 # par exemple, c'est le 5ème centre
 # alors color[j] = col[5]
-function return_color(label_points, col, Indices_depart)
+function return_color(label_points, col, startup_indices)
     color = zeros(Int, length(label_points))
-    for i in eachindex(Indices_depart)
-        color[label_points.==Indices_depart[i]] .= col[i]
+    for i in eachindex(startup_indices)
+        color[label_points.==startup_indices[i]] .= col[i]
     end
     return color
 end

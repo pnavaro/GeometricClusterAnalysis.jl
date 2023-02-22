@@ -9,19 +9,19 @@ library("FNN")
 
 # Auxiliary functions
 
-matrice_hauteur_Tomato <- function(graph,Naissance){
+distance_matrix_Tomato <- function(graph,birth){
   # graph : Matrix that contains 0 and 1, graph_i,j = 1 iff i and j are neighbours
   c = nrow(graph)
-  matrice_hauteur = matrix(data = Inf,c,c)
-  if(c!=length(Naissance)){
-    return("Error, graph should be of size lxl with l the length of Naissance")
+  distance_matrix = matrix(data = Inf,c,c)
+  if(c!=length(birth)){
+    return("Error, graph should be of size lxl with l the length of birth")
   }
   for(i in 1:c){
     for(j in 1:i){
-      matrice_hauteur[i,j] = max(Naissance[i],Naissance[j])*1/graph[i,j]
+      distance_matrix[i,j] = max(birth[i],birth[j])*1/graph[i,j]
     } 
   }
-  return(matrice_hauteur)
+  return(distance_matrix)
 }
 
 graph_nn <- function(P,k){
@@ -51,17 +51,17 @@ graph_radius <- function(P,r){
 
 # MAIN
 
-Tomato <- function(P,Naissance_function,graph,Stop=Inf,Seuil = Inf){
-  Naissance = Naissance_function(P)
+Tomato <- function(P,birth_function,graph,infinity=Inf,threshold = Inf){
+  birth = birth_function(P)
   # Computing matrix
-  matrice_hauteur = matrice_hauteur_Tomato(graph,Naissance)
+  distance_matrix = distance_matrix_Tomato(graph,birth)
   # Starting the hierarchical clustering algorithm
-  hc = hierarchical_clustering_lem(matrice_hauteur,Stop = Stop,Seuil = Seuil,store_all_colors = TRUE ,store_all_step_time = TRUE)
+  hc = hierarchical_clustering_lem(distance_matrix,infinity = infinity,threshold = threshold,store_all_colors = TRUE ,store_all_step_time = TRUE)
   # Transforming colors
-  color = return_color(1:nrow(P),hc$color,hc$Indices_depart)
+  color = return_color(1:nrow(P),hc$color,hc$startup_indices)
   Colors = list()
   for (i in 1:length(hc$Couleurs)){
-    Colors[[i]] = return_color(1:nrow(P),hc$Couleurs[[i]],hc$Indices_depart)
+    Colors[[i]] = return_color(1:nrow(P),hc$Couleurs[[i]],hc$startup_indices)
   }
   return(list(color = color,Colors = Colors,hierarchical_clustering = hc))
 }

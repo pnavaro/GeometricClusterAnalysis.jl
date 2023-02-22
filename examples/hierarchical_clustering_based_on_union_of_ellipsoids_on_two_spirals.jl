@@ -101,7 +101,7 @@ df = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
 
 mh = build_matrix(df)
 
-# ### Selection of parameter "Seuil"
+# ### Selection of parameter "threshold"
 
 # We draw a persistence diagram based on the filtration of the union of ellipsoids.
 #
@@ -109,41 +109,41 @@ mh = build_matrix(df)
 #
 # The top left point corresponds to the ellipsoid that appeared first and therefore never merges with a component born before. Its death time is $\infty$.
 #
-# The parameter "Seuil" aims at removing ellipsoids born after time "Seuil". Such ellipsoids are considered as irrelevant. This may be due to a bad initialisation of the algorithm that creates ellipsoids in bad directions with respect to the data.
+# The parameter "threshold" aims at removing ellipsoids born after time "threshold". Such ellipsoids are considered as irrelevant. This may be due to a bad initialisation of the algorithm that creates ellipsoids in bad directions with respect to the data.
 
 # +
-hc = hierarchical_clustering_lem(mh, Stop = Inf, Seuil = Inf, 
+hc = hierarchical_clustering_lem(mh, infinity = Inf, threshold = Inf, 
                                  store_all_colors = false, 
                                  store_all_step_time = false)
 
-lims = (min(min(hc.Naissance...),min(hc.Mort...)),max(max(hc.Naissance...),max(hc.Mort[hc.Mort.!=Inf]...))+1)
+lims = (min(min(hc.birth...),min(hc.death...)),max(max(hc.birth...),max(hc.death[hc.death.!=Inf]...))+1)
 plot(hc,xlims = lims, ylims = lims)
 # -
 
 # Note that the "+1" in the second argument of lims and lims2 hereafter is to separate
 # the components whose death time is $\infty$ to other components.
 
-# We consider that ellipsoids born after time "Seuil = 3" were not relevant.
+# We consider that ellipsoids born after time "threshold = 3" were not relevant.
 
-# ### Selection of parameter "Stop"
+# ### Selection of parameter "infinity"
 
-# We then have to select parameter "Stop". Connected components which lifetime is larger than "Stop" are components that we want not to die.
+# We then have to select parameter "infinity". Connected components which lifetime is larger than "infinity" are components that we want not to die.
 
 # +
-hc2 = hierarchical_clustering_lem(mh, Stop = Inf, Seuil = 3, 
+hc2 = hierarchical_clustering_lem(mh, infinity = Inf, threshold = 3, 
                                  store_all_colors = false, 
                                  store_all_step_time = false)
 
-lims2 = (min(min(hc2.Naissance...),min(hc2.Mort...)),max(max(hc2.Naissance...),max(hc2.Mort[hc2.Mort.!=Inf]...))+1)
+lims2 = (min(min(hc2.birth...),min(hc2.death...)),max(max(hc2.birth...),max(hc2.death[hc2.death.!=Inf]...))+1)
 plot(hc2,xlims = lims2, ylims = lims2)
 # -
 
-# We select "Stop = 15". Since there are clearly two connected components that have a lifetime much larger than others. This lifetime is larger than 15, whereas the lifetime of others is smaller than 15.
+# We select "infinity = 15". Since there are clearly two connected components that have a lifetime much larger than others. This lifetime is larger than 15, whereas the lifetime of others is smaller than 15.
 
 # ### Clustering
 
 # +
-hc3 = hierarchical_clustering_lem(mh, Stop = 15, Seuil = 3, 
+hc3 = hierarchical_clustering_lem(mh, infinity = 15, threshold = 3, 
                                  store_all_colors = true, 
                                  store_all_step_time = true)
 
@@ -152,7 +152,7 @@ plot(hc3,xlims = lims2, ylims = lims2) # Using the sames xlims and ylims than th
 
 # ### Getting the number of components, colors of ellipsoids and times of evolution of the clustering
 
-nellipsoids = length(hc3.Indices_depart) # Number of ellipsoids
+nellipsoids = length(hc3.startup_indices) # Number of ellipsoids
 Col = hc3.Couleurs # Ellispoids colors
 Temps = hc3.Temps_step ; # Time at which a component borns or dies
 
@@ -165,10 +165,10 @@ Temps = hc3.Temps_step ; # Time at which a component borns or dies
 # - Col[end - 1] = Col[end] contains 2 different labels
 # - Col[end - 2] contains 3 different labels
 
-# Using a parameter Seuil not equal to $\infty$ erases some ellipsoids.
+# Using a parameter threshold not equal to $\infty$ erases some ellipsoids.
 # Therefore we need to compute new labels of the data points, with respect to the new ellipsoids.
 
-remain_indices = hc3.Indices_depart
+remain_indices = hc3.startup_indices
 color_points, dists = subcolorize(data.points, npoints, df, remain_indices) 
 
 # ## Removing outliers

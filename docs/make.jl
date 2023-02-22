@@ -12,7 +12,7 @@ bib = CitationBibliography(joinpath(@__DIR__, "references.bib"), sorting = :nyt)
 makedocs(
     bib,
     sitename = "GeometricClusterAnalysis.jl",
-    authors = ["Claire Brécheteau", "Pierre Navaro"],
+    authors = "Claire Brécheteau and Pierre Navaro",
     modules = [GeometricClusterAnalysis],
     format = Documenter.HTML(;
         prettyurls = get(ENV, "CI", nothing) == "true",

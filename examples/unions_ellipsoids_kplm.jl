@@ -19,14 +19,14 @@ function f_Σ!(Σ) end
 
 df = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
 
-mh = build_matrix(df)
+mh = build_distance_matrix(df)
 
 hc = hierarchical_clustering_lem(
     mh,
     infinity = Inf,
     threshold = Inf,
-    store_all_colors = true,
-    store_all_step_time = true,
+    store_colors = true,
+    store_timesteps = true,
 )
 
 Col = hc.Couleurs

@@ -23,7 +23,7 @@ dist_func = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
 
 P = collect(data.points')
 
-mh = build_matrix(dist_func)
+mh = build_distance_matrix(dist_func)
 hc = hierarchical_clustering_lem(mh)
 
 nb_means_removed = 5

@@ -25,7 +25,7 @@ nstart = 1
 plot_all_steps <- function(method,P,k,c,sig,iter_max,nstart,infinity = Inf, threshold = Inf){
   dist_func = method(P,k,c,sig,iter_max,nstart)
   distance_matrix = build_distance_matrix(dist_func$means,dist_func$weights,dist_func$Sigma,indexed_by_r2 = TRUE)
-  fp_hc = second_passage_hc(dist_func,distance_matrix,infinity=infinity, threshold =  threshold,indexed_by_r2 = TRUE,store_all_colors = TRUE,store_all_step_time = TRUE)
+  fp_hc = second_passage_hc(dist_func,distance_matrix,infinity=infinity, threshold =  threshold,indexed_by_r2 = TRUE,store_colors = TRUE,store_timesteps = TRUE)
   Col = fp_hc$hierarchical_clustering$Couleurs
   Temps = fp_hc$hierarchical_clustering$Temps_step
   res = dist_func

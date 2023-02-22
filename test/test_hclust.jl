@@ -56,7 +56,7 @@ using Test
         @test σ ≈ dist_func[:Sigma][i]
     end
 
-    mh = build_matrix(df)
+    mh = build_distance_matrix(df)
 
     R"""
     distance_matrix = build_distance_matrix(dist_func$means,dist_func$weights,dist_func$Sigma,indexed_by_r2 = TRUE)
@@ -67,7 +67,7 @@ using Test
 
     R"""
     hc = hierarchical_clustering_lem(distance_matrix, infinity = Inf, threshold = Inf, 
-                                     store_all_colors = TRUE, store_all_step_time = TRUE)
+                                     store_colors = TRUE, store_timesteps = TRUE)
 
     """
 
@@ -77,18 +77,18 @@ using Test
         mh,
         infinity = Inf,
         threshold = Inf,
-        store_all_colors = true,
-        store_all_step_time = true,
+        store_colors = true,
+        store_timesteps = true,
     )
 
-    @test Int.(hc_r[:color]) ≈ hc.couleurs
+    @test Int.(hc_r[:color]) ≈ hc.colors
 
-    for (col1, col2) in zip(hc_r[:Couleurs], hc.Couleurs)
+    for (col1, col2) in zip(hc_r[:Couleurs], hc.saved_colors)
         @test Int.(col1) ≈ col2
     end
 
-    Col = hc.Couleurs
-    Temps = hc.Temps_step
+    Col = hc.saved_colors
+    Temps = hc.timesteps
 
     @test Temps ≈ hc_r[:Temps_step]
 

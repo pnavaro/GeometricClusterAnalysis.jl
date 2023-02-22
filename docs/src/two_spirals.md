@@ -81,7 +81,7 @@ in the diagonal, and the intersecting times of pairs of ellipsoids
 in the lower left triangular part of the matrix.
 
 ```@example two-spirals
-mh = build_matrix(df)
+mh = build_distance_matrix(df)
 ```
 
 ### Selection of parameter "threshold"
@@ -105,8 +105,8 @@ ellipsoids in bad directions with respect to the data.
 
 ```@example two-spirals
 hc = hierarchical_clustering_lem(mh, infinity = Inf, threshold = Inf, 
-                                 store_all_colors = false, 
-                                 store_all_step_time = false)
+                                 store_colors = false, 
+                                 store_timesteps = false)
 
 lims = (min(min(hc.birth...),
         min(hc.death...)),
@@ -132,8 +132,8 @@ die.
 
 ```@example two-spirals
 hc2 = hierarchical_clustering_lem(mh, infinity = Inf, threshold = 3, 
-                                 store_all_colors = false, 
-                                 store_all_step_time = false)
+                                 store_colors = false, 
+                                 store_timesteps = false)
 
 lims2 = (min(min(hc2.birth...),
          min(hc2.death...)),
@@ -152,8 +152,8 @@ than 15.
 
 ```@example two-spirals
 hc3 = hierarchical_clustering_lem(mh, infinity = 15, threshold = 3, 
-                                 store_all_colors = true, 
-                                 store_all_step_time = true)
+                                 store_colors = true, 
+                                 store_timesteps = true)
 
 # Using the sames xlims and ylims than the previous persistence diagram.
 plot(hc3,xlims = lims2, ylims = lims2) 
@@ -163,21 +163,21 @@ plot(hc3,xlims = lims2, ylims = lims2)
 
 ```@example two-spirals
 nellipsoids = length(hc3.startup_indices) # Number of ellipsoids
-Col = hc3.Couleurs # Ellispoids colors
-Temps = hc3.Temps_step # Time at which a component borns or dies
+saved_colors = hc3.saved_colors # Ellispoids colors
+timesteps = hc3.timesteps # Time at which a component borns or dies
 ```
 
 !!! note "Note"
 
-    `Col[i]` contains the labels of the ellipsoids just before the time `Temps[i]`
+    `saved_colors[i]` contains the labels of the ellipsoids just before the time `timesteps[i]`
 
 !!! note "Example"
 
-    - `Col[1]` contains only 0 labels
+    - `saved_colors[1]` contains only 0 labels
     
     Moreover, if there are 2 connexed components in the remaining clustering :
-    - `Col[end - 1] = Col[end]` contains 2 different labels
-    - `Col[end - 2]` contains 3 different labels
+    - `saved_colors[end - 1] = saved_colors[end]` contains 2 different labels
+    - `saved_colors[end - 2]` contains 3 different labels
 
 Using a parameter `threshold` not equal to $\infty$ erases some ellipsoids.
 Therefore we need to compute new labels of the data points, with
@@ -224,47 +224,47 @@ Since `indexed_by_r2 = true`, we use `sq_time` and not its squareroot.
 
 ```@example two-spirals
 
-sq_time = (0:200) ./200 .* (Temps[end-1] - Temps[1]) .+ Temps[1]
-Col2 = Vector{Int}[] 
-Colors2 = Vector{Int}[]
+sq_time = (0:200) ./200 .* (timesteps[end-1] - timesteps[1]) .+ timesteps[1]
+saved_point_colors = Vector{Int}[] 
+saved_ellipsoid_colors = Vector{Int}[]
 
 let idx = 0
 
-    new_colors2 = zeros(Int, npoints)
-    new_col2 = zeros(Int, nellipsoids)
-    next_sqtime = Temps[idx+1]
+    new_point_colors = zeros(Int, npoints)
+    new_ellipsoid_colors = zeros(Int, nellipsoids)
+    next_sqtime = timesteps[idx+1]
     updated = false
     
     for i = 1:length(sq_time)
         while sq_time[i] >= next_sqtime
             idx +=1
-            next_sqtime = Temps[idx+1]
+            next_sqtime = timesteps[idx+1]
             updated = true
         end
         if updated
-            new_col2 = Col[idx+1]
-            new_colors2 = return_color(color_points, new_col2, remain_indices)
+            new_ellipsoid_colors = saved_colors[idx+1]
+            new_point_colors = return_color(color_points, new_ellipsoid_colors, remain_indices)
             updated = false
         end
-        push!(Col2, copy(new_col2))
-        push!(Colors2, copy(new_colors2))
+        push!(saved_point_colors, copy(new_ellipsoid_colors))
+        push!(saved_ellipsoid_colors, copy(new_point_colors))
     end
 
 end
 
 # If the cost of the point is smaller to the time : label 0 (not in the ellipsoid)
-for i = 1:length(Col2), j = 1:size(data.points)[2]
-    Colors2[i][j] = Colors2[i][j] * (dists[j] <= sq_time[i])
+for i = 1:length(saved_point_colors), j = 1:size(data.points)[2]
+    saved_ellipsoid_colors[i][j] = saved_ellipsoid_colors[i][j] * (dists[j] <= sq_time[i])
 end
 
 μ = [df.μ[i] for i in remain_indices if i>0]
 ω = [df.weights[i] for i in remain_indices if i>0]
 Σ = [df.Σ[i] for i in remain_indices if i>0]
 
-ncolors2 = length(Colors2)
+n = length(saved_ellipsoid_colors)
 
-anim = @animate for i = [1:ncolors2; Iterators.repeated(ncolors2,30)...]
-    ellipsoids(data.points, Col2[i], Colors2[i], μ, ω, Σ, sq_time[i]; markersize=5)
+anim = @animate for i = [1:n; Iterators.repeated(n,30)...]
+    ellipsoids(data.points, saved_point_colors[i], saved_ellipsoid_colors[i], μ, ω, Σ, sq_time[i]; markersize=5)
     xlims!(-60, 60)
     ylims!(-60, 60)
 end

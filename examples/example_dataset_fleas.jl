@@ -131,7 +131,7 @@ plot(p1, p2, layout = l, aspect_ratio= :equal)
 R"""
 
 
-hierarchical_clustering_lem <- function(distance_matrix,infinity = Inf,threshold = Inf,store_all_colors = FALSE,store_all_step_time = FALSE){
+hierarchical_clustering_lem <- function(distance_matrix,infinity = Inf,threshold = Inf,store_colors = FALSE,store_timesteps = FALSE){
   # distance_matrix : (r_{i,j})_{i,j} r_{i,j} : time r when components i and j merge
   # r_{i,i} : birth time of component i.
   # c : number of components
@@ -139,7 +139,7 @@ hierarchical_clustering_lem <- function(distance_matrix,infinity = Inf,threshold
   # threshold : centers born after threshold are removed
   # It is possible to select infinity and threshold after running the algorithm with infinity = Inf and threshold = Inf
   # For this, we look at the persistence diagram of the components : (x-axis Birth ; y-axis Death)
-  # store_all_colors = TRUE : in the list Couleurs, we store all configurations of colors, for every step.
+  # store_colors = TRUE : in the list Couleurs, we store all configurations of colors, for every step.
   # Thresholding :
   
   # Matrice_hauteur is modified such that diagonal elements are non-decreasing
@@ -160,7 +160,7 @@ hierarchical_clustering_lem <- function(distance_matrix,infinity = Inf,threshold
   couleurs = rep(0,c)
   Couleurs = NULL
   Temps_step = NULL
-  if(store_all_colors){
+  if(store_colors){
     Couleurs = list(couleurs) # list of the different vectors of couleurs for the different loops of the algorithm
   }
   step = 1
@@ -184,7 +184,7 @@ hierarchical_clustering_lem <- function(distance_matrix,infinity = Inf,threshold
   ihj = (indice_hauteur-1) %/% c + 1
   ihi = indice_hauteur - (ihj-1) * c
   timestep = matrice_dist[ihi,ihj] # Next time when something appends (a component get born or two components merge)
-  if(store_all_step_time){
+  if(store_timesteps){
     Temps_step = list(timestep)
   }
   # ihi >= ihj since the matrix is triangular inferior with infinity value above the diagonal
@@ -232,10 +232,10 @@ hierarchical_clustering_lem <- function(distance_matrix,infinity = Inf,threshold
     timestep = matrice_dist[ihi,ihj]
     continu = (timestep != Inf)
     step = step + 1
-    if(store_all_colors){
+    if(store_colors){
       Couleurs[[step]] = couleurs
     }
-    if(store_all_step_time){
+    if(store_timesteps){
       Temps_step[[step]] = timestep
     }
   }
@@ -332,7 +332,7 @@ Tomato <- function(P,birth_function,graph,infinity=Inf,threshold = Inf){
   # Computing matrix
   distance_matrix = distance_matrix_Tomato(graph,birth)
   # Starting the hierarchical clustering algorithm
-  hc = hierarchical_clustering_lem(distance_matrix,infinity = infinity,threshold = threshold,store_all_colors = TRUE ,store_all_step_time = TRUE)
+  hc = hierarchical_clustering_lem(distance_matrix,infinity = infinity,threshold = threshold,store_colors = TRUE ,store_timesteps = TRUE)
   # Transforming colors
   color = return_color(1:nrow(P),hc$color,hc$startup_indices)
   Colors = list()

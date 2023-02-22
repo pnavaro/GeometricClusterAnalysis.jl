@@ -2,9 +2,9 @@ export HClust
 
 struct HClust
 
-    couleurs::Vector{Int}
-    Couleurs::Vector{Vector{Int}}
-    Temps_step::Vector{Float64}
+    colors::Vector{Int}
+    saved_colors::Vector{Vector{Int}}
+    timesteps::Vector{Float64}
     birth::Vector{Float64}
     death::Vector{Float64}
     startup_indices::Vector{Int}
@@ -80,10 +80,10 @@ function intersection_radius(Σ₁, Σ₂, μ₁, μ₂, ω₁, ω₂)
 
 end
 
-export build_matrix
+export build_distance_matrix
 
 """
-    build_matrix(result; indexed_by_r2 = true)
+$(SIGNATURES)
 
 Distance matrix for the graph filtration
 
@@ -91,7 +91,7 @@ Distance matrix for the graph filtration
 - indexed_by_r2 = false requires elements of weigths to be non-negative.
 - indexed_by_r2 = false for the sub-level set of the square-root of non-negative power functions : the k-PDTM or the k-PLM (when determinant of matrices are forced to be 1)
 """
-function build_matrix(result; indexed_by_r2 = true)
+function build_distance_matrix(result; indexed_by_r2 = true)
 
     c = length(result.weights)
 
@@ -142,15 +142,15 @@ $(SIGNATURES)
 - `threshold` : centers born after `threshold` are removed
 - It is possible to select infinity and `threshold` after running the algorithm with infinity = Inf and `threshold` = Inf
 - For this, we look at the persistence diagram of the components : (x-axis Birth ; y-axis Death)
-- store_all_colors = TRUE : in the list Couleurs, we store all configurations of colors, for every step.
+- store_colors = TRUE : in the list saved_colors, we store all configurations of colors, for every step.
 - Thresholding
 """
 function hierarchical_clustering_lem(
     distance_matrix;
     infinity = Inf,
     threshold = Inf,
-    store_all_colors = false,
-    store_all_step_time = false,
+    store_colors = false,
+    store_timesteps = false,
 )
 
     # Matrice_hauteur is modified such that diagonal elements are non-decreasing
@@ -170,10 +170,10 @@ function hierarchical_clustering_lem(
 
     birth = x[1:c]
     death = fill(Inf, c)
-    couleurs = zeros(Int, c)
-    Temps_step = Float64[]
-    Couleurs = Vector{Int}[] # list of the different vectors of couleurs for the different loops of the algorithm
-    push!(Couleurs, copy(couleurs))
+    colors = zeros(Int, c)
+    timesteps = Float64[]
+    saved_colors = Vector{Int}[] # list of the different vectors of colors for the different loops of the algorithm
+    push!(saved_colors, copy(colors))
     step = 1
     matrice_dist = fill(Inf, c, c) # The new distance_matrix
 
@@ -200,27 +200,27 @@ function hierarchical_clustering_lem(
     ihj = indice_hauteur[2]
     # Next time when something appends (a component get born or two components merge)
     timestep = matrice_dist[indice_hauteur]
-    store_all_step_time && push!(Temps_step, timestep)
+    store_timesteps && push!(timesteps, timestep)
 
     # ihi >= ihj since the matrix is triangular inferior with infinity value above the diagonal
 
     while (continu)
 
         if timestep == matrice_dist[ihi, ihi] # Component ihi birth
-            couleurs[ihi] = ihi
+            colors[ihi] = ihi
             matrice_dist[ihi, ihi] = Inf # No need to get born any more
             indice += 1
         else   # Components of the same color as ihi and of the same color as ihj merge
-            coli0 = couleurs[ihi]
-            colj0 = couleurs[ihj]
+            coli0 = colors[ihi]
+            colj0 = colors[ihj]
             coli = max(coli0, colj0)
             colj = min(coli0, colj0)
             if timestep - birth[coli] <= infinity # coli and colj merge
-                for i = 1:min(indice, c) # NB ihi<=indice, so couleurs[ihi] = couleurs[ihj]
-                    if couleurs[i] == coli
-                        couleurs[i] = colj
+                for i = 1:min(indice, c) # NB ihi<=indice, so colors[ihi] = colors[ihj]
+                    if colors[i] == coli
+                        colors[i] = colj
                         for j = 1:min(indice, c)
-                            if couleurs[j] == colj
+                            if colors[j] == colj
                                 matrice_dist[i, j] = Inf
                                 matrice_dist[j, i] = Inf # Already of the same color. No need to be merged later
                             end
@@ -229,10 +229,10 @@ function hierarchical_clustering_lem(
                 end
                 death[coli] = timestep
             else # Component coli dont die, since lives longer than infinity.
-                for i = 1:min(indice, c) # NB ihi<=indice, so couleurs[ihi] = couleurs[ihj]
-                    if couleurs[i] == coli
+                for i = 1:min(indice, c) # NB ihi<=indice, so colors[ihi] = colors[ihj]
+                    if colors[i] == coli
                         for j = 1:min(indice, c)
-                            if couleurs[j] == colj
+                            if colors[j] == colj
                                 matrice_dist[i, j] = Inf
                                 matrice_dist[j, i] = Inf # We will always have timestep - birth[coli] > infinity, so they will never merge...
                             end
@@ -249,12 +249,12 @@ function hierarchical_clustering_lem(
         continu = (timestep != Inf)
         step = step + 1
 
-        store_all_colors && push!(Couleurs, copy(couleurs))
-        store_all_step_time && push!(Temps_step, timestep)
+        store_colors && push!(saved_colors, copy(colors))
+        store_timesteps && push!(timesteps, timestep)
 
     end
 
-    HClust(couleurs, Couleurs, Temps_step, birth, death, startup_indices)
+    HClust(colors, saved_colors, timesteps, birth, death, startup_indices)
 
 end
 
@@ -262,10 +262,10 @@ export return_color
 
 
 """
-    return_color(centre, couleurs, startup_indices)
+$(SIGNATURES)
 
 - centre : vector of integers such that centre[i] is the label of the center associated to the i-th point
-- couleurs[1] : label of the center that is born first, i.e. for the Indice_depart[1]-th center
+- colors[1] : label of the center that is born first, i.e. for the Indice_depart[1]-th center
 """
 # col : labels des centres en sortie d'algo.
 # label_points : les labels des points à valeurs dans le même ensemble que les indices de départ.

@@ -151,7 +151,7 @@ function color_points_from_centers(points, k, nsignal, model, hc)
     color_points[color_points.==0] .= c + 1
     color_points .= [remain_indices_2[c] for c in color_points]
     color_points[color_points.==0] .= c + 1
-    color_final = return_color(color_points, hc.couleurs, remain_indices)
+    color_final = return_color(color_points, hc.colors, remain_indices)
 
     return color_final
 

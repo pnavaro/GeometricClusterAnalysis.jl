@@ -56,7 +56,7 @@ Tomato <- function(P,birth_function,graph,infinity=Inf,threshold = Inf){
   # Computing matrix
   distance_matrix = distance_matrix_Tomato(graph,birth)
   # Starting the hierarchical clustering algorithm
-  hc = hierarchical_clustering_lem(distance_matrix,infinity = infinity,threshold = threshold,store_all_colors = TRUE ,store_all_step_time = TRUE)
+  hc = hierarchical_clustering_lem(distance_matrix,infinity = infinity,threshold = threshold,store_colors = TRUE ,store_timesteps = TRUE)
   # Transforming colors
   color = return_color(1:nrow(P),hc$color,hc$startup_indices)
   Colors = list()

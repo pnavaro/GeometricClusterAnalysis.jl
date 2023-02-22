@@ -99,7 +99,7 @@ df = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
 
 # This is a matrix that contains the birth times of the ellipsoids in the diagonal, and the intersecting times of pairs of ellipsoids in the lower left triangular part of the matrix.
 
-mh = build_matrix(df)
+mh = build_distance_matrix(df)
 
 # ### Selection of parameter "threshold"
 
@@ -113,8 +113,8 @@ mh = build_matrix(df)
 
 # +
 hc = hierarchical_clustering_lem(mh, infinity = Inf, threshold = Inf, 
-                                 store_all_colors = false, 
-                                 store_all_step_time = false)
+                                 store_colors = false, 
+                                 store_timesteps = false)
 
 lims = (min(min(hc.birth...),min(hc.death...)),max(max(hc.birth...),max(hc.death[hc.death.!=Inf]...))+1)
 plot(hc,xlims = lims, ylims = lims)
@@ -131,8 +131,8 @@ plot(hc,xlims = lims, ylims = lims)
 
 # +
 hc2 = hierarchical_clustering_lem(mh, infinity = Inf, threshold = 3, 
-                                 store_all_colors = false, 
-                                 store_all_step_time = false)
+                                 store_colors = false, 
+                                 store_timesteps = false)
 
 lims2 = (min(min(hc2.birth...),min(hc2.death...)),max(max(hc2.birth...),max(hc2.death[hc2.death.!=Inf]...))+1)
 plot(hc2,xlims = lims2, ylims = lims2)
@@ -144,8 +144,8 @@ plot(hc2,xlims = lims2, ylims = lims2)
 
 # +
 hc3 = hierarchical_clustering_lem(mh, infinity = 15, threshold = 3, 
-                                 store_all_colors = true, 
-                                 store_all_step_time = true)
+                                 store_colors = true, 
+                                 store_timesteps = true)
 
 plot(hc3,xlims = lims2, ylims = lims2) # Using the sames xlims and ylims than the previous persistence diagram.
 # -

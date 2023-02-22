@@ -37,7 +37,7 @@ function f_Σ!(Σ) end
 
 df = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
 
-mh = build_matrix(df)
+mh = build_distance_matrix(df)
 
 hc1 = hierarchical_clustering_lem(mh)
 plot(hc1, xlims = (-15, 10))
@@ -87,22 +87,22 @@ ellipsoids(data.points, remain_indices, color_final, color_final, df, 0 )
 
 ```@example three-curves
 hc = hierarchical_clustering_lem(mh, infinity = infinity, threshold = threshold, 
-                                 store_all_colors = true, 
-                                 store_all_step_time = true)
+                                 store_colors = true, 
+                                 store_timesteps = true)
 
-Col = hc.Couleurs
-Temps = hc.Temps_step
+saved_colors = hc.saved_colors
+timesteps = hc.timesteps
 
 remain_indices = hc.startup_indices
 length_ri = length(remain_indices)
 
-color_points, dists = subcolorize(data.points, nsignal, df, remain_indices)
+color_points, distances = subcolorize(data.points, nsignal, df, remain_indices)
 
-Colors = [return_color(color_points, col, remain_indices) for col in Col]
+returned_colors = [return_color(color_points, col, remain_indices) for col in saved_colors]
 
-for i = 1:length(Col)
+for i = 1:length(saved_colors)
     for j = 1:size(data.points)[2]
-        Colors[i][j] = Colors[i][j] * (dists[j] <= Temps[i])
+        returned_colors[i][j] = returned_colors[i][j] * (distances[j] <= timesteps[i])
     end
 end
 
@@ -110,9 +110,9 @@ end
 ω = [df.weights[i] for i in remain_indices if i > 0]
 Σ = [df.Σ[i] for i in remain_indices if i > 0]
 
-ncolors = length(Colors)
+ncolors = length(returned_colors)
 anim = @animate for i = [1:ncolors-1; Iterators.repeated(ncolors-1,30)...]
-    ellipsoids(data.points, Col[i], Colors[i], μ, ω, Σ, Temps[i]; markersize=5)
+    ellipsoids(data.points, saved_colors[i], returned_colors[i], μ, ω, Σ, timesteps[i]; markersize=5)
     xlims!(-2, 3)
     ylims!(-2, 3)
 end

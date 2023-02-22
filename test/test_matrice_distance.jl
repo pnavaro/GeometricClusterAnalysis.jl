@@ -23,7 +23,7 @@ using Plots
 
     df = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
 
-    mh = build_matrix(df)
+    mh = build_distance_matrix(df)
 
     ncenters = length(df.μ)
 

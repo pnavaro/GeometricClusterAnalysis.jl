@@ -143,11 +143,11 @@ function tomato(P, birth, graph, infinity=Inf, threshold = Inf)
   # Computing matrix
   hmatrix = hmatrix_tomato(graph, birth)
   # Starting the hierarchical clustering algorithm
-  hc = hierarchical_clustering_lem(hmatrix, infinity = infinity, threshold = threshold, store_all_colors = true ,store_all_step_time = true)
+  hc = hierarchical_clustering_lem(hmatrix, infinity = infinity, threshold = threshold, store_colors = true ,store_timesteps = true)
   # Transforming colors
   color = return_color(1:n, hc.color, hc.startup_indices)
-  for i in 1:length(hc.couleurs)
-    colors[i] = return_color(1:n, hc.Couleurs[i], hc.startup_indices)
+  for i in 1:length(hc.colors)
+    colors[i] = return_color(1:n, hc.saved_colors[i], hc.startup_indices)
   end
   return color, colors, hc
 end

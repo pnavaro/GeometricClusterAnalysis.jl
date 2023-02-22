@@ -1,11 +1,6 @@
 # The Three-Curves example
 
 ```@example three-curves
-import Pkg
-Pkg.activate("/Users/navaro/JuliaProjects/KPLMCenters.jl/")
-```
-
-```@example three-curves
 using GeometricClusterAnalysis
 using LinearAlgebra
 using Plots

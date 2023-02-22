@@ -1,19 +1,21 @@
 # The Three-Curves example
 
 ```@example three-curves
+import Pkg
+Pkg.activate("/Users/navaro/JuliaProjects/KPLMCenters.jl/")
+```
 
+```@example three-curves
 using GeometricClusterAnalysis
 using LinearAlgebra
 using Plots
 using Random
 using Statistics
-
 ```
 
 ## Generate the dataset
 
 Let's generate a set of points that draws three curves with a different label.
-
 
 ```@example three-curves
 nsignal = 500    # number of signal points
@@ -43,7 +45,10 @@ df = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
 mh = build_matrix(df)
 
 hc1 = hierarchical_clustering_lem(mh)
+plot(hc1, xlims = (-15, 10))
+```
 
+```@example three-curves
 nb_means_removed = 5 
 
 lengthn = length(hc1.Naissance)
@@ -60,15 +65,24 @@ plot(hc2, xlims = (-15, 10))
 ```
 
 ```@example three-curves
-
 bd = birth_death(hc2)
 
 sort!(bd)
 lengthbd = length(bd)
 Stop = mean((bd[lengthbd - nb_clusters],bd[lengthbd - nb_clusters + 1]))
 
-sp_hc = hierarchical_clustering_lem(mh; Stop = Stop, Seuil = Seuil)
+sp_hc = hierarchical_clustering_lem(mh; Stop = 0, Seuil = Seuil)
 
+plot(sp_hc, xlims = (-15, 10))
+```
+
+```@example three-curves
+sp_hc = hierarchical_clustering_lem(mh; Stop = 0, Seuil = Seuil)
+
+plot(sp_hc, xlims = (-15, 10))
+```
+
+```@example three-curves
 color_final = color_points_from_centers( data.points, k, nsignal, df, sp_hc)
 
 remain_indices = sp_hc.Indices_depart
@@ -76,10 +90,8 @@ remain_indices = sp_hc.Indices_depart
 ellipsoids(data.points, remain_indices, color_final, color_final, df, 0 )
 ```
 
-
 ```@example three-curves
-
-hc = hierarchical_clustering_lem(mh, Stop = Inf, Seuil = Inf, 
+hc = hierarchical_clustering_lem(mh, Stop = Stop, Seuil = Seuil, 
                                  store_all_colors = true, 
                                  store_all_step_time = true)
 

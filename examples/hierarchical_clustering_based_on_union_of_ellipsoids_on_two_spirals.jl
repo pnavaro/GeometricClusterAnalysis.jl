@@ -1,6 +1,20 @@
-# Hierarchical clustering based on a union of ellipsoids - Example of two spirals
+# -*- coding: utf-8 -*-
+# ---
+# jupyter:
+#   jupytext:
+#     formats: ipynb,jl:light
+#     text_representation:
+#       extension: .jl
+#       format_name: light
+#       format_version: '1.5'
+#       jupytext_version: 1.14.1
+#   kernelspec:
+#     display_name: Julia 1.8.4
+#     language: julia
+#     name: julia-1.8
+# ---
 
-```@example two-spirals
+# # Hierarchical clustering based on a union of ellipsoids - Example of two spirals
 
 using GeometricClusterAnalysis
 using Plots
@@ -192,30 +206,27 @@ sq_time = (0:200) ./200 .* (Temps[end-1] - Temps[1]) .+ Temps[1] # Depends on "T
 Col2 = Vector{Int}[] 
 Colors2 = Vector{Int}[]
 
-let idx = 0
+idx = 0
+new_colors2 = zeros(Int, npoints)
+new_col2 = zeros(Int, nellipsoids)
+next_sqtime = Temps[idx+1]
+updated = false
 
-    new_colors2 = zeros(Int, npoints)
-    new_col2 = zeros(Int, nellipsoids)
-    next_sqtime = Temps[idx+1]
-    updated = false
-    
-    for i = 1:length(sq_time)
-        while sq_time[i] >= next_sqtime
-            println(idx," ",sq_time[i]," ",next_sqtime," ",Temps[idx+2])
-            idx +=1
-            next_sqtime = Temps[idx+1]
-            updated = true
-        end
-        if updated
-            new_col2 = Col[idx+1]
-            new_colors2 = return_color(color_points, new_col2, remain_indices)
-            updated = false
-        end
-        println(i," ",new_col2)
-        push!(Col2, copy(new_col2)) ;
-        push!(Colors2, copy(new_colors2)) ;
+for i = 1:length(sq_time)
+    while sq_time[i] >= next_sqtime
+        println(idx," ",sq_time[i]," ",next_sqtime," ",Temps[idx+2])
+        idx +=1
+        next_sqtime = Temps[idx+1]
+        updated = true
     end
-
+    if updated
+        new_col2 = Col[idx+1]
+        new_colors2 = return_color(color_points, new_col2, remain_indices)
+        updated = false
+    end
+    println(i," ",new_col2)
+    push!(Col2, copy(new_col2)) ;
+    push!(Colors2, copy(new_colors2)) ;
 end
 
 for i = 1:length(Col2)
@@ -239,7 +250,6 @@ end ;
 
 # ### Animation - Clustering result
 
-gif(anim, "assets/anim_kpdtm2.gif", fps = 5); nothing #hide
+gif(anim, "anim_kpdtm2.gif", fps = 5)
 
-```
-![](assets/anim_kpdtm2.gif)
+

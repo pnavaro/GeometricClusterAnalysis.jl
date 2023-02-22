@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Two Spirals · GeometricClusterAnalysis.jl</title><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.png" alt="GeometricClusterAnalysis.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">GeometricClusterAnalysis.jl</a></span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Documentation</a></li><li><a class="tocitem" href="../fake_data/">Datasets</a></li><li><a class="tocitem" href="../three_curves/">Three Curves</a></li><li class="is-active"><a class="tocitem" href>Two Spirals</a></li><li><span class="tocitem">Trimmed Bregman Clustering</span><ul><li><a class="tocitem" href="../trimmed-bregman/">Bregman divergences</a></li><li><a class="tocitem" href="../poisson1/">One-dimensional data from the Poisson distribution</a></li><li><a class="tocitem" href="../poisson2/">Two-dimensional data from the Poisson distribution</a></li><li><a class="tocitem" href="../obama/">Application to authors texts clustering</a></li></ul></li><li><a class="tocitem" href="../tomato/">ToMaTo</a></li><li><a class="tocitem" href="../types/">Types</a></li><li><a class="tocitem" href="../functions/">Functions</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Two Spirals</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Two Spirals</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/pnavaro/GeometricClusterAnalysis.jl/blob/master/docs/src/two_spirals.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Hierarchical-clustering-based-on-a-union-of-ellipsoids-Example-of-two-spirals"><a class="docs-heading-anchor" href="#Hierarchical-clustering-based-on-a-union-of-ellipsoids-Example-of-two-spirals">Hierarchical clustering based on a union of ellipsoids - Example of two spirals</a><a id="Hierarchical-clustering-based-on-a-union-of-ellipsoids-Example-of-two-spirals-1"></a><a class="docs-heading-anchor-permalink" href="#Hierarchical-clustering-based-on-a-union-of-ellipsoids-Example-of-two-spirals" title="Permalink"></a></h1><pre><code class="language- hljs">
-using GeometricClusterAnalysis
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Two Spirals · GeometricClusterAnalysis.jl</title><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.png" alt="GeometricClusterAnalysis.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">GeometricClusterAnalysis.jl</a></span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Documentation</a></li><li><a class="tocitem" href="../fake_data/">Datasets</a></li><li><a class="tocitem" href="../three_curves/">Three Curves</a></li><li class="is-active"><a class="tocitem" href>Two Spirals</a></li><li><span class="tocitem">Trimmed Bregman Clustering</span><ul><li><a class="tocitem" href="../trimmed-bregman/">Bregman divergences</a></li><li><a class="tocitem" href="../poisson1/">One-dimensional data from the Poisson distribution</a></li><li><a class="tocitem" href="../poisson2/">Two-dimensional data from the Poisson distribution</a></li><li><a class="tocitem" href="../obama/">Application to authors texts clustering</a></li></ul></li><li><a class="tocitem" href="../tomato/">ToMaTo</a></li><li><a class="tocitem" href="../types/">Types</a></li><li><a class="tocitem" href="../functions/">Functions</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Two Spirals</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Two Spirals</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/pnavaro/GeometricClusterAnalysis.jl/blob/master/docs/src/two_spirals.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Hierarchical-clustering-based-on-a-union-of-ellipsoids-Example-of-two-spirals"><a class="docs-heading-anchor" href="#Hierarchical-clustering-based-on-a-union-of-ellipsoids-Example-of-two-spirals">Hierarchical clustering based on a union of ellipsoids - Example of two spirals</a><a id="Hierarchical-clustering-based-on-a-union-of-ellipsoids-Example-of-two-spirals-1"></a><a class="docs-heading-anchor-permalink" href="#Hierarchical-clustering-based-on-a-union-of-ellipsoids-Example-of-two-spirals" title="Permalink"></a></h1><pre><code class="language-julia hljs">using GeometricClusterAnalysis
 using Plots
 using Random
 
@@ -96,8 +95,8 @@ mh = build_matrix(df)
 # The parameter &quot;Seuil&quot; aims at removing ellipsoids born after time &quot;Seuil&quot;. Such ellipsoids are considered as irrelevant. This may be due to a bad initialisation of the algorithm that creates ellipsoids in bad directions with respect to the data.
 
 # +
-hc = hierarchical_clustering_lem(mh, Stop = Inf, Seuil = Inf, 
-                                 store_all_colors = false, 
+hc = hierarchical_clustering_lem(mh, Stop = Inf, Seuil = Inf,
+                                 store_all_colors = false,
                                  store_all_step_time = false)
 
 lims = (min(min(hc.Naissance...),min(hc.Mort...)),max(max(hc.Naissance...),max(hc.Mort[hc.Mort.!=Inf]...))+1)
@@ -114,8 +113,8 @@ plot(hc,xlims = lims, ylims = lims)
 # We then have to select parameter &quot;Stop&quot;. Connected components which lifetime is larger than &quot;Stop&quot; are components that we want not to die.
 
 # +
-hc2 = hierarchical_clustering_lem(mh, Stop = Inf, Seuil = 3, 
-                                 store_all_colors = false, 
+hc2 = hierarchical_clustering_lem(mh, Stop = Inf, Seuil = 3,
+                                 store_all_colors = false,
                                  store_all_step_time = false)
 
 lims2 = (min(min(hc2.Naissance...),min(hc2.Mort...)),max(max(hc2.Naissance...),max(hc2.Mort[hc2.Mort.!=Inf]...))+1)
@@ -127,8 +126,8 @@ plot(hc2,xlims = lims2, ylims = lims2)
 # ### Clustering
 
 # +
-hc3 = hierarchical_clustering_lem(mh, Stop = 15, Seuil = 3, 
-                                 store_all_colors = true, 
+hc3 = hierarchical_clustering_lem(mh, Stop = 15, Seuil = 3,
+                                 store_all_colors = true,
                                  store_all_step_time = true)
 
 plot(hc3,xlims = lims2, ylims = lims2) # Using the sames xlims and ylims than the previous persistence diagram.
@@ -142,7 +141,7 @@ Temps = hc3.Temps_step ; # Time at which a component borns or dies
 
 # Note : Col[i] contains the labels of the ellipsoids just before the time Temps[i]
 #
-# Example : 
+# Example :
 # - Col[1] contains only 0 labels
 #
 # Moreover, if there are 2 connexed components in the remaining clustering :
@@ -153,7 +152,7 @@ Temps = hc3.Temps_step ; # Time at which a component borns or dies
 # Therefore we need to compute new labels of the data points, with respect to the new ellipsoids.
 
 remain_indices = hc3.Indices_depart
-color_points, dists = subcolorize(data.points, npoints, df, remain_indices) 
+color_points, dists = subcolorize(data.points, npoints, df, remain_indices)
 
 # ## Removing outliers
 
@@ -187,7 +186,7 @@ end
 
 # +
 sq_time = (0:200) ./200 .* (Temps[end-1] - Temps[1]) .+ Temps[1] # Depends on &quot;Temps&quot; vector.
-Col2 = Vector{Int}[] 
+Col2 = Vector{Int}[]
 Colors2 = Vector{Int}[]
 
 let idx = 0
@@ -196,7 +195,7 @@ let idx = 0
     new_col2 = zeros(Int, nellipsoids)
     next_sqtime = Temps[idx+1]
     updated = false
-    
+
     for i = 1:length(sq_time)
         while sq_time[i] &gt;= next_sqtime
             println(idx,&quot; &quot;,sq_time[i],&quot; &quot;,next_sqtime,&quot; &quot;,Temps[idx+2])
@@ -235,7 +234,256 @@ anim = @animate for i = [1:ncolors2; Iterators.repeated(ncolors2,30)...]
 end ;
 # -
 
-# ### Animation - Clustering result
-
-gif(anim, &quot;assets/anim_kpdtm2.gif&quot;, fps = 5); nothing #hide
-</code></pre><p><img src="assets/anim_kpdtm2.gif" alt/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../three_curves/">« Three Curves</a><a class="docs-footer-nextpage" href="../trimmed-bregman/">Bregman divergences »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Wednesday 22 February 2023 08:29">Wednesday 22 February 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+# ### Animation - Clustering result</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">The dataset contains 2400 points, of dimension 2.0 -0.33095886282088693 -0.33095886282088693 -0.21462950522921403
+1 [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+2 [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+1 -0.10740364326317456 -0.21462950522921403 0.5577266076216989
+3 [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+4 [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+5 [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+6 [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+7 [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+8 [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+2 0.5632620154099626 0.5577266076216989 0.5815502927995359
+9 [1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+3 0.6750396251888188 0.5815502927995359 0.6172043373704253
+4 0.6750396251888188 0.6172043373704253 0.7943830036231063
+10 [1, 2, 3, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+11 [1, 2, 3, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+5 0.8985948447465312 0.7943830036231063 1.0604259971667334
+12 [1, 2, 3, 4, 5, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+13 [1, 2, 3, 4, 5, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+6 1.1221500643042437 1.0604259971667334 1.0754844484693362
+7 1.1221500643042437 1.0754844484693362 1.156389904294545
+14 [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+8 1.2339276740830998 1.156389904294545 1.1746227875070998
+9 1.2339276740830998 1.1746227875070998 1.294610871605438
+15 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+10 1.345705283861956 1.294610871605438 1.583209630790095
+16 [1, 2, 3, 1, 5, 6, 7, 8, 9, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+17 [1, 2, 3, 1, 5, 6, 7, 8, 9, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+18 [1, 2, 3, 1, 5, 6, 7, 8, 9, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+11 1.6810381131985246 1.583209630790095 1.602263794391317
+12 1.6810381131985246 1.602263794391317 1.6715510318800242
+13 1.6810381131985246 1.6715510318800242 1.902881549742428
+19 [1, 2, 3, 1, 5, 6, 7, 8, 9, 10, 11, 12, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+20 [1, 2, 3, 1, 5, 6, 7, 8, 9, 10, 11, 12, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+14 1.9045933327562368 1.902881549742428 1.9099124126857283
+21 [1, 2, 3, 1, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+15 2.016370942535093 1.9099124126857283 1.9414311262866917
+16 2.016370942535093 1.9414311262866917 2.108734295533527
+22 [1, 2, 3, 1, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+17 2.128148552313949 2.108734295533527 2.158318682916046
+23 [1, 2, 3, 1, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+18 2.2399261620928055 2.158318682916046 2.2270785123801082
+19 2.2399261620928055 2.2270785123801082 2.255152714271814
+24 [1, 2, 3, 1, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 0, 0, 0, 0, 0, 0, 0]
+20 2.3517037718716614 2.255152714271814 2.3109951971212546
+21 2.3517037718716614 2.3109951971212546 2.36696145169868
+25 [1, 2, 3, 1, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 0, 0, 0, 0, 0]
+22 2.4634813816505177 2.36696145169868 2.403448332727509
+23 2.4634813816505177 2.403448332727509 2.5135476855397663
+26 [1, 2, 3, 1, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 0, 0, 0]
+24 2.575258991429374 2.5135476855397663 2.536584997934434
+25 2.575258991429374 2.536584997934434 2.7338459674913054
+27 [1, 2, 3, 1, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0]
+28 [1, 2, 3, 1, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0]
+26 2.798814210987086 2.7338459674913054 2.7611346546456015
+27 2.798814210987086 2.7611346546456015 3.0519659123125034
+29 [1, 2, 3, 1, 2, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
+30 [1, 2, 3, 1, 2, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
+31 [1, 2, 3, 1, 2, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
+28 3.1341470403236547 3.0519659123125034 3.4499567870439924
+32 [1, 2, 1, 1, 2, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
+33 [1, 2, 1, 1, 2, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
+34 [1, 2, 1, 1, 2, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
+29 3.469479869660223 3.4499567870439924 3.6243545120502407
+35 [1, 2, 1, 1, 2, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 9, 22, 23, 24, 25, 26]
+36 [1, 2, 1, 1, 2, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 9, 22, 23, 24, 25, 26]
+30 3.6930350892179358 3.6243545120502407 3.6624536197931143
+31 3.6930350892179358 3.6624536197931143 3.964942701420325
+37 [1, 2, 1, 1, 2, 6, 7, 8, 9, 1, 11, 12, 13, 14, 7, 16, 17, 18, 19, 20, 9, 22, 23, 24, 25, 26]
+38 [1, 2, 1, 1, 2, 6, 7, 8, 9, 1, 11, 12, 13, 14, 7, 16, 17, 18, 19, 20, 9, 22, 23, 24, 25, 26]
+39 [1, 2, 1, 1, 2, 6, 7, 8, 9, 1, 11, 12, 13, 14, 7, 16, 17, 18, 19, 20, 9, 22, 23, 24, 25, 26]
+32 4.028367918554505 3.964942701420325 3.995970466024427
+33 4.028367918554505 3.995970466024427 4.186952321459452
+40 [1, 2, 1, 1, 2, 1, 7, 7, 9, 1, 11, 12, 13, 14, 7, 16, 17, 18, 19, 20, 9, 22, 23, 24, 25, 26]
+41 [1, 2, 1, 1, 2, 1, 7, 7, 9, 1, 11, 12, 13, 14, 7, 16, 17, 18, 19, 20, 9, 22, 23, 24, 25, 26]
+34 4.251923138112217 4.186952321459452 4.556762042686954
+42 [1, 2, 1, 1, 2, 1, 7, 7, 9, 1, 2, 12, 13, 14, 7, 16, 17, 18, 19, 20, 9, 22, 23, 24, 25, 26]
+43 [1, 2, 1, 1, 2, 1, 7, 7, 9, 1, 2, 12, 13, 14, 7, 16, 17, 18, 19, 20, 9, 22, 23, 24, 25, 26]
+44 [1, 2, 1, 1, 2, 1, 7, 7, 9, 1, 2, 12, 13, 14, 7, 16, 17, 18, 19, 20, 9, 22, 23, 24, 25, 26]
+35 4.587255967448786 4.556762042686954 4.632146796853174
+45 [1, 2, 1, 1, 2, 1, 7, 7, 7, 1, 2, 12, 13, 14, 7, 16, 17, 18, 19, 20, 7, 22, 23, 24, 25, 26]
+36 4.699033577227642 4.632146796853174 4.660792190054433
+37 4.699033577227642 4.660792190054433 4.710643247002881
+46 [1, 2, 1, 1, 2, 1, 7, 7, 7, 1, 2, 12, 13, 14, 7, 16, 17, 2, 19, 19, 7, 22, 23, 24, 25, 26]
+38 4.8108111870064985 4.710643247002881 4.715129481549088
+39 4.8108111870064985 4.715129481549088 4.755879231460048
+40 4.8108111870064985 4.755879231460048 4.871390521479045
+47 [1, 2, 1, 1, 2, 1, 7, 7, 7, 1, 2, 12, 13, 14, 7, 16, 7, 2, 1, 1, 7, 22, 23, 14, 25, 26]
+41 4.922588796785354 4.871390521479045 5.006709640785374
+48 [1, 2, 1, 1, 2, 1, 7, 7, 7, 1, 2, 12, 13, 14, 7, 16, 7, 2, 1, 1, 7, 2, 23, 14, 25, 26]
+42 5.03436640656421 5.006709640785374 5.038690563586377
+49 [1, 2, 1, 1, 2, 1, 7, 7, 7, 1, 2, 12, 13, 14, 7, 16, 7, 2, 1, 1, 7, 2, 23, 14, 14, 26]
+43 5.146144016343067 5.038690563586377 5.063802125797705
+44 5.146144016343067 5.063802125797705 5.205225200531979
+50 [1, 2, 1, 1, 2, 1, 7, 7, 7, 1, 2, 12, 7, 14, 7, 16, 7, 2, 1, 1, 7, 2, 14, 14, 14, 26]
+45 5.257921626121923 5.205225200531979 5.2894497793449915
+51 [1, 2, 1, 1, 2, 1, 7, 7, 7, 1, 2, 12, 7, 14, 7, 1, 7, 2, 1, 1, 7, 2, 14, 14, 14, 26]
+46 5.369699235900779 5.2894497793449915 5.466274350461074
+52 [1, 2, 1, 1, 2, 1, 7, 7, 7, 1, 2, 7, 7, 14, 7, 1, 7, 2, 1, 1, 7, 2, 14, 14, 14, 26]
+47 5.4814768456796354 5.466274350461074 5.473954313310385
+48 5.4814768456796354 5.473954313310385 6.023686796399182
+53 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 26]
+54 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 26]
+55 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 26]
+56 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 26]
+57 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 26]
+49 6.040364894573916 6.023686796399182 22.024563092950352
+58 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+59 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+60 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+61 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+62 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+63 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+64 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+65 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+66 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+67 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+68 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+69 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+70 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+71 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+72 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+73 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+74 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+75 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+76 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+77 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+78 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+79 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+80 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+81 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+82 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+83 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+84 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+85 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+86 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+87 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+88 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+89 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+90 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+91 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+92 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+93 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+94 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+95 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+96 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+97 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+98 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+99 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+100 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+101 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+102 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+103 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+104 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+105 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+106 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+107 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+108 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+109 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+110 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+111 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+112 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+113 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+114 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+115 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+116 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+117 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+118 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+119 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+120 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+121 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+122 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+123 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+124 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+125 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+126 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+127 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+128 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+129 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+130 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+131 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+132 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+133 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+134 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+135 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+136 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+137 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+138 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+139 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+140 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+141 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+142 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+143 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+144 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+145 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+146 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+147 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+148 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+149 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+150 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+151 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+152 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+153 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+154 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+155 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+156 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+157 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+158 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+159 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+160 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+161 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+162 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+163 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+164 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+165 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+166 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+167 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+168 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+169 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+170 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+171 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+172 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+173 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+174 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+175 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+176 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+177 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+178 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+179 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+180 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+181 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+182 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+183 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+184 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+185 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+186 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+187 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+188 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+189 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+190 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+191 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+192 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+193 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+194 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+195 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+196 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+197 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+198 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+199 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+200 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+50 22.024563092950352 22.024563092950352 Inf
+201 [1, 1, 1, 1, 1, 1, 7, 7, 7, 1, 1, 7, 7, 7, 7, 1, 7, 1, 1, 1, 7, 1, 7, 7, 7, 1]
+[ Info: Saved animation to /Users/runner/work/GeometricClusterAnalysis.jl/GeometricClusterAnalysis.jl/docs/build/assets/anim_kpdtm2.gif</code></pre><p><img src="../assets/anim_kpdtm2.gif" alt/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../three_curves/">« Three Curves</a><a class="docs-footer-nextpage" href="../trimmed-bregman/">Bregman divergences »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Wednesday 22 February 2023 08:43">Wednesday 22 February 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

@@ -1,3 +1,5 @@
 install.packages("devtools")
 install.packages("here")
 install.packages("FNN")
+install.packages("tourr")
+install.packages("TDA")

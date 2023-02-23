@@ -87,9 +87,9 @@ $(SIGNATURES)
 
 Distance matrix for the graph filtration
 
-- indexed_by_r2 = true always work 
-- indexed_by_r2 = false requires elements of weigths to be non-negative.
-- indexed_by_r2 = false for the sub-level set of the square-root of non-negative power functions : the k-PDTM or the k-PLM (when determinant of matrices are forced to be 1)
+- `indexed_by_r2 = true` always work 
+- `indexed_by_r2 = false` requires elements of weigths to be non-negative.
+- `indexed_by_r2 = false` for the sub-level set of the square-root of non-negative power functions : the *k-PDTM* or the *k-PLM* (when determinant of matrices are forced to be 1)
 """
 function build_distance_matrix(result; indexed_by_r2 = true)
 
@@ -135,15 +135,16 @@ export hierarchical_clustering_lem
 """
 $(SIGNATURES)
 
-- distance_matrix : ``(r_{i,j})_{i,j} r_{i,j}`` : time ``r`` when components ``i`` and ``j`` merge
+- `distance_matrix` : ``(r_{i,j})_{i,j} r_{i,j}`` : time ``r`` when components ``i`` and ``j`` merge
 - ``r_{i,i}`` : birth time of component ``i``.
-- c : number of components
-- infinity : components whose lifetime is larger than infinity never die
+- `c` : number of components
+- `infinity` : components whose lifetime is larger than infinity never die
 - `threshold` : centers born after `threshold` are removed
-- It is possible to select infinity and `threshold` after running the algorithm with infinity = Inf and `threshold` = Inf
-- For this, we look at the persistence diagram of the components : (x-axis Birth ; y-axis Death)
-- store_colors = TRUE : in the list saved_colors, we store all configurations of colors, for every step.
-- Thresholding
+- `store_colors = true` : in `saved_colors`, we store all configurations of colors, for every step.
+- `store_timesteps = true` : in `saved_timesteps`, we store all timesteps.
+
+It is possible to select infinity and `threshold` after running the algorithm with `infinity = Inf` 
+and `threshold = Inf`.  For this, we look at the persistence diagram of the components : (x-axis Birth ; y-axis Death)
 """
 function hierarchical_clustering_lem(
     distance_matrix;

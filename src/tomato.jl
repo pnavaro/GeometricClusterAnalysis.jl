@@ -100,34 +100,40 @@ end
 
 """
 $(SIGNATURES)
-  - k - Nearest neighbours graph
-  - k number of nearest neighbours to link to
-"""
-function graph_nn(P,k)
-  n = size(P, 1)
-  graph = zeros(n,n)
-  kdtree = KDTree(P)
-  for i in 1:n
-    knear, dists = knn(kdtree, P[i,:], k+1)
-    graph[i,knear] .= 1
-    graph[knear,i] .= 1
-    graph[i,i] = 1
-  end
 
-  return graph
+Nearest neighbours graph
+
+  - k : number of nearest neighbours to link to
+"""
+function graph_nn(points, k)
+
+    n = size(points, 1)
+    graph = zeros(n,n)
+    kdtree = KDTree(points)
+
+    for i in 1:n
+        knear, dists = knn(kdtree, points[i,:], k+1)
+        graph[i,knear] .= 1
+        graph[knear,i] .= 1
+        graph[i,i] = 1
+    end
+
+    return graph
 
 end
+
+
 
 """
 $(SIGNATURES)
 
 Rips graph with radius r
 """
-function graph_radius(P,r)
-  n = size(P,1)
-  graph = zeros(Int, n,n)
+function graph_radius(points,r)
+  n = size(points,1)
+  graph = zeros(Int, n, n)
   for i in 1:n, j in 1:n
-      graph[i,j] = (sum((view(P,j,:) .- view(P,i,:)).^2) <= r^2)
+      graph[i,j] = (sum((view(points,j,:) .- view(points,i,:)).^2) <= r^2)
   end
   return graph 
 end
@@ -136,10 +142,10 @@ end
 """
 $(SIGNATURES)
 """
-function tomato(P, birth, graph, infinity=Inf, threshold = Inf)
+function tomato(points, birth, graph, infinity=Inf, threshold = Inf)
 
-  n = size(P,1)
-  birth = birth_function(P)
+  n = size(points,1)
+  birth = birth_function(points)
   # Computing matrix
   hmatrix = hmatrix_tomato(graph, birth)
   # Starting the hierarchical clustering algorithm

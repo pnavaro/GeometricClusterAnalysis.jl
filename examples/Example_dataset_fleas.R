@@ -1,4 +1,5 @@
 library(here)
+source(here("R","plot_pointclouds_centers.R"))
 source(here("R","functions_for_evaluating_methods.R"))
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

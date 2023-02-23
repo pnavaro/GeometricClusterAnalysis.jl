@@ -50,6 +50,7 @@ x = @rget x
 
 @test mahalanobis(x, colMeans(x), cov(x)) ≈ d
 
+include("test_tomato.jl")
 include("test_kpdtm.jl")
 include("test_nearest_neighbors.jl")
 include("test_colorize.jl")

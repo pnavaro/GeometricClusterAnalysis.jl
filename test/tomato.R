@@ -1,11 +1,8 @@
 # Algorithm ToMATo from paper "Persistence-based clustering in Riemannian Manifolds"
 # Frederic Chazal, Steve Oudot, Primoz Skraba, Leonidas J. Guibas
 
-library(here)
-source(here("test","hierarchical_clustering_complexes.R"))
-
+source("hierarchical_clustering_complexes.R")
 library("FNN")
-
 
 # Auxiliary functions
 
@@ -47,9 +44,6 @@ graph_radius <- function(P,r){
   }
   return(graph)
 }
-
-
-# MAIN
 
 Tomato <- function(P,birth_function,graph,infinity=Inf,threshold = Inf){
   birth = birth_function(P)

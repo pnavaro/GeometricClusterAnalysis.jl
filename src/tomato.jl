@@ -138,22 +138,57 @@ function graph_radius(points,r)
   return graph 
 end
 
-
 """
 $(SIGNATURES)
-"""
-function tomato(points, birth, graph, infinity=Inf, threshold = Inf)
 
-  n = size(points,1)
-  birth = birth_function(points)
-  # Computing matrix
-  hmatrix = hmatrix_tomato(graph, birth)
-  # Starting the hierarchical clustering algorithm
-  hc = hierarchical_clustering_lem(hmatrix, infinity = infinity, threshold = threshold, store_colors = true ,store_timesteps = true)
-  # Transforming colors
-  color = return_color(1:n, hc.color, hc.startup_indices)
-  for i in 1:length(hc.colors)
-    colors[i] = return_color(1:n, hc.saved_colors[i], hc.startup_indices)
+`birth` : distance to measure
+`graph` : Matrix that contains 0 and 1, ``graph_{i,j} = 1`` if ``i`` and ``j`` are neighbours
+"""
+function distance_matrix_tomato(graph, birth)
+  
+  c = size(graph,1)
+  distance_matrix = fill(Inf,c,c)
+  if c != length(birth)
+    @error "graph should be of size lxl with l the length of birth"
   end
-  return color, colors, hc
+  for i in 1:c, j in 1:i
+      distance_matrix[i,j] = max(birth[i],birth[j])*1/graph[i,j]
+  end
+  return distance_matrix
+end
+
+function tomato(x, k, graph; infinity = Inf, threshold = Inf)
+
+  n = size(x,2)
+  m0 = k / n
+  birth = dtm(x, m0)
+  # Computing matrix
+  dm = distance_matrix_tomato(graph, birth)
+  # Starting the hierarchical clustering algorithm
+  hc = hierarchical_clustering_lem(dm, infinity = infinity, threshold = threshold, 
+        store_colors = true, store_timesteps = true)
+  # Transforming colors
+  colors = return_color(1:n, hc.colors, hc.startup_indices)
+  saved_colors = [return_color(1:n, c, hc.startup_indices) for c in hc.saved_colors]
+
+  return colors, saved_colors, hc
+        
+end
+
+export tomato_clustering
+
+function tomato_clustering( nb_clusters, points, k, c, signal, r, iter_max, nstart)
+
+    graph = graph_radius(points, r)
+    x = collect(transpose(points))
+    m0 = k / size(x,2)
+    sort_dtm = sort(dtm(x, m0))
+    threshold = sort_dtm[signal]
+    _, _, hc = tomato(x, k, graph; infinity = Inf, threshold = threshold)
+    sort_bd = sort(hc.death .- hc.birth)
+    infinity = mean([sort_bd[end - nb_clusters], sort_bd[end - nb_clusters + 1]])
+    colors, _, _ = tomato(x, k, graph, infinity = infinity, threshold = threshold)
+    lifetime = reverse(sort_bd)
+    colors, lifetime
+
 end

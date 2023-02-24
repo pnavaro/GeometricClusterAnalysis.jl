@@ -150,28 +150,6 @@ plot(p1, p2, layout = l)
 # ## k-PLM 
 
 # +
-function compute_threshold_infinity(dist_func, distance_matrix, nb_means_removed, nb_clusters)
-  
-  infinity , threshold = Inf, Inf
-  hc1 = hierarchical_clustering_lem(distance_matrix,infinity = infinity, threshold = threshold)
-        
-  if nb_means_removed > 0
-      threshold = mean((hc1.birth[end - nb_means_removed],hc1.birth[end - nb_means_removed + 1]))
-  else
-      threshold = Inf
-  end
-  
-  hc2 = hierarchical_clustering_lem(distance_matrix, infinity = infinity, threshold =  threshold)
-  bd = birth_death(hc2)
-  sort!(bd)
-  infinity = mean((bd[end - nb_clusters],bd[end - nb_clusters + 1]))
-  threshold, infinity
-    
-end
-
-
-
-# +
 nb_clusters, k, c, iter_max, nstart = 3, 10, 50, 100, 10
 @show nsignal = size(points, 1)
 
@@ -196,4 +174,28 @@ p2 = plot_pointset(points, col_kplm)
 plot(p1, p2, layout = l)
 # -
 
+# ## Witnessed
 
+clustering_witnessed <- function(nb_clusters,P,k,c,sig,iter_max,nstart,indexed_by_r2 = TRUE){
+  method = k_witnessed_distance 
+  dist_func = method(P,k,c,sig,iter_max,nstart)
+  distance_matrix = distance_matrix_Power_function_Buchet(sqrt(dist_func$weights),dist_func$means)
+  fp_hc = second_passage_hc(dist_func,distance_matrix,infinity=Inf,threshold = Inf)
+  bd = fp_hc$hierarchical_clustering$death - fp_hc$hierarchical_clustering$birth  
+  sort_bd = sort(bd)
+  lengthbd = length(bd)
+  infinity = mean(c(sort_bd[lengthbd - nb_clusters],sort_bd[lengthbd - nb_clusters + 1]))
+  sp_hc = second_passage_hc(dist_func,distance_matrix,infinity=infinity,threshold = Inf)
+  return(list(label =sp_hc$color, lifetime = sort_bd[length(sort_bd):1]))
+}
+
+
+# ## k-PDTM
+
+# ## Power function Buchet et al.
+#
+
+# ## DTM filtration
+#
+
+# ## Spectral

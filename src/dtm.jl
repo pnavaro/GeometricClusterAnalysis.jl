@@ -64,3 +64,55 @@ function dtm(x, m0; r = 2)
     return dtm_value
     
 end
+
+function build_distance_matrix_power_function_buchet(birth, points)
+
+    function height(a,b,c,d)
+        # a and b are two vectors, c and d two numerics
+        l = sum((a .- b).^2)
+        res = l
+        c ==d && (res = sqrt(c))
+        ctemp = c
+        dtemp = d
+        c = min(ctemp,dtemp)
+        d = max(ctemp,dtemp)
+        if l != 0
+            if l >= d-c
+                res = sqrt(((d-c)^2+2*(d+c)*l+l^2)/(4*l))
+            else
+                res = sqrt(d)
+            end
+        end
+        return res 
+    end
+    
+    c = length(birth)
+    distance_matrix = fill(Inf,(c,c))
+    for i in 1:c, j in 1:i
+        distance_matrix[i,j] = height(points[:,i], points[:,j], birth[i]^2, birth[j]^2)
+    end
+
+    return distance_matrix
+
+end
+
+function power_function_buchet(points, birth_function, infinity=Inf, threshold = Inf)
+
+    birth = birth_function(points)
+    # Computing matrix
+    distance_matrix = build_distance_matrix_power_function_buchet(birth, points)
+    # Starting the hierarchical clustering algorithm
+    hc = hierarchical_clustering_lem(distance_matrix, 
+                                     infinity = infinity,
+                                     threshold = threshold, 
+                                     store_colors = true ,
+                                     store_timesteps = true)
+    # Transforming colors
+    n = size(points, 2)
+    colors = return_color(1:n, hc.colors, hc.startup_indices)
+    returned_colors = [ return_color(1:n, hc.saved_colors[i], hc.startup_indices) 
+                        for i in eachindex(hc.saved_colors) ]
+                         
+    return colors, returned_colors, hc
+
+end

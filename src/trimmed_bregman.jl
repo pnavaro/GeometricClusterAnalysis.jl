@@ -112,7 +112,6 @@ function trimmed_bregman_clustering(
             for i = 1:k
                 if cluster_nonempty[i]
                     divergence = [bregman(p, old_centers[:, i]) for p in eachcol(x)]
-                    #divergence[divergence .== Inf] .= typemax(Float64)/n 
                     for j = 1:n
                         if divergence[j] < divergence_min[j]
                             divergence_min[j] = divergence[j]

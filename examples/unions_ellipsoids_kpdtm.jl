@@ -44,8 +44,8 @@ hc = hierarchical_clustering_lem(
 )
 
 
-Col = hc.Couleurs
-Temps = hc.Temps_step
+saved_colors = hc.saved_colors
+timesteps = hc.timesteps
 
 remain_indices = hc.startup_indices
 length_ri = length(remain_indices)
@@ -57,15 +57,14 @@ color_points, dists = subcolorize(data.points, nsignal, df, remain_indices)
 
 
 # Associate colours to points (as represented in the plot)
-Colors = [return_color(color_points, col, remain_indices) for col in Col]
+returned_colors = [return_color(color_points, c, remain_indices) for c in colors]
 
 # scatter(data.points[1,:],data.points[2,:],color = Colors[1])
 # scatter!([μ[8][1]], [μ[8][2]], color = "green", label = "", markersize = 10)
 
-for i = 1:length(Col)
-    for j = 1:size(data.points)[2]
-        Colors[i][j] = Colors[i][j] * (dists[j] <= Temps[i]) # If the cost of the point is smaller to the time : label 0 (not in the ellipsoid)
-    end
+for i = eachindex(returned_colors), j = 1:data.np
+    # If the cost of the point is smaller to the time : label 0 (not in the ellipsoid)
+    returned_colors[i][j] = returned_colors[i][j] * (dists[j] <= timesteps[i]) 
 end
 
 # Pas sûr qu'il faille garder ça...
@@ -73,9 +72,9 @@ end
 ω = [df.weights[i] for i in remain_indices]
 Σ = [df.Σ[i] for i in remain_indices]
 
-ncolors = length(Colors)
+ncolors = length(returned_colors)
 anim = @animate for i in [1:ncolors-1; Iterators.repeated(ncolors - 1, 30)...]
-    ellipsoids(data.points, Col[i], Colors[i], μ, ω, Σ, Temps[i]; markersize = 5)
+    ellipsoids(data.points, saved_colors[i], returned_colors[i], μ, ω, Σ, timesteps[i]; markersize = 5)
     xlims!(-2, 4)
     ylims!(-2, 2)
 end
@@ -83,33 +82,29 @@ end
 gif(anim, "anim_kpdtm.gif", fps = 10)
 
 
-
-
-
 ## COLORIZE - steps parametrized by regularly increasing time parameter time
-# Attention - vérifier que le dernier élément de Temps vaut forcément Inf.
+# Attention - vérifier que le dernier élément de `timesteps` vaut forcément Inf.
 
-let
+let idx = 0
 
-    time = (1:20) ./ 40 # A regler en fonction du vecteur Temps 
+    time = (1:20) ./ 40 # A regler en fonction du vecteur `timesteps` 
     sq_time = time .^ 2
     Col2 = Vector{Int}[]
     Colors2 = Vector{Int}[]
 
-    idx = 0
-    new_colors2 = zeros(Int, length(Colors[1]))
-    new_col2 = zeros(Int, length(Col[1]))
-    next_sqtime = Temps[idx+1]
+    new_colors2 = zeros(Int, length(returned_colors[1]))
+    new_col2 = zeros(Int, length(saved_colors[1]))
+    next_sqtime = timesteps[idx+1]
     updated = false
 
     for i = 1:length(time)
         while sq_time[i] >= next_sqtime
             idx += 1
-            next_sqtime = Temps[idx+1]
+            next_sqtime = timesteps[idx+1]
             updated = true
         end
         if updated
-            new_col2 = Col[idx]
+            new_col2 = saved_colors[idx]
             new_colors2 = return_color(color_points, new_col2, remain_indices)
             updated = false
         end
@@ -117,10 +112,9 @@ let
         push!(Colors2, copy(new_colors2))
     end
 
-    for i = 1:length(Col2)
-        for j = 1:size(data.points)[2]
-            Colors2[i][j] = Colors2[i][j] * (dists[j] <= sq_time[i]) # If the cost of the point is smaller to the time : label 0 (not in the ellipsoid)
-        end
+    for i = eachindex(Col2), j = 1:data.np
+        # If the cost of the point is smaller to the time : label 0 (not in the ellipsoid)
+        Colors2[i][j] = Colors2[i][j] * (dists[j] <= sq_time[i]) 
     end
 
     ncolors2 = length(Colors2)

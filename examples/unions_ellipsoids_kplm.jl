@@ -29,8 +29,8 @@ hc = hierarchical_clustering_lem(
     store_timesteps = true,
 )
 
-Col = hc.Couleurs
-Temps = hc.Temps_step
+saved_colors = hc.saved_colors
+timesteps = hc.timesteps
 
 remain_indices = hc.startup_indices
 length_ri = length(remain_indices)
@@ -47,21 +47,19 @@ color_points, dists = subcolorize(data.points, nsignal, df, remain_indices)
 #color_points .= [remain_indices_2[c] for c in color_points]
 #color_points .+= (color_points.==0) .* (c + 1)
 
-Colors = [return_color(color_points, col, remain_indices) for col in Col]
+colors = [return_color(color_points, col, remain_indices) for col in saved_colors]
 
-for i = 1:length(Col)
-    for j = 1:size(data.points)[2]
-        Colors[i][j] = Colors[i][j] * (dists[j] <= Temps[i])
-    end
+for i = eachindex(saved_colors), j = 1:data.np
+    colors[i][j] = colors[i][j] * (dists[j] <= timesteps[i])
 end
 
 μ = [df.μ[i] for i in remain_indices if i > 0]
 ω = [df.weights[i] for i in remain_indices if i > 0]
 Σ = [df.Σ[i] for i in remain_indices if i > 0]
 
-ncolors = length(Colors)
+ncolors = length(colors)
 anim = @animate for i in [1:ncolors-1; Iterators.repeated(ncolors - 1, 30)...]
-    ellipsoids(data.points, Col[i], Colors[i], μ, ω, Σ, Temps[i]; markersize = 5)
+    ellipsoids(data.points, saved_colors[i], colors[i], μ, ω, Σ, timesteps[i]; markersize = 5)
     xlims!(-2, 4)
     ylims!(-2, 2)
 end

@@ -209,7 +209,9 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!, first_
 
                             Σ[i] .= (μ[i] .- centers[i]) * (μ[i] .- centers[i])'
                             Σ[i] .+= (k - 1) / k .* cov(points[:, idxs[tid]]')
-                            Σ[i] .+= (cloud_size - 1) / cloud_size .* cov(points[:, cloud]')
+                            if cloud_size > 1
+                                Σ[i] .+= (cloud_size - 1) / cloud_size .* cov(points[:, cloud]')
+                            end
 
                             f_Σ!(Σ[i])
 
@@ -275,3 +277,5 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!, first_
     return KpResult(k, centers, μ, weights, colors, Σ, cost_opt)
 
 end
+
+

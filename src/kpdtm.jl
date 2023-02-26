@@ -8,17 +8,17 @@ $(SIGNATURES)
 function meanvar!(μ, ω, points::Matrix{Float64}, centers, k::Int)
 
     d, n = size(points)
-    c = length(centers)
 
     kdtree = KDTree(points)
-    idxs, dists = knn(kdtree, hcat(centers...), k, true)
+    idxs, dists = knn(kdtree, centers, k, true)
 
     fill!(ω, 0.0)
     for i in eachindex(μ)
         fill!(μ[i], 0.0)
     end
 
-    for i = 1:c
+    @show centers
+    for i = eachcol(centers)
         x̄ = vec(mean(view(points, :, idxs[i]), dims = 2))
         μ[i] .= x̄
         ω[i] = sum((view(points, :, idxs[i]) .- x̄) .^ 2) / k
@@ -41,7 +41,6 @@ function recolor(points, centers, k, nsignal)
     # Step 1 : Update means and weights
 
     meanvar!(μ, ω, points, centers, k)
-
 
     # Step 2 : Update color
 
@@ -73,12 +72,14 @@ function recolor(points, centers, k, nsignal)
 
 end
 
+export k_witnessed_distance
+
 """
 $(SIGNATURES)
 """
-function k_witnessed_distance(points, k, c, sig, iter_max, nstart)
+function k_witnessed_distance(points, k, c, signal, iter_max, nstart)
 
-    μ, ω, colors = recolor(points, centers, k, sig)
+    μ, ω, colors = recolor(points, points, k, signal)
     d = size(points, 1)
     Σ = [diagm(ones(d)) for i in eachindex(centers)]
     return μ, ω, colors, Σ
@@ -138,7 +139,7 @@ function kpdtm(rng, points, k, c, nsignal, iter_max, nstart, first_centers)
 
             # Step 1 : Update means ans weights
 
-            meanvar!(μ, ω, points, centers, k)
+            meanvar!(μ, ω, points, hcat(centers...), k)
 
             # Step 2 : Update color
 

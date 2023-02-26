@@ -7,7 +7,7 @@
 #       extension: .jl
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.14.1
+#       jupytext_version: 1.14.4
 #   kernelspec:
 #     display_name: Julia 1.8.5
 #     language: julia
@@ -25,6 +25,7 @@
 # - `ade3`, the aedeagus width from the side in microns
 # - `species`, which species is being examined - concinna, heptapotamica, heikertingeri
 
+using CategoricalArrays
 using Clustering
 using Plots
 using Random
@@ -66,8 +67,10 @@ end
 dataset = rcopy(R"tourr::flea")
 
 points = Matrix(Float64.(dataset[:,1:6]))
-a
 scale!(points)
+pairs = Dict(label=>i for (i,label) in enumerate(levels(dataset[:,7])))
+true_colors = zeros(Int, size(points,1))
+recode!(true_colors, dataset[:,7], pairs...)
 
 # ## K-means 
 
@@ -139,7 +142,7 @@ using Revise
 using GeometricClusterAnalysis
 
 nb_clusters, k, c, r, iter_max = 3, 10, 100, 1.9, 100
-
+signal = size(points,1)
 col_tomato, _ = tomato_clustering( nb_clusters, points, k, c, signal, r, iter_max, nstart)
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
@@ -159,9 +162,10 @@ rng = MersenneTwister(6625)
 
 x = collect(transpose(points))
 
+# +
 dist_func = kplm(rng, x, k, c, nsignal, iter_max, nstart, f_Σ!)
 
-distance_matrix = build_distance_matrix(df)
+distance_matrix = build_distance_matrix(dist_func)
 
 nb_means_removed = 0
 
@@ -176,18 +180,22 @@ plot(p1, p2, layout = l)
 
 # ## Witnessed
 
-clustering_witnessed <- function(nb_clusters,P,k,c,sig,iter_max,nstart,indexed_by_r2 = TRUE){
-  method = k_witnessed_distance 
-  dist_func = method(P,k,c,sig,iter_max,nstart)
-  distance_matrix = distance_matrix_Power_function_Buchet(sqrt(dist_func$weights),dist_func$means)
-  fp_hc = second_passage_hc(dist_func,distance_matrix,infinity=Inf,threshold = Inf)
-  bd = fp_hc$hierarchical_clustering$death - fp_hc$hierarchical_clustering$birth  
-  sort_bd = sort(bd)
-  lengthbd = length(bd)
-  infinity = mean(c(sort_bd[lengthbd - nb_clusters],sort_bd[lengthbd - nb_clusters + 1]))
-  sp_hc = second_passage_hc(dist_func,distance_matrix,infinity=infinity,threshold = Inf)
-  return(list(label =sp_hc$color, lifetime = sort_bd[length(sort_bd):1]))
-}
+x
+
+# +
+dist_func = k_witnessed_distance(x, k, c, signal, iter_max, nstart)
+
+#
+#  distance_matrix = distance_matrix_Power_function_Buchet(sqrt(dist_func$weights),dist_func$means)
+#  fp_hc = second_passage_hc(dist_func,distance_matrix,infinity=Inf,threshold = Inf)
+#  bd = fp_hc$hierarchical_clustering$death - fp_hc$hierarchical_clustering$birth  
+#  sort_bd = sort(bd)
+#  lengthbd = length(bd)
+#  infinity = mean(c(sort_bd[lengthbd - nb_clusters],sort_bd[lengthbd - nb_clusters + 1]))
+#  sp_hc = second_passage_hc(dist_func,distance_matrix,infinity=infinity,threshold = Inf)
+#  return(list(label =sp_hc$color, lifetime = sort_bd[length(sort_bd):1]))
+#}
+# -
 
 
 # ## k-PDTM

@@ -135,7 +135,7 @@ end
 
 function distance_matrix_dtm_filtration(birth, points)
     @show c = length(birth)
-    distance_matrix = zeros(c,c)
+    distance_matrix = fill(Inf, (c,c))
     for i in 1:c
         for j in 1:i
             other = (birth[i]+birth[j]+sqrt(sum((points[:,i] .- points[:,j]).^2)))/2

@@ -132,3 +132,38 @@ function power_function_buchet(points, birth_function; infinity = Inf, threshold
     return colors, returned_colors, hc
 
 end
+
+function distance_matrix_dtm_filtration(birth, points)
+    @show c = length(birth)
+    distance_matrix = zeros(c,c)
+    for i in 1:c
+        for j in 1:i
+            other = (birth[i]+birth[j]+sqrt(sum((points[:,i] .- points[:,j]).^2)))/2
+            distance_matrix[i,j] = max(birth[i],birth[j],other)
+        end 
+    end
+    return distance_matrix 
+end
+
+export dtm_filtration
+
+"""
+$(SIGNATURES)
+"""
+function dtm_filtration(points, birth_function; infinity = Inf, threshold = Inf)
+
+  birth = birth_function(points)
+  # Computing matrix
+  distance_matrix = distance_matrix_dtm_filtration(birth, points)
+  # Starting the hierarchical clustering algorithm
+  hc = hierarchical_clustering_lem(distance_matrix, infinity = infinity, threshold = threshold,
+                                   store_colors = true , store_timesteps = true)
+  # Transforming colors
+  n = size(points, 2)
+  colors = return_color(1:n, hc.colors, hc.startup_indices)
+  returned_colors = [return_color(1:n, c, hc.startup_indices) for c in hc.saved_colors]
+  
+  return colors, returned_colors, hc
+
+end
+

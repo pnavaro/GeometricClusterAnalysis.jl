@@ -271,7 +271,7 @@ Si `label_points[j] = 3`, alors on cherche le centre dont l'indice de départ va
 function return_color(label_points, colors_in, startup_indices)
     colors_out = zeros(Int, length(label_points))
     for i in eachindex(startup_indices)
-        colors_out[label_points.==startup_indices[i]] .= colors_in[i]
+        colors_out[label_points .== startup_indices[i]] .= colors_in[i]
     end
     return colors_out
 end

@@ -65,9 +65,14 @@ function dtm(x, m0; r = 2)
     
 end
 
+export build_distance_matrix_power_function_buchet
+
+"""
+$(SIGNATURES)
+"""
 function build_distance_matrix_power_function_buchet(birth, points)
 
-    function height(a,b,c,d)
+    function height(a, b, c, d)
         # a and b are two vectors, c and d two numerics
         l = sum((a .- b).^2)
         res = l
@@ -89,7 +94,7 @@ function build_distance_matrix_power_function_buchet(birth, points)
     c = length(birth)
     distance_matrix = fill(Inf,(c,c))
     for i in 1:c, j in 1:i
-        distance_matrix[i,j] = height(points[:,i], points[:,j], birth[i]^2, birth[j]^2)
+        distance_matrix[i,j] = height(points[i], points[j], birth[i]^2, birth[j]^2)
     end
 
     return distance_matrix

@@ -1,7 +1,6 @@
 # Algorithm ToMATo from paper 'Persistence-based clustering in Riemannian
 # Manifolds' Frederic Chazal, Steve Oudot, Primoz Skraba, Leonidas J. Guibas
 
-source("hierarchical_clustering_complexes.R")
 library("FNN")
 
 # Auxiliary functions

@@ -1,4 +1,4 @@
-
+source(here::here("test","ellipsoids_intersection.R"))
 
 # Auxiliary function - Important !!!
 

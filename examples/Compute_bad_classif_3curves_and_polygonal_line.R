@@ -1,11 +1,11 @@
 library(here)
 source(here("test","hierarchical_clustering_complexes.R"))
-source(here("test","Tomato.R"))
+source(here("test","tomato.R"))
 source(here("test","fonctions_puissances.R"))
 source(here("test","kplm.R"))
 source(here("test","kpdtm.R"))
-source(here("R", "DTM_filtration.R"))
-source(here("R","plot_pointclouds_centers.R"))
+source(here("test", "dtm_filtration.R"))
+source(here("test","plot_pointclouds_centers.R"))
 
 
 
@@ -14,15 +14,15 @@ source(here("R","plot_pointclouds_centers.R"))
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-source(here("R","Sample_generation/Sample_3curves.R"))
-source(here("R","Sample_generation/Sample_14segments.R"))
+source(here("test","sample_3curves.R"))
+source(here("test","sample_14segments.R"))
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                                   # Clustering methods :
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-source(here("R","functions_for_evaluating_methods.R"))
+source(here("test","functions_for_evaluating_methods.R"))
 
 
 nb_clusters = 14 # 3,2

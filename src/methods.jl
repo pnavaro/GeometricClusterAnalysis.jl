@@ -1,13 +1,4 @@
-# A main function that take as an argument a clustering method, to compute its
-# performance via the FDR and NMI
-
-# and
-
-# For each method, the function that returns the proper clustering.
-
-# Auxiliary function
-
-
+#=
 modify_label <- function(label) {
     # label is a vector of integers with possibly value 0 if there are m
     # different positive integers, set f, a bijective map between these
@@ -258,3 +249,5 @@ clustering_spectral <- function(nb_clusters, P, Nnoise, iter_max, nstart, k = 10
     col[sort_dtm$ix[1:(nrow(P_old) - Nnoise)]] = col_spectral2
     return(list(label = col, lifetime = rep(0, nrow(P_old))))
 }
+
+=#

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Fleas dataset · GeometricClusterAnalysis.jl</title><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.png" alt="GeometricClusterAnalysis.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">GeometricClusterAnalysis.jl</a></span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Documentation</a></li><li><a class="tocitem" href="../fake_data/">Datasets</a></li><li class="is-active"><a class="tocitem" href>Fleas dataset</a><ul class="internal"><li><a class="tocitem" href="#R-K-means"><span>R K-means</span></a></li><li><a class="tocitem" href="#K-means-from-Clustering.jl"><span>K-means from Clustering.jl</span></a></li><li><a class="tocitem" href="#K-means-from-ClusterAnalysis.jl"><span>K-means from ClusterAnalysis.jl</span></a></li><li><a class="tocitem" href="#Robust-trimmed-clustering-:-tclust"><span>Robust trimmed clustering : tclust</span></a></li><li><a class="tocitem" href="#ToMaTo"><span>ToMaTo</span></a></li><li><a class="tocitem" href="#k-PLM"><span>k-PLM</span></a></li><li><a class="tocitem" href="#Witnessed"><span>Witnessed</span></a></li><li><a class="tocitem" href="#k-PDTM"><span>k-PDTM</span></a></li><li><a class="tocitem" href="#Power-function-Buchet-et-al."><span>Power function Buchet et al.</span></a></li><li><a class="tocitem" href="#DTM-filtration"><span>DTM filtration</span></a></li><li><a class="tocitem" href="#Spectral-with-specc"><span>Spectral with <code>specc</code></span></a></li></ul></li><li><a class="tocitem" href="../three_curves/">Three Curves</a></li><li><a class="tocitem" href="../two_spirals/">Two Spirals</a></li><li><span class="tocitem">Trimmed Bregman Clustering</span><ul><li><a class="tocitem" href="../trimmed-bregman/">Bregman divergences</a></li><li><a class="tocitem" href="../poisson1/">One-dimensional data from the Poisson distribution</a></li><li><a class="tocitem" href="../poisson2/">Two-dimensional data from the Poisson distribution</a></li><li><a class="tocitem" href="../obama/">Application to authors texts clustering</a></li></ul></li><li><a class="tocitem" href="../tomato/">ToMaTo</a></li><li><a class="tocitem" href="../types/">Types</a></li><li><a class="tocitem" href="../functions/">Functions</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Fleas dataset</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Fleas dataset</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/pnavaro/GeometricClusterAnalysis.jl/blob/master/docs/src/fleas.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Flea-beatle-measurements"><a class="docs-heading-anchor" href="#Flea-beatle-measurements">Flea beatle measurements</a><a id="Flea-beatle-measurements-1"></a><a class="docs-heading-anchor-permalink" href="#Flea-beatle-measurements" title="Permalink"></a></h1><ul><li><code>tars1</code>, width of the first joint of the first tarsus in microns (the sum of measurements for both tarsi)</li><li><code>tars2</code>, the same for the second joint</li><li><code>head</code>, the maximal width of the head between the external edges of the eyes in 0.01 mm</li><li><code>ade1</code>, the maximal width of the aedeagus in the fore-part in microns</li><li><code>ade2</code>, the front angle of the aedeagus ( 1 unit = 7.5 degrees)</li><li><code>ade3</code>, the aedeagus width from the side in microns</li><li><code>species</code>, which species is being examined - concinna, heptapotamica, heikertingeri</li></ul><pre><code class="language- hljs">using Clustering
+using Plots
+using Random
+using RCall
+using Statistics</code></pre><p>Julia equivalent of the R function <code>scale</code></p><pre><code class="language-julia hljs">function scale!(x)
+
+    for col in eachcol(x)
+        μ, σ = mean(col), std(col)
+        col .-= μ
+        col ./= σ
+    end
+
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">scale! (generic function with 1 method)</code></pre><p>Scatter plot function</p><pre><code class="language-julia hljs">function plot_pointset( points, color)
+
+    p = plot(; title = &quot;Flea beatle measurements&quot;, xlabel = &quot;x&quot;, ylabel = &quot;y&quot; )
+
+    for c in unique(color)
+
+        which = color .== c
+        scatter!(p, points[which,1], points[which, 2], color = c,
+              markersize = 5, label = &quot;$c&quot;, legendfontsize=10)
+
+    end
+
+    return p
+
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">plot_pointset (generic function with 1 method)</code></pre><p>Dataset from R package <a href="http://ggobi.github.io/tourr/">tourr</a></p><pre><code class="language- hljs">dataset = rcopy(R&quot;tourr::flea&quot;)
+
+points = Matrix(Float64.(dataset[:,1:6]))
+scale!(points)
+pairs = collect(enumerate(unique(dataset[:,7])))
+
+true_colors = zeros(Int,length(dataset[:,7]))
+for i in eachindex(true_colors, dataset[:,7])
+    for j in eachindex(pairs)
+        p = pairs[j]
+        if p[2] == dataset[i,7]
+            true_colors[i] = p[1]
+        end
+    end
+end</code></pre><h2 id="R-K-means"><a class="docs-heading-anchor" href="#R-K-means">R K-means</a><a id="R-K-means-1"></a><a class="docs-heading-anchor-permalink" href="#R-K-means" title="Permalink"></a></h2><pre><code class="language- hljs">R&quot;&quot;&quot;
+dataset = tourr::flea
+true_color = c(rep(1,21),rep(2,22),rep(3,31))
+P = scale(dataset[,1:6])
+col_kmeans = kmeans(P,3)$cluster
+print(aricode::NMI(col_kmeans,true_color))
+&quot;&quot;&quot;
+col_kmeans = @rget col_kmeans
+println(&quot;NMI = $(mutualinfo(true_colors, col_kmeans))&quot;)
+l = @layout [a b]
+p1 = plot_pointset(points, true_colors)
+p2 = plot_pointset(points, col_kmeans)
+plot(p1, p2, layout = l, aspect_ratio= :equal)</code></pre><h2 id="K-means-from-Clustering.jl"><a class="docs-heading-anchor" href="#K-means-from-Clustering.jl">K-means from Clustering.jl</a><a id="K-means-from-Clustering.jl-1"></a><a class="docs-heading-anchor-permalink" href="#K-means-from-Clustering.jl" title="Permalink"></a></h2><pre><code class="language- hljs">features = collect(points&#39;)
+result = kmeans(features, 3)
+println(&quot;NMI = $(mutualinfo(true_colors, result.assignments))&quot;)
+l = @layout [a b]
+p1 = plot_pointset(points, true_colors)
+p2 = plot_pointset(points, result.assignments)
+plot(p1, p2, layout = l, aspect_ratio= :equal)</code></pre><h2 id="K-means-from-ClusterAnalysis.jl"><a class="docs-heading-anchor" href="#K-means-from-ClusterAnalysis.jl">K-means from ClusterAnalysis.jl</a><a id="K-means-from-ClusterAnalysis.jl-1"></a><a class="docs-heading-anchor-permalink" href="#K-means-from-ClusterAnalysis.jl" title="Permalink"></a></h2><pre><code class="language- hljs">import ClusterAnalysis
+
+flea = rcopy(R&quot;tourr::flea&quot;)
+df = flea[:, 1:end-1];  # dataset is stored in a DataFrame
+
+# parameters of k-means
+k, nstart, maxiter = 3, 10, 10;
+
+model = ClusterAnalysis.kmeans(df, k, nstart=nstart, maxiter=maxiter)
+println(&quot;NMI = $(mutualinfo(true_colors, model.cluster))&quot;)
+l = @layout [a b]
+p1 = plot_pointset(points, true_colors)
+p2 = plot_pointset(points, model.cluster)
+plot(p1, p2, layout = l, aspect_ratio= :equal)</code></pre><h2 id="Robust-trimmed-clustering-:-tclust"><a class="docs-heading-anchor" href="#Robust-trimmed-clustering-:-tclust">Robust trimmed clustering : tclust</a><a id="Robust-trimmed-clustering-:-tclust-1"></a><a class="docs-heading-anchor-permalink" href="#Robust-trimmed-clustering-:-tclust" title="Permalink"></a></h2><pre><code class="language- hljs">R&quot;&quot;&quot;
+dataset = tourr::flea
+P = scale(dataset[,1:6])
+&quot;&quot;&quot;
+tclust_color = Int.(rcopy(R&quot;tclust::tclust(P,3,alpha = 0,restr.fact = 10)$cluster&quot;))
+println(&quot;NMI = $(mutualinfo(true_colors,tclust_color))&quot;)
+l = @layout [a b]
+p1 = plot_pointset(points, true_colors)
+p2 = plot_pointset(points, tclust_color)
+plot(p1, p2, layout = l, aspect_ratio= :equal)</code></pre><h2 id="ToMaTo"><a class="docs-heading-anchor" href="#ToMaTo">ToMaTo</a><a id="ToMaTo-1"></a><a class="docs-heading-anchor-permalink" href="#ToMaTo" title="Permalink"></a></h2><p>Algorithm ToMATo from paper &quot;Persistence-based clustering in Riemannian Manifolds&quot; Frederic Chazal, Steve Oudot, Primoz Skraba, Leonidas J. Guibas</p><pre><code class="language- hljs">using GeometricClusterAnalysis
+
+nb_clusters, k, c, r, iter_max = 3, 10, 100, 1.9, 100
+signal = size(points,1)
+col_tomato, _ = tomato_clustering( nb_clusters, points, k, c, signal, r, iter_max, nstart)
+l = @layout [a b]
+p1 = plot_pointset(points, true_colors)
+p2 = plot_pointset(points, col_tomato)
+plot(p1, p2, layout = l)</code></pre><h2 id="k-PLM"><a class="docs-heading-anchor" href="#k-PLM">k-PLM</a><a id="k-PLM-1"></a><a class="docs-heading-anchor-permalink" href="#k-PLM" title="Permalink"></a></h2><pre><code class="language- hljs">nb_clusters, k, c, iter_max, nstart = 3, 10, 50, 100, 10
+nsignal = size(points, 1)
+
+function f_Σ!(Σ) end
+
+rng = MersenneTwister(6625)
+
+x = collect(transpose(points))
+
+dist_func = kplm(rng, x, k, c, nsignal, iter_max, nstart, f_Σ!)
+
+distance_matrix = build_distance_matrix(dist_func)
+
+nb_means_removed = 0
+
+threshold, infinity = compute_threshold_infinity(dist_func, distance_matrix, nb_means_removed, nb_clusters)
+hc = hierarchical_clustering_lem(distance_matrix,infinity = infinity, threshold = threshold)
+col_kplm = color_points_from_centers(x, k, nsignal, dist_func, hc)
+l = @layout [a b]
+p1 = plot_pointset(points, true_colors)
+p2 = plot_pointset(points, col_kplm)
+plot(p1, p2, layout = l)</code></pre><h2 id="Witnessed"><a class="docs-heading-anchor" href="#Witnessed">Witnessed</a><a id="Witnessed-1"></a><a class="docs-heading-anchor-permalink" href="#Witnessed" title="Permalink"></a></h2><pre><code class="language- hljs">μ, ω, colors = k_witnessed_distance(x, k, c, signal, iter_max, nstart)
+distance_matrix = build_distance_matrix_power_function_buchet(sqrt.(ω), hcat(μ...))
+
+hc1 = hierarchical_clustering_lem(distance_matrix, infinity = Inf, threshold = Inf)
+bd = hc1.death .- hc1.birth  
+sort!(bd)
+infinity = mean((bd[end - nb_clusters], bd[end - nb_clusters + 1]))
+hc2 = hierarchical_clustering_lem(distance_matrix, infinity = infinity, threshold = Inf)
+witnessed_colors = return_color(colors, hc2.colors, hc2.startup_indices)
+
+l = @layout [a b]
+p1 = plot_pointset(points, true_colors)
+p2 = plot_pointset(points, witnessed_colors)
+plot(p1, p2, layout = l)</code></pre><h2 id="k-PDTM"><a class="docs-heading-anchor" href="#k-PDTM">k-PDTM</a><a id="k-PDTM-1"></a><a class="docs-heading-anchor-permalink" href="#k-PDTM" title="Permalink"></a></h2><pre><code class="language- hljs">df_kpdtm = kpdtm(rng, x, k, c, nsignal, iter_max, nstart)
+distance_matrix = build_distance_matrix(df_kpdtm)
+hc1 = hierarchical_clustering_lem(distance_matrix, infinity = Inf, threshold = Inf)
+bd = hc1.death .- hc1.birth  
+sort!(bd)
+infinity = mean((bd[end - nb_clusters], bd[end - nb_clusters + 1]))
+hc2 = hierarchical_clustering_lem(distance_matrix, infinity = infinity, threshold = Inf)
+kpdtm_colors = return_color(df_kpdtm.colors, hc2.colors, hc2.startup_indices)
+l = @layout [a b]
+p1 = plot_pointset(points, true_colors)
+p2 = plot_pointset(points, kpdtm_colors)
+plot(p1, p2, layout = l)</code></pre><h2 id="Power-function-Buchet-et-al."><a class="docs-heading-anchor" href="#Power-function-Buchet-et-al.">Power function Buchet et al.</a><a id="Power-function-Buchet-et-al.-1"></a><a class="docs-heading-anchor-permalink" href="#Power-function-Buchet-et-al." title="Permalink"></a></h2><pre><code class="language- hljs">using GeometricClusterAnalysis
+
+m0 = k / size(x, 2)
+birth_function(x) = dtm(x, m0)
+birth = sort(birth_function(x))
+threshold = birth[nsignal]
+
+distance_matrix = build_distance_matrix_power_function_buchet(birth, x)
+
+buchet_colors, returned_colors, hc1 = power_function_buchet(x, birth_function; 
+         infinity = Inf, threshold = threshold)
+sort_bd = sort(hc1.death .- hc1.birth)
+infinity =  mean((sort_bd[end - nb_clusters],sort_bd[end - nb_clusters + 1]))
+buchet_colors, returned_colors, hc2 = power_function_buchet(x, birth_function; 
+         infinity=infinity, threshold = threshold)
+l = @layout [a b]
+p1 = plot_pointset(points, true_colors)
+p2 = plot_pointset(points, buchet_colors)
+plot(p1, p2, layout = l)</code></pre><h2 id="DTM-filtration"><a class="docs-heading-anchor" href="#DTM-filtration">DTM filtration</a><a id="DTM-filtration-1"></a><a class="docs-heading-anchor-permalink" href="#DTM-filtration" title="Permalink"></a></h2><pre><code class="language- hljs">using GeometricClusterAnalysis
+
+m0 = k / size(x, 2)
+birth_function(x) = dtm(x, m0)
+birth = sort(birth_function(x))
+threshold = birth[nsignal]
+
+distance_matrix =  GeometricClusterAnalysis.distance_matrix_dtm_filtration(birth, x)
+
+dtm_colors, returned_colors, hc1 = dtm_filtration(x, birth_function; 
+         infinity = Inf, threshold = threshold)
+sort_bd = sort(hc1.death .- hc1.birth)
+infinity =  mean((sort_bd[end - nb_clusters],sort_bd[end - nb_clusters + 1]))
+dtm_colors, returned_colors, hc2 = dtm_filtration(x, birth_function; 
+         infinity=infinity, threshold = threshold)
+l = @layout [a b]
+p1 = plot_pointset(points, true_colors)
+p2 = plot_pointset(points, dtm_colors)
+plot(p1, p2, layout = l)</code></pre><h2 id="Spectral-with-specc"><a class="docs-heading-anchor" href="#Spectral-with-specc">Spectral with <code>specc</code></a><a id="Spectral-with-specc-1"></a><a class="docs-heading-anchor-permalink" href="#Spectral-with-specc" title="Permalink"></a></h2><pre><code class="language- hljs">spectral_colors = rcopy(R&quot;kernlab::specc(P, centers = 3)&quot;)
+l = @layout [a b]
+p1 = plot_pointset(points, true_colors)
+p2 = plot_pointset(points, spectral_colors)
+plot(p1, p2, layout = l)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../fake_data/">« Datasets</a><a class="docs-footer-nextpage" href="../three_curves/">Three Curves »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Tuesday 28 February 2023 11:13">Tuesday 28 February 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

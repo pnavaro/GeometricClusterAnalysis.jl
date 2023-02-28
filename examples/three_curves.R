@@ -1,8 +1,8 @@
 # Complete illustration of the method for the Example with 3 curves
 
 library(here)
-source(here("R", "sample_3curves.R"))
-source(here("R", "plot_pointclouds_centers.R"))
+source(here("test", "sample_3curves.R"))
+source(here("test", "plot_pointclouds_centers.R"))
 source(here("test", "kplm.R"))
 source(here("test", "hierarchical_clustering_complexes.R"))
 
@@ -53,7 +53,7 @@ sig = 520 # Number of points to consider as signal
 
 f_Sigma <- function(Sigma){return(Sigma)}
 method = function(P,k,c,sig,iter_max,nstart){
-  return(LL_minimizer_multidim_trimmed_lem(P,k,c,sig,iter_max,nstart,f_Sigma))
+  return(kplm(P,k,c,sig,iter_max,nstart,f_Sigma))
 }
 
 dist_func = method(P,k,c,sig,iter_max,nstart)

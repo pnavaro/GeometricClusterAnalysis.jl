@@ -1,8 +1,8 @@
-update.packages(ask = FALSE)
-install.packages("devtools")
-install.packages("here")
-install.packages("FNN")
-install.packages("tourr")
-install.packages("TDA")
-install.packages("tclust")
-install.packages("specc")
+deps <- c("devtools", "here", "FNN", "tourr", "TDA", "tclust", "kernlab")
+packages <- installed.packages()
+
+for(pkg in deps) {
+    if(!is.element(pkg, packages[,1])){
+        install.packages(pkg, quiet = TRUE)
+    }
+}

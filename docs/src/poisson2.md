@@ -39,7 +39,7 @@ maxiter = 50
 nstart = 50 
 ```
 
-## Using the classical algorithm : Trimmed ``k``-means [Cuesta-Albertos1997](@cite)
+## Using the classical algorithm : Trimmed ``k``-means
 
 [Cuesta-Albertos1997](@cite)
 

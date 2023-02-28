@@ -1,39 +1,25 @@
-# -*- coding: utf-8 -*-
-# ---
-# jupyter:
-#   jupytext:
-#     formats: ipynb,jl:light
-#     text_representation:
-#       extension: .jl
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.14.1
-#   kernelspec:
-#     display_name: Julia 1.8.5
-#     language: julia
-#     name: julia-1.8
-# ---
+# Flea beatle measurements
 
-# # Flea beatle measurements
-#
-#
-# - `tars1`, width of the first joint of the first tarsus in microns (the sum of measurements for both tarsi)
-# - `tars2`, the same for the second joint
-# - `head`, the maximal width of the head between the external edges of the eyes in 0.01 mm
-# - `ade1`, the maximal width of the aedeagus in the fore-part in microns
-# - `ade2`, the front angle of the aedeagus ( 1 unit = 7.5 degrees)
-# - `ade3`, the aedeagus width from the side in microns
-# - `species`, which species is being examined - concinna, heptapotamica, heikertingeri
 
+- `tars1`, width of the first joint of the first tarsus in microns (the sum of measurements for both tarsi)
+- `tars2`, the same for the second joint
+- `head`, the maximal width of the head between the external edges of the eyes in 0.01 mm
+- `ade1`, the maximal width of the aedeagus in the fore-part in microns
+- `ade2`, the front angle of the aedeagus ( 1 unit = 7.5 degrees)
+- `ade3`, the aedeagus width from the side in microns
+- `species`, which species is being examined - concinna, heptapotamica, heikertingeri
+
+```@example fleas
 using Clustering
 using Plots
 using Random
 using RCall
 using Statistics
+```
 
-# Julia equivalent of the `scale` R function
+Julia equivalent of the R function `scale`
 
-# +
+```@example fleas
 function scale!(x)
     
     for col in eachcol(x)
@@ -43,8 +29,11 @@ function scale!(x)
     end
     
 end
+```
 
-# +
+Scatter plot function
+
+```@example fleas
 function plot_pointset( points, color)
 
     p = plot(; title = "Flea beatle measurements", xlabel = "x", ylabel = "y" )
@@ -60,9 +49,11 @@ function plot_pointset( points, color)
     return p
 
 end
+```
 
-# -
+Dataset from R package [tourr](http://ggobi.github.io/tourr/)
 
+```@example fleas
 dataset = rcopy(R"tourr::flea")
 
 points = Matrix(Float64.(dataset[:,1:6]))
@@ -78,10 +69,11 @@ for i in eachindex(true_colors, dataset[:,7])
         end
     end
 end
-true_colors
+```
 
-# ## K-means 
+## R K-means 
 
+```@example fleas
 R"""
 dataset = tourr::flea
 true_color = c(rep(1,21),rep(2,22),rep(3,31))
@@ -95,21 +87,23 @@ l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, col_kmeans)
 plot(p1, p2, layout = l, aspect_ratio= :equal)
+```
 
-# ## K-means from Clustering.jl
+## K-means from Clustering.jl
 
+```@example fleas
 features = collect(points')
 result = kmeans(features, 3)
+println("NMI = $(mutualinfo(true_colors, result.assignments))")
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, result.assignments)
 plot(p1, p2, layout = l, aspect_ratio= :equal)
+```
 
-println("NMI = $(mutualinfo(true_colors, result.assignments))")
+## K-means from ClusterAnalysis.jl
 
-# ## K-means from ClusterAnalysis.jl
-
-# +
+```@example fleas
 import ClusterAnalysis
 
 flea = rcopy(R"tourr::flea")
@@ -124,10 +118,11 @@ l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, model.cluster)
 plot(p1, p2, layout = l, aspect_ratio= :equal)
-# -
+```
 
-# ## Robust trimmed clustering : tclust
+## Robust trimmed clustering : tclust
 
+```@example fleas
 R"""
 dataset = tourr::flea
 P = scale(dataset[,1:6])
@@ -138,14 +133,14 @@ l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, tclust_color)
 plot(p1, p2, layout = l, aspect_ratio= :equal)
+```
 
-# ## ToMaTo
-#
-# Algorithm ToMATo from paper "Persistence-based clustering in Riemannian Manifolds"
-# Frederic Chazal, Steve Oudot, Primoz Skraba, Leonidas J. Guibas
-#
+## ToMaTo
 
-# +
+Algorithm ToMATo from paper "Persistence-based clustering in Riemannian Manifolds"
+Frederic Chazal, Steve Oudot, Primoz Skraba, Leonidas J. Guibas
+
+```@example fleas
 using GeometricClusterAnalysis
 
 nb_clusters, k, c, r, iter_max = 3, 10, 100, 1.9, 100
@@ -155,13 +150,13 @@ l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, col_tomato)
 plot(p1, p2, layout = l)
-# -
+```
 
-# ## k-PLM 
+## k-PLM 
 
-# +
+```@example fleas
 nb_clusters, k, c, iter_max, nstart = 3, 10, 50, 100, 10
-@show nsignal = size(points, 1)
+nsignal = size(points, 1)
 
 function f_Σ!(Σ) end
 
@@ -169,7 +164,6 @@ rng = MersenneTwister(6625)
 
 x = collect(transpose(points))
 
-# +
 dist_func = kplm(rng, x, k, c, nsignal, iter_max, nstart, f_Σ!)
 
 distance_matrix = build_distance_matrix(dist_func)
@@ -183,14 +177,12 @@ l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, col_kplm)
 plot(p1, p2, layout = l)
-# -
+```
 
-# ## Witnessed
+## Witnessed
 
-
-# +
+```@example fleas
 μ, ω, colors = k_witnessed_distance(x, k, c, signal, iter_max, nstart)
-
 distance_matrix = build_distance_matrix_power_function_buchet(sqrt.(ω), hcat(μ...))
 
 hc1 = hierarchical_clustering_lem(distance_matrix, infinity = Inf, threshold = Inf)
@@ -204,11 +196,12 @@ l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, witnessed_colors)
 plot(p1, p2, layout = l)
-# -
+```
 
 
-# ## k-PDTM
+## k-PDTM
 
+```@example fleas
 df_kpdtm = kpdtm(rng, x, k, c, nsignal, iter_max, nstart)
 distance_matrix = build_distance_matrix(df_kpdtm)
 hc1 = hierarchical_clustering_lem(distance_matrix, infinity = Inf, threshold = Inf)
@@ -221,17 +214,17 @@ l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, kpdtm_colors)
 plot(p1, p2, layout = l)
+```
 
-# ## Power function Buchet et al.
-#
+## Power function Buchet et al.
 
-# +
+```@example fleas
 using GeometricClusterAnalysis
 
 m0 = k / size(x, 2)
 birth_function(x) = dtm(x, m0)
 birth = sort(birth_function(x))
-@show threshold = birth[nsignal]
+threshold = birth[nsignal]
 
 distance_matrix = build_distance_matrix_power_function_buchet(birth, x)
 
@@ -245,18 +238,17 @@ l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, buchet_colors)
 plot(p1, p2, layout = l)
-# -
+```
 
-# ## DTM filtration
-#
+## DTM filtration
 
-# +
+```@example fleas
 using GeometricClusterAnalysis
 
 m0 = k / size(x, 2)
 birth_function(x) = dtm(x, m0)
 birth = sort(birth_function(x))
-@show threshold = birth[nsignal]
+threshold = birth[nsignal]
 
 distance_matrix =  GeometricClusterAnalysis.distance_matrix_dtm_filtration(birth, x)
 
@@ -270,14 +262,14 @@ l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, dtm_colors)
 plot(p1, p2, layout = l)
-# -
+```
 
-# ## Spectral with `specc`
+## Spectral with `specc`
 
+```@example fleas
 spectral_colors = rcopy(R"kernlab::specc(P, centers = 3)")
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, spectral_colors)
 plot(p1, p2, layout = l)
-
-
+```

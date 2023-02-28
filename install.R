@@ -1,6 +1,8 @@
+update.packages(ask = FALSE)
 install.packages("devtools")
 install.packages("here")
 install.packages("FNN")
 install.packages("tourr")
 install.packages("TDA")
 install.packages("tclust")
+install.packages("specc")

@@ -134,7 +134,7 @@ function power_function_buchet(points, birth_function; infinity = Inf, threshold
 end
 
 function distance_matrix_dtm_filtration(birth, points)
-    @show c = length(birth)
+    c = length(birth)
     distance_matrix = fill(Inf, (c,c))
     for i in 1:c
         for j in 1:i

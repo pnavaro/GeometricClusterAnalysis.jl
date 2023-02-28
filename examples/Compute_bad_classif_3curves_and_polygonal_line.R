@@ -1,13 +1,11 @@
-
-
-source("scripts/auxiliary_functions/hierarchical_clustering_complexes.R")
-source("scripts/auxiliary_functions/Tomato.R")
-source("scripts/auxiliary_functions/DTM_filtration.R")
-source("scripts/auxiliary_functions/fonctions_puissances.R")
-
-source("scripts/auxiliary_functions/versions_kPLM.R")
-source("scripts/auxiliary_functions/version_kPDTM.R")
-source("scripts/Plot/plot_pointclouds_centers.R")
+library(here)
+source(here("test","hierarchical_clustering_complexes.R"))
+source(here("test","Tomato.R"))
+source(here("test","fonctions_puissances.R"))
+source(here("test","kplm.R"))
+source(here("test","kpdtm.R"))
+source(here("R", "DTM_filtration.R"))
+source(here("R","plot_pointclouds_centers.R"))
 
 
 
@@ -16,15 +14,15 @@ source("scripts/Plot/plot_pointclouds_centers.R")
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-source("scripts/Sample_generation/Sample_3curves.R")
-source("scripts/Sample_generation/Sample_14segments.R")
+source(here("R","Sample_generation/Sample_3curves.R"))
+source(here("R","Sample_generation/Sample_14segments.R"))
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                                   # Clustering methods :
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-source("scripts/auxiliary_functions/functions_for_evaluating_methods.R")
+source(here("R","functions_for_evaluating_methods.R"))
 
 
 nb_clusters = 14 # 3,2

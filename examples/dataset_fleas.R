@@ -1,6 +1,6 @@
 library(here)
-source(here("R","plot_pointclouds_centers.R"))
-source(here("R","functions_for_evaluating_methods.R"))
+source(here("test","plot_pointclouds_centers.R"))
+source(here("test","functions_for_evaluating_methods.R"))
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #                                   Real fleas dataset
@@ -80,13 +80,13 @@ filename = "clustering_dbscan.png"
 plot_pointset(P,col_dbscan,coord = c(1,2),save_plot = TRUE,filename,path)
 # 0.647
 
-col_PLM_nonhier = LL_minimizer_multidim_trimmed_lem(P,10,3,nrow(P),100,10,f_Sigma)$color
+col_PLM_nonhier = kplm(P,10,3,nrow(P),100,10,f_Sigma)$color
 aricode::NMI(col_PLM_nonhier,true_color)
 filename = "clustering_hier_kPLM.png"
 plot_pointset(P,true_color,coord = c(1,2),save_plot = TRUE,filename,path)
 # 1
 
-col_PDTM_nonhier = Trimmed_kPDTM(P,10,3,nrow(P),100,10)$color
+col_PDTM_nonhier = kpdtm(P,10,3,nrow(P),100,10)$color
 aricode::NMI(col_PLM_nonhier,true_color)
 filename = "clustering_hier_kPDTM.png"
 plot_pointset(P,true_color,coord = c(1,2),save_plot = TRUE,filename,path)

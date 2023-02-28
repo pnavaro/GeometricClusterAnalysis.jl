@@ -86,16 +86,16 @@ end
 $(SIGNATURES)
 """
 function hmatrix_tomato(graph, birth)
-  # graph : Matrix that contains 0 and 1, graph_i,j = 1 iff i and j are neighbours
-  c = size(graph,1)
-  distance_matrix = fill(Inf,c,c)
-  if c != length(birth)
-    @error "graph should be of size lxl with l the length of birth"
-  end
-  for i in 1:c, j in 1:i
-      distance_matrix[i,j] = max(birth[i],birth[j])*1/graph[i,j]
-  end
-  return distance_matrix
+    # graph : Matrix that contains 0 and 1, graph_i,j = 1 iff i and j are neighbours
+    c = size(graph, 1)
+    distance_matrix = fill(Inf, c, c)
+    if c != length(birth)
+        @error "graph should be of size lxl with l the length of birth"
+    end
+    for i = 1:c, j = 1:i
+        distance_matrix[i, j] = max(birth[i], birth[j]) * 1 / graph[i, j]
+    end
+    return distance_matrix
 end
 
 """
@@ -108,14 +108,14 @@ Nearest neighbours graph
 function graph_nn(points, k)
 
     n = size(points, 1)
-    graph = zeros(n,n)
+    graph = zeros(n, n)
     kdtree = KDTree(points)
 
-    for i in 1:n
-        knear, dists = knn(kdtree, points[i,:], k+1)
-        graph[i,knear] .= 1
-        graph[knear,i] .= 1
-        graph[i,i] = 1
+    for i = 1:n
+        knear, dists = knn(kdtree, points[i, :], k + 1)
+        graph[i, knear] .= 1
+        graph[knear, i] .= 1
+        graph[i, i] = 1
     end
 
     return graph
@@ -129,13 +129,13 @@ $(SIGNATURES)
 
 Rips graph with radius r
 """
-function graph_radius(points,r)
-  n = size(points,1)
-  graph = zeros(Int, n, n)
-  for i in 1:n, j in 1:n
-      graph[i,j] = (sum((view(points,j,:) .- view(points,i,:)).^2) <= r^2)
-  end
-  return graph 
+function graph_radius(points, r)
+    n = size(points, 1)
+    graph = zeros(Int, n, n)
+    for i = 1:n, j = 1:n
+        graph[i, j] = (sum((view(points, j, :) .- view(points, i, :)) .^ 2) <= r^2)
+    end
+    return graph
 end
 
 """
@@ -145,48 +145,53 @@ $(SIGNATURES)
 `graph` : Matrix that contains 0 and 1, ``graph_{i,j} = 1`` if ``i`` and ``j`` are neighbours
 """
 function distance_matrix_tomato(graph, birth)
-  
-  c = size(graph,1)
-  distance_matrix = fill(Inf,c,c)
-  if c != length(birth)
-    @error "graph should be of size lxl with l the length of birth"
-  end
-  for i in 1:c, j in 1:i
-      distance_matrix[i,j] = max(birth[i],birth[j])*1/graph[i,j]
-  end
-  return distance_matrix
+
+    c = size(graph, 1)
+    distance_matrix = fill(Inf, c, c)
+    if c != length(birth)
+        @error "graph should be of size lxl with l the length of birth"
+    end
+    for i = 1:c, j = 1:i
+        distance_matrix[i, j] = max(birth[i], birth[j]) * 1 / graph[i, j]
+    end
+    return distance_matrix
 end
 
 function tomato(x, k, graph; infinity = Inf, threshold = Inf)
 
-  n = size(x,2)
-  m0 = k / n
-  birth = dtm(x, m0)
-  # Computing matrix
-  dm = distance_matrix_tomato(graph, birth)
-  # Starting the hierarchical clustering algorithm
-  hc = hierarchical_clustering_lem(dm, infinity = infinity, threshold = threshold, 
-        store_colors = true, store_timesteps = true)
-  # Transforming colors
-  colors = return_color(1:n, hc.colors, hc.startup_indices)
-  saved_colors = [return_color(1:n, c, hc.startup_indices) for c in hc.saved_colors]
+    n = size(x, 2)
+    m0 = k / n
+    birth = dtm(x, m0)
+    # Computing matrix
+    dm = distance_matrix_tomato(graph, birth)
+    # Starting the hierarchical clustering algorithm
+    hc = hierarchical_clustering_lem(
+        dm,
+        infinity = infinity,
+        threshold = threshold,
+        store_colors = true,
+        store_timesteps = true,
+    )
+    # Transforming colors
+    colors = return_color(1:n, hc.colors, hc.startup_indices)
+    saved_colors = [return_color(1:n, c, hc.startup_indices) for c in hc.saved_colors]
 
-  return colors, saved_colors, hc
-        
+    return colors, saved_colors, hc
+
 end
 
 export tomato_clustering
 
-function tomato_clustering( nb_clusters, points, k, c, signal, r, iter_max, nstart)
+function tomato_clustering(nb_clusters, points, k, c, signal, r, iter_max, nstart)
 
     graph = graph_radius(points, r)
     x = collect(transpose(points))
-    m0 = k / size(x,2)
+    m0 = k / size(x, 2)
     sort_dtm = sort(dtm(x, m0))
     threshold = sort_dtm[signal]
     _, _, hc = tomato(x, k, graph; infinity = Inf, threshold = threshold)
     sort_bd = sort(hc.death .- hc.birth)
-    infinity = mean([sort_bd[end - nb_clusters], sort_bd[end - nb_clusters + 1]])
+    infinity = mean([sort_bd[end-nb_clusters], sort_bd[end-nb_clusters+1]])
     colors, _, _ = tomato(x, k, graph, infinity = infinity, threshold = threshold)
     lifetime = reverse(sort_bd)
     colors, lifetime

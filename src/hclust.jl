@@ -271,33 +271,45 @@ Si `label_points[j] = 3`, alors on cherche le centre dont l'indice de départ va
 function return_color(label_points, colors_in, startup_indices)
     colors_out = zeros(Int, length(label_points))
     for i in eachindex(startup_indices)
-        colors_out[label_points .== startup_indices[i]] .= colors_in[i]
+        colors_out[label_points.==startup_indices[i]] .= colors_in[i]
     end
     return colors_out
 end
 
-export  compute_threshold_infinity
+export compute_threshold_infinity
 
 """
 $(SIGNATURES)
 """
-function compute_threshold_infinity(dist_func, distance_matrix, nb_means_removed, nb_clusters)
-  
-  infinity , threshold = Inf, Inf
-  hc1 = hierarchical_clustering_lem(distance_matrix,infinity = infinity, threshold = threshold)
-        
-  if nb_means_removed > 0
-      threshold = mean((hc1.birth[end - nb_means_removed],hc1.birth[end - nb_means_removed + 1]))
-  else
-      threshold = Inf
-  end
-  
-  hc2 = hierarchical_clustering_lem(distance_matrix, infinity = infinity, threshold =  threshold)
-  bd = birth_death(hc2)
-  sort!(bd)
-  infinity = mean((bd[end - nb_clusters],bd[end - nb_clusters + 1]))
-  threshold, infinity
-    
+function compute_threshold_infinity(
+    dist_func,
+    distance_matrix,
+    nb_means_removed,
+    nb_clusters,
+)
+
+    infinity, threshold = Inf, Inf
+    hc1 = hierarchical_clustering_lem(
+        distance_matrix,
+        infinity = infinity,
+        threshold = threshold,
+    )
+
+    if nb_means_removed > 0
+        threshold =
+            mean((hc1.birth[end-nb_means_removed], hc1.birth[end-nb_means_removed+1]))
+    else
+        threshold = Inf
+    end
+
+    hc2 = hierarchical_clustering_lem(
+        distance_matrix,
+        infinity = infinity,
+        threshold = threshold,
+    )
+    bd = birth_death(hc2)
+    sort!(bd)
+    infinity = mean((bd[end-nb_clusters], bd[end-nb_clusters+1]))
+    threshold, infinity
+
 end
-
-

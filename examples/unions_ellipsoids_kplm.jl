@@ -49,7 +49,7 @@ color_points, dists = subcolorize(data.points, nsignal, df, remain_indices)
 
 colors = [return_color(color_points, col, remain_indices) for col in saved_colors]
 
-for i = eachindex(saved_colors), j = 1:data.np
+for i in eachindex(saved_colors), j = 1:data.np
     colors[i][j] = colors[i][j] * (dists[j] <= timesteps[i])
 end
 

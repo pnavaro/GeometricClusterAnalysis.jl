@@ -50,32 +50,36 @@ display(p)
 sample_generator = (rng, n) -> sample_poisson(rng, n, d, lambdas, proba)
 outliers_generator = (rng, n) -> sample_outliers(rng, n, d; scale = 120)
 
-nmi_kmeans, _, _ = performance(n, n_outliers, k, α, sample_generator, outliers_generator, euclidean)
-nmi_poisson, _, _ = performance(n, n_outliers, k, α, sample_generator, outliers_generator, poisson)
+nmi_kmeans, _, _ =
+    performance(n, n_outliers, k, α, sample_generator, outliers_generator, euclidean)
+nmi_poisson, _, _ =
+    performance(n, n_outliers, k, α, sample_generator, outliers_generator, poisson)
 
-boxplot( ones(100), nmi_kmeans, label = "kmeans" )
-boxplot!( fill(2, 100), nmi_poisson, label = "poisson" )
+boxplot(ones(100), nmi_kmeans, label = "kmeans")
+boxplot!(fill(2, 100), nmi_poisson, label = "poisson")
 
 vect_k = collect(1:5)
-vect_α = sort([((0:2)./50)...,((1:4)./5)...])
+vect_α = sort([((0:2) ./ 50)..., ((1:4) ./ 5)...])
 
 rng = MersenneTwister(42)
 nstart = 5
 
-params_risks = select_parameters_nonincreasing(rng, vect_k, vect_α, x, poisson, maxiter, nstart)
+params_risks =
+    select_parameters_nonincreasing(rng, vect_k, vect_α, x, poisson, maxiter, nstart)
 
 p = plot()
-for (i,k) in enumerate(vect_k)
-   plot!( p, vect_α, params_risks[i, :], label ="k=$k", markershape = :circle )
+for (i, k) in enumerate(vect_k)
+    plot!(p, vect_α, params_risks[i, :], label = "k=$k", markershape = :circle)
 end
 display(p)
 
 vec_k = [3]
 vec_α = collect(0:15) ./ 200
-params_risks = select_parameters_nonincreasing(rng, vec_k, vec_α, x, poisson, maxiter, nstart)
+params_risks =
+    select_parameters_nonincreasing(rng, vec_k, vec_α, x, poisson, maxiter, nstart)
 
 plot(vec_α, params_risks[1, :], markershape = :circle)
 
 k, α = 3, 0.04
-tb = trimmed_bregman_clustering( rng, x, k, α, poisson, maxiter, nstart )
+tb = trimmed_bregman_clustering(rng, x, k, α, poisson, maxiter, nstart)
 plot(tb; aspect_ratio = :equal)

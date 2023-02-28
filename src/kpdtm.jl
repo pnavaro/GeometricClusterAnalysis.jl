@@ -17,7 +17,7 @@ function meanvar!(μ, ω, points::Matrix{Float64}, centers, k::Int)
         fill!(μ[i], 0.0)
     end
 
-    for i = eachindex(centers)
+    for i in eachindex(centers)
         x̄ = vec(mean(view(points, :, idxs[i]), dims = 2))
         μ[i] .= x̄
         ω[i] = sum((view(points, :, idxs[i]) .- x̄) .^ 2) / k
@@ -79,7 +79,7 @@ $(SIGNATURES)
 function k_witnessed_distance(points, k, c, signal, iter_max, nstart)
 
     d, n = size(points)
-    centers = [points[:,i] for i in 1:n]
+    centers = [points[:, i] for i = 1:n]
     μ, ω, colors = recolor(points, centers, k, signal)
     d = size(points, 1)
     Σ = [diagm(ones(d)) for i in eachindex(centers)]
@@ -200,7 +200,7 @@ function kpdtm(rng, points, k, c, nsignal, iter_max, nstart, first_centers)
 
     end
 
-    centers = [centers_opt[i] for i in 1:c if kept_centers_opt[i]]
+    centers = [centers_opt[i] for i = 1:c if kept_centers_opt[i]]
 
     colors_old = zero(colors_opt)
 

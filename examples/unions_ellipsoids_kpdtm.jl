@@ -62,9 +62,9 @@ returned_colors = [return_color(color_points, c, remain_indices) for c in colors
 # scatter(data.points[1,:],data.points[2,:],color = Colors[1])
 # scatter!([μ[8][1]], [μ[8][2]], color = "green", label = "", markersize = 10)
 
-for i = eachindex(returned_colors), j = 1:data.np
+for i in eachindex(returned_colors), j = 1:data.np
     # If the cost of the point is smaller to the time : label 0 (not in the ellipsoid)
-    returned_colors[i][j] = returned_colors[i][j] * (dists[j] <= timesteps[i]) 
+    returned_colors[i][j] = returned_colors[i][j] * (dists[j] <= timesteps[i])
 end
 
 # Pas sûr qu'il faille garder ça...
@@ -74,7 +74,16 @@ end
 
 ncolors = length(returned_colors)
 anim = @animate for i in [1:ncolors-1; Iterators.repeated(ncolors - 1, 30)...]
-    ellipsoids(data.points, saved_colors[i], returned_colors[i], μ, ω, Σ, timesteps[i]; markersize = 5)
+    ellipsoids(
+        data.points,
+        saved_colors[i],
+        returned_colors[i],
+        μ,
+        ω,
+        Σ,
+        timesteps[i];
+        markersize = 5,
+    )
     xlims!(-2, 4)
     ylims!(-2, 2)
 end
@@ -112,9 +121,9 @@ let idx = 0
         push!(Colors2, copy(new_colors2))
     end
 
-    for i = eachindex(Col2), j = 1:data.np
+    for i in eachindex(Col2), j = 1:data.np
         # If the cost of the point is smaller to the time : label 0 (not in the ellipsoid)
-        Colors2[i][j] = Colors2[i][j] * (dists[j] <= sq_time[i]) 
+        Colors2[i][j] = Colors2[i][j] * (dists[j] <= sq_time[i])
     end
 
     ncolors2 = length(Colors2)

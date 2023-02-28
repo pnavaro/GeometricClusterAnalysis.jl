@@ -34,7 +34,8 @@ end
 
 @recipe function f(e::Ellipsoids)
 
-    x, y, fillcolors, pointcolors, centers, weights, covariances, α = _ellipsoids_args(e.args)
+    x, y, fillcolors, pointcolors, centers, weights, covariances, α =
+        _ellipsoids_args(e.args)
 
     title := @sprintf("time = %7.3f", α)
 

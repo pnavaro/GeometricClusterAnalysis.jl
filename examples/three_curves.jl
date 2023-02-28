@@ -36,10 +36,8 @@ nb_means_removed = 5
 
 lengthn = length(hc.birth)
 if nb_means_removed > 0
-    threshold = mean((
-        hc.birth[lengthn-nb_means_removed],
-        hc.birth[lengthn-nb_means_removed+1],
-    ))
+    threshold =
+        mean((hc.birth[lengthn-nb_means_removed], hc.birth[lengthn-nb_means_removed+1]))
 else
     threshold = Inf
 end
@@ -65,4 +63,4 @@ b = color_final[color_final.>0]
 
 println(mutualinfo(a, b, normed = true))
 
-ellipsoids(data.points, remain_indices, color_final, color_final, dist_func, 0 )
+ellipsoids(data.points, remain_indices, color_final, color_final, dist_func, 0)

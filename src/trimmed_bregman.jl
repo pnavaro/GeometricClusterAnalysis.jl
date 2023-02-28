@@ -246,7 +246,7 @@ function trimmed_bregman_clustering(
         for i = 1:k
             if cluster_nonempty[i]
                 for j = 1:n
-                    divergence[j] = bregman(x[:,j], old_centers[:, i]) 
+                    divergence[j] = bregman(x[:, j], old_centers[:, i])
                     if divergence[j] < divergence_min[j]
                         divergence_min[j] = divergence[j]
                         cluster[j] = i
@@ -280,7 +280,7 @@ function trimmed_bregman_clustering(
     for i = 1:k
         if cluster_nonempty[i]
             for j = 1:n
-                divergence[j] = bregman(x[:,j], new_centers[i])
+                divergence[j] = bregman(x[:, j], new_centers[i])
                 if divergence[j] < divergence_min[j]
                     divergence_min[j] = divergence[j]
                     cluster[j] = i

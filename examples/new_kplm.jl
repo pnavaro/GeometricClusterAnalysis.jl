@@ -112,8 +112,8 @@ function initiate_centers(rng, points, n_centers)
     return centers = [points[:, i] for i in first_centers]
 end
 
-function Dim(dimension,d,c)
-    return sqrt((d*(dimension-d/2-1/2)+dimension+2)*c)
+function Dim(dimension, d, c)
+    return sqrt((d * (dimension - d / 2 - 1 / 2) + dimension + 2) * c)
 end
 
 # ## The new kplm function
@@ -140,8 +140,17 @@ When λ>=1, λ is fixed to this value.
 Returns mean_kplm which is the mean value of the kplm function over all sample points (analoguous to the mean sum of squares for k-means, so, no squareroot).
     
 """
-function kplm(rng, points, n_signal_points, n_nearest_neighbours, first_centers, iter_max=10, d=0, λ=0) 
-   
+function kplm(
+    rng,
+    points,
+    n_signal_points,
+    n_nearest_neighbours,
+    first_centers,
+    iter_max = 10,
+    d = 0,
+    λ = 0,
+)
+
     # Initialisation
     dimension, n_points = size(points)
     dimension_centers = size(first_centers[1])[1]
@@ -154,38 +163,38 @@ function kplm(rng, points, n_signal_points, n_nearest_neighbours, first_centers,
     if !(0 < n_centers <= n_signal_points)
         @error "The number of centers should be positive and not larger than the number of points considered as signal (that is, not considered as outliers)."
     end
-    
+
     if !(0 < n_signal_points <= n_points)
         @error "The number of points considered as signal (that is, not considered as outliers) should be positive and not larger than the number of points."
     end
 
-    if (dimension!= dimension_centers)
+    if (dimension != dimension_centers)
         @error "The points and the centers should have the same dimensionality. That is, the matrix points should have the same number of rows as the number of vectors in first_centers."
     end
-    
-    if (λ<1)&&(λ!=0)
+
+    if (λ < 1) && (λ != 0)
         @error "The eigenvalue of the covariance matrices, λ, should not be smaller than 1, or should be equal to 0 for an automatic data-dependant choice for λ."
     end
-    
+
     if !(0 <= d <= dimension)
         @error "The parameter d should belong to {0, 1, 2,..., dimension}, where dimension is the dimension of points (the number of raws of the matrix points)"
     end
-    
-    if (iter_max<0)
+
+    if (iter_max < 0)
         @error "There should be at least 1 iteration for the principal loop in the algorithm"
     end
-    
 
-    
+
+
     # Some arrays for nearest neighbors computation
-    
+
     ntid = nthreads()
     if n_centers > ntid
         chunks = Iterators.partition(1:n_centers, n_centers ÷ ntid)
     else
         chunks = Iterators.partition(1:n_centers, n_centers)
     end
-    
+
     dists = [zeros(Float64, n_points) for _ = 1:ntid]
     idxs = [zeros(Int, n_nearest_neighbours) for _ = 1:ntid]
 
@@ -193,30 +202,30 @@ function kplm(rng, points, n_signal_points, n_nearest_neighbours, first_centers,
     dists_min = zeros(n_points)
     idxs_min = zeros(Int, n_points)
     labels = zeros(Int, n_points)
-    
+
     # Some arrays to store the previous centers and matrices
-    
+
     centers_old = [fill(Inf, dimension) for i = 1:n_centers]
     T_old = [diagm(ones(dimension)) for i = 1:n_centers] # Transition matrices
     λ_old = 1 # Same eigenvalue for every matrix. A first step with Identity matrices, so λ=1.
 
-   
+
     if d == 0
         λ_0 = 1
     else
         λ_0 = λ
     end
-    
-    λ_to_update = ((λ==0)&&(d!=0)) # If true, we will update λ at every step of the loop. If false, we will use λ_0, the λ given in parameter of the function.
-    
+
+    λ_to_update = ((λ == 0) && (d != 0)) # If true, we will update λ at every step of the loop. If false, we will use λ_0, the λ given in parameter of the function.
+
     centers = first_centers
     T = [diagm(ones(dimension)) for i = 1:n_centers] # Transition matrices
-    λ = 1 
+    λ = 1
     kept_centers = trues(n_centers)
     μ = [zeros(dimension) for i = 1:n_centers] # Means of neighbours of centers, they are the centers of ellipsoids
     ω = zeros(n_centers) # Weights for the ellipsoids
     fill!(labels, 0)
-    
+
     nstep = 0
     continu_Σ = true
 
@@ -231,26 +240,24 @@ function kplm(rng, points, n_signal_points, n_nearest_neighbours, first_centers,
         λ_old = λ
 
         # Step 1 : Update Means μ and Weights ω
-        
+
         @sync for chunk in chunks
             @spawn begin
                 tid = threadid()
                 for i in chunk
-                    
-                    invΣ = T[i] * Diagonal([ones(dimension-d);(1/λ)*ones(d)]) * T[i]'
 
-                    compute_dists_inv!(dists[tid], centers[i], points, invΣ) 
+                    invΣ = T[i] * Diagonal([ones(dimension - d); (1 / λ) * ones(d)]) * T[i]'
+
+                    compute_dists_inv!(dists[tid], centers[i], points, invΣ)
 
                     idxs[tid] .= sortperm(dists[tid])[1:n_nearest_neighbours]
 
                     μ[i] .= vec(mean(view(points, :, idxs[tid]), dims = 2))
-                    
+
                     @assert λ > 0
                     ω[i] =
-                        mean(
-                            sqmahalanobis(points[:, j], μ[i], invΣ) for
-                            j in idxs[tid]
-                        ) + d*log(λ)
+                        mean(sqmahalanobis(points[:, j], μ[i], invΣ) for j in idxs[tid]) +
+                        d * log(λ)
 
                 end
             end
@@ -262,7 +269,7 @@ function kplm(rng, points, n_signal_points, n_nearest_neighbours, first_centers,
 
         for i = 1:n_centers
             if kept_centers[i]
-                invΣ = T[i]*diagm([ones(dimension-d);(1/λ)*ones(d)])*(T[i]')
+                invΣ = T[i] * diagm([ones(dimension - d); (1 / λ) * ones(d)]) * (T[i]')
                 compute_dists_inv!(kplm_values, μ[i], points, invΣ)
                 kplm_values .+= ω[i]
                 for j = 1:n_points
@@ -282,7 +289,7 @@ function kplm(rng, points, n_signal_points, n_nearest_neighbours, first_centers,
         @views labels[idxs_min[1:(n_points-n_signal_points)]] .= 0
 
         # Step 4 : Update centers, transition matrices and the eigenvalue λ
-        
+
         new_λ = zeros(n_centers)
 
         @sync for chunk in chunks
@@ -296,8 +303,9 @@ function kplm(rng, points, n_signal_points, n_nearest_neighbours, first_centers,
                     if cloud_size > 0
 
                         centers[i] .= vec(mean(view(points, :, cloud), dims = 2))
-                        
-                        invΣ = T[i] * diagm([ones(dimension-d);(1/λ)*ones(d)])*(T[i]')
+
+                        invΣ =
+                            T[i] * diagm([ones(dimension - d); (1 / λ) * ones(d)]) * (T[i]')
 
                         compute_dists_inv!(dists[tid], centers[i], points, invΣ)
 
@@ -306,37 +314,39 @@ function kplm(rng, points, n_signal_points, n_nearest_neighbours, first_centers,
                         μ[i] .= vec(mean(points[:, idxs[tid]], dims = 2))
 
                         Σ = (μ[i] .- centers[i]) * (μ[i] .- centers[i])'
-                        Σ .+= (n_nearest_neighbours - 1) / n_nearest_neighbours .* cov(points[:, idxs[tid]]')
-                        if(cloud_size>1)
+                        Σ .+=
+                            (n_nearest_neighbours - 1) / n_nearest_neighbours .*
+                            cov(points[:, idxs[tid]]')
+                        if (cloud_size > 1)
                             Σ .+= (cloud_size - 1) / cloud_size .* cov(points[:, cloud]')
                         end
                         eig = eigen(Symmetric(Σ))
                         T[i] .= eig.vectors
-                        if(d>0)
-                            new_λ[i] = (cloud_size/n_points)*mean(last(eig.values,d))
+                        if (d > 0)
+                            new_λ[i] = (cloud_size / n_points) * mean(last(eig.values, d))
                         end
 
                     else
 
                         kept_centers[i] = false
-                        
+
                     end
                 end
             end
 
         end
-        
+
         if λ_to_update
-            λ = max(1,sum(new_λ)) # mean of the d largest eigenvalues of the original matrices Σ[i], weighted by the mass of cells.
-            # λ cannot be smaller than 1
+            λ = max(1, sum(new_λ)) # mean of the d largest eigenvalues of the original matrices Σ[i], weighted by the mass of cells.
+        # λ cannot be smaller than 1
         else
             λ = λ_0 # to avoid to have λ=1 at every step, since we use λ=1 for the first step.
         end
-        
+
 
         # Step 5 : Condition for loop
 
-        stop_Σ = (λ_old==λ) # True while all matrices of Σ_old and of Σ are equal
+        stop_Σ = (λ_old == λ) # True while all matrices of Σ_old and of Σ are equal
 
         for i = 1:n_centers
 
@@ -346,14 +356,14 @@ function kplm(rng, points, n_signal_points, n_nearest_neighbours, first_centers,
 
             end
 
-       end
+        end
 
-       continu_Σ = !stop_Σ # False if all matrices of Σ_old and of Σ are equal
+        continu_Σ = !stop_Σ # False if all matrices of Σ_old and of Σ are equal
 
     end
-    
+
     # Last Step : Return centers and transition matrices for non-empty clusters, recompute the labels, and compute the mean kplm value of points with non zero label.
-        
+
     centers_ = Vector{Float64}[]
     T_ = Matrix{Float64}[]
     Σ = Matrix{Float64}[]
@@ -364,15 +374,15 @@ function kplm(rng, points, n_signal_points, n_nearest_neighbours, first_centers,
 
             push!(centers_, centers[i])
             push!(T_, T[i])
-            push!(Σ, T[i]*diagm([ones(dimension-d);λ*ones(d)])*(T[i]'))
-                
+            push!(Σ, T[i] * diagm([ones(dimension - d); λ * ones(d)]) * (T[i]'))
+
         end
     end
 
     n_centers = length(centers_)
-    
+
     # Update Means μ and Weights ω
-    
+
     # Careful since n_centers may change... So need to redefine chunks.
     if n_centers > ntid
         chunks = Iterators.partition(1:n_centers, n_centers ÷ ntid)
@@ -382,37 +392,35 @@ function kplm(rng, points, n_signal_points, n_nearest_neighbours, first_centers,
 
     #dists = [zeros(Float64, n_points) for _ = 1:ntid]
     #idxs = [zeros(Int, n_nearest_neighbours) for _ = 1:ntid]
-        
+
     @sync for chunk in chunks
         @spawn begin
             tid = threadid()
             for i in chunk
-                    
-                invΣ = T_[i] * diagm([ones(dimension-d);(1/λ)*ones(d)])*(T_[i]')
-                    
-                compute_dists_inv!(dists[tid], centers_[i], points, invΣ) 
+
+                invΣ = T_[i] * diagm([ones(dimension - d); (1 / λ) * ones(d)]) * (T_[i]')
+
+                compute_dists_inv!(dists[tid], centers_[i], points, invΣ)
 
                 idxs[tid] .= sortperm(dists[tid])[1:n_nearest_neighbours]
 
                 μ[i] .= vec(mean(view(points, :, idxs[tid]), dims = 2))
-                                                                                                                         
-                @assert λ    > 0                                                                                          
+
+                @assert λ > 0
 
                 ω[i] =
-                    mean(
-                        sqmahalanobis(points[:, j], μ[i], invΣ) for
-                        j in idxs[tid]
-                    ) + d*log(λ)
+                    mean(sqmahalanobis(points[:, j], μ[i], invΣ) for j in idxs[tid]) +
+                    d * log(λ)
             end
         end
-    end    
+    end
 
     # Update labels
 
     fill!(dists_min, Inf)
 
     for i = 1:n_centers
-        invΣ = T_[i]*diagm([ones(dimension-d);(1/λ)*ones(d)])*(T_[i]')
+        invΣ = T_[i] * diagm([ones(dimension - d); (1 / λ) * ones(d)]) * (T_[i]')
         compute_dists_inv!(kplm_values, μ[i], points, invΣ)
         kplm_values .+= ω[i]
         for j = 1:n_points
@@ -425,18 +433,18 @@ function kplm(rng, points, n_signal_points, n_nearest_neighbours, first_centers,
     end
 
     # Trimming and computing mean_kplm
-        
+
     sortperm!(idxs_min, dists_min, rev = true)
 
     @views labels[idxs_min[1:(n_points-n_signal_points)]] .= 0
 
     @views mean_kplm = mean(view(dists_min, idxs_min[(n_points-n_signal_points+1):end]))
-        
-        
+
+
     return KpResult(n_nearest_neighbours, centers_, μ, ω, Σ, labels, mean_kplm)
-    
+
 end
-                                                                                                                                    
+
 # -
 
 # ## Using the new klpm function on a simple example
@@ -447,29 +455,29 @@ function noisy_nested_spirals(rng, n_signal_points, n_outliers, σ, dimension)
 
     nmid = n_signal_points ÷ 2
 
-    t1 = 6 .* rand(rng, nmid).+2
-    t2 = 6 .* rand(rng, n_signal_points-nmid).+2
+    t1 = 6 .* rand(rng, nmid) .+ 2
+    t2 = 6 .* rand(rng, n_signal_points - nmid) .+ 2
 
     x = zeros(n_signal_points)
     y = zeros(n_signal_points)
 
     λ = 5
 
-    x[1:nmid] = λ .*t1.*cos.(t1)
-    y[1:nmid] = λ .*t1.*sin.(t1)
+    x[1:nmid] = λ .* t1 .* cos.(t1)
+    y[1:nmid] = λ .* t1 .* sin.(t1)
 
-    x[(nmid+1):n_signal_points] = λ .*t2.*cos.(t2 .- 0.8*π)
-    y[(nmid+1):n_signal_points] = λ .*t2.*sin.(t2 .- 0.8*π)
+    x[(nmid+1):n_signal_points] = λ .* t2 .* cos.(t2 .- 0.8 * π)
+    y[(nmid+1):n_signal_points] = λ .* t2 .* sin.(t2 .- 0.8 * π)
 
-    p0 = hcat(x, y, zeros(Int8, n_signal_points, dimension-2))
+    p0 = hcat(x, y, zeros(Int8, n_signal_points, dimension - 2))
     signal = p0 .+ σ .* randn(rng, n_signal_points, dimension)
     noise = 120 .* rand(rng, n_outliers, dimension) .- 60
 
     points = collect(transpose(vcat(signal, noise)))
-    labels = vcat(ones(nmid),2*ones(n_signal_points - nmid), zeros(n_outliers))
+    labels = vcat(ones(nmid), 2 * ones(n_signal_points - nmid), zeros(n_outliers))
 
     return Data{Float64}(n_signal_points + n_outliers, dimension, points, labels)
-end ;
+end;
 
 # ### Data generation
 
@@ -477,15 +485,20 @@ end ;
 n_signal_points = 200 # number of points in the sample not considered as outliers
 n_outliers = 100 # number of outliers
 dimension = 10      # dimension of the data
-σ = 0.5 ;  # standard deviation for the additive noise
+σ = 0.5;  # standard deviation for the additive noise
 
-rng = MersenneTwister(1234) ;
+rng = MersenneTwister(1234);
 # -
 
 spirals = noisy_nested_spirals(rng, n_signal_points, n_outliers, σ, dimension);
 
-p = scatter(spirals.points[1,:], spirals.points[2,:]; markershape = :diamond, 
-                markercolor = spirals.labels, label = "")
+p = scatter(
+    spirals.points[1, :],
+    spirals.points[2, :];
+    markershape = :diamond,
+    markercolor = spirals.labels,
+    label = "",
+)
 
 # ### Computing the kplm
 
@@ -498,8 +511,17 @@ d = 1
 
 nthreads()
 
-first_centers = initiate_centers(rng,spirals.points,n_centers);
-@time spirals_kplm = kplm(rng,spirals.points,n_signal_points,n_nearest_neighbours,first_centers,iter_max,d,λ);
+first_centers = initiate_centers(rng, spirals.points, n_centers);
+@time spirals_kplm = kplm(
+    rng,
+    spirals.points,
+    n_signal_points,
+    n_nearest_neighbours,
+    first_centers,
+    iter_max,
+    d,
+    λ,
+);
 
 #=
 

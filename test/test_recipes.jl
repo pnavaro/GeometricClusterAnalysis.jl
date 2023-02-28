@@ -30,10 +30,8 @@ nb_means_removed = 5
 
 lengthn = length(hc.birth)
 if nb_means_removed > 0
-    threshold = mean((
-        hc.birth[lengthn-nb_means_removed],
-        hc.birth[lengthn-nb_means_removed+1],
-    ))
+    threshold =
+        mean((hc.birth[lengthn-nb_means_removed], hc.birth[lengthn-nb_means_removed+1]))
 else
     threshold = Inf
 end
@@ -55,4 +53,3 @@ color_final = color_points_from_centers(data.points, k, nsignal, dist_func, sp_h
 remain_indices = sp_hc.startup_indices
 
 ellipsoids(data.points, remain_indices, color_final, dist_func, 0.0)
-

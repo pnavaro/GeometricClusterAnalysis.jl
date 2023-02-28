@@ -48,31 +48,58 @@ Y_labels = recode(
     "Sir Arthur Conan Doyle" => 6,
 )
 
-lda = fit(MulticlassLDA, X_pca, Y_labels; outdim=20)
+lda = fit(MulticlassLDA, X_pca, Y_labels; outdim = 20)
 points = predict(lda, X_pca)
 @show size(points)
 
-function plot_clustering( points, cluster, true_labels; axis = 1:2)
+function plot_clustering(points, cluster, true_labels; axis = 1:2)
 
-    pairs = Dict(1 => :rtriangle, 2 => :diamond, 3 => :square, 4 => :ltriangle,
-                  5 => :star, 6 => :pentagon, 0 => :circle)
+    pairs = Dict(
+        1 => :rtriangle,
+        2 => :diamond,
+        3 => :square,
+        4 => :ltriangle,
+        5 => :star,
+        6 => :pentagon,
+        0 => :circle,
+    )
 
     shapes = replace(cluster, pairs...)
 
-    p = scatter(points[1, :], points[2, :]; markershape = shapes, 
-                markercolor = true_labels, label = "")
-    
-    authors = [ "Obama", "God", "Twain", "Dickens", 
-                "Hawthorne", "Conan Doyle"]
+    p = scatter(
+        points[1, :],
+        points[2, :];
+        markershape = shapes,
+        markercolor = true_labels,
+        label = "",
+    )
+
+    authors = ["Obama", "God", "Twain", "Dickens", "Hawthorne", "Conan Doyle"]
 
     xl, yl = xlims(p), ylims(p)
-    for (s,a) in zip(values(pairs),authors)
-        scatter!(p, [1], markershape=s, markercolor = "blue", label=a, xlims=xl, ylims=yl)
+    for (s, a) in zip(values(pairs), authors)
+        scatter!(
+            p,
+            [1],
+            markershape = s,
+            markercolor = "blue",
+            label = a,
+            xlims = xl,
+            ylims = yl,
+        )
     end
     for c in keys(pairs)
-        scatter!(p, [1], markershape=:circle, markercolor = c, label = c, xlims=xl, ylims=yl)
+        scatter!(
+            p,
+            [1],
+            markershape = :circle,
+            markercolor = c,
+            label = c,
+            xlims = xl,
+            ylims = yl,
+        )
     end
-    plot!(p, xlabel = "PC1", ylabel = "PC2", legend=:outertopright)
+    plot!(p, xlabel = "PC1", ylabel = "PC2", legend = :outertopright)
 
     return p
 
@@ -80,16 +107,16 @@ end
 
 
 k = 4
-α = 20/209 
+α = 20 / 209
 maxiter = 50
 nstart = 50
 tb_kmeans = trimmed_bregman_clustering(rng, points, k, α, euclidean, maxiter, nstart)
 @show tb_kmeans.cluster
 
-plot_clustering(tb_kmeans.points, tb_kmeans.cluster , Y_labels)
+plot_clustering(tb_kmeans.points, tb_kmeans.cluster, Y_labels)
 
-function standardize!( points )
-    points .-= minimum(points, dims=2)
+function standardize!(points)
+    points .-= minimum(points, dims = 2)
 end
 
 standardize!(points)
@@ -103,7 +130,7 @@ println("k-means : $(mutualinfo(Y_labels, tb_kmeans.cluster, normed = true))")
 println("poisson : $(mutualinfo(Y_labels, tb_poisson.cluster, normed = true))")
 
 vect_k = collect(1:6)
-vect_alpha = [(1:5)./50; [0.15,0.25,0.75,0.85,0.9]]
+vect_alpha = [(1:5) ./ 50; [0.15, 0.25, 0.75, 0.85, 0.9]]
 nstart = 20
 
 rng = MersenneTwister(20)
@@ -111,8 +138,8 @@ rng = MersenneTwister(20)
 params_risks = select_parameters(rng, vect_k, vect_alpha, points, poisson, maxiter, nstart)
 
 plot(; title = "select parameters")
-for (i,k) in enumerate(vect_k)
-   plot!( vect_alpha, params_risks[i, :], label ="k=$k", markershape = :circle )
+for (i, k) in enumerate(vect_k)
+    plot!(vect_alpha, params_risks[i, :], label = "k=$k", markershape = :circle)
 end
 xlabel!("alpha")
 ylabel!("NMI")

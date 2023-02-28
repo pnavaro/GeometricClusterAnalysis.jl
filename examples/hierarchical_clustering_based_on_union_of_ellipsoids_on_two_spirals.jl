@@ -28,47 +28,47 @@ function noisy_nested_spirals(rng, nsignal, nnoise, σ, d)
 
     nmid = nsignal ÷ 2
 
-    t1 = 6 .* rand(rng, nmid).+2
-    t2 = 6 .* rand(rng, nsignal-nmid).+2
+    t1 = 6 .* rand(rng, nmid) .+ 2
+    t2 = 6 .* rand(rng, nsignal - nmid) .+ 2
 
     x = zeros(nsignal)
     y = zeros(nsignal)
 
     λ = 5
 
-    x[1:nmid] = λ .*t1.*cos.(t1)
-    y[1:nmid] = λ .*t1.*sin.(t1)
+    x[1:nmid] = λ .* t1 .* cos.(t1)
+    y[1:nmid] = λ .* t1 .* sin.(t1)
 
-    x[(nmid+1):nsignal] = λ .*t2.*cos.(t2 .- 0.8*π)
-    y[(nmid+1):nsignal] = λ .*t2.*sin.(t2 .- 0.8*π)
+    x[(nmid+1):nsignal] = λ .* t2 .* cos.(t2 .- 0.8 * π)
+    y[(nmid+1):nsignal] = λ .* t2 .* sin.(t2 .- 0.8 * π)
 
     p0 = hcat(x, y)
     signal = p0 .+ σ .* randn(rng, nsignal, d)
     noise = 120 .* rand(rng, nnoise, d) .- 60
 
     points = collect(transpose(vcat(signal, noise)))
-    colors = vcat(ones(nmid),2*ones(nsignal - nmid), zeros(nnoise))
+    colors = vcat(ones(nmid), 2 * ones(nsignal - nmid), zeros(nnoise))
 
     return Data{Float64}(nsignal + nnoise, d, points, colors)
-end ;
+end;
 
 # ### Parameters
 
 nsignal = 2000 # number of signal points
 nnoise = 400   # number of outliers
 dim = 2       # dimension of the data
-σ = 0.5 ;  # standard deviation for the additive noise
+σ = 0.5;  # standard deviation for the additive noise
 
 # ### Data generation
 
 rng = MersenneTwister(1234)
 data = noisy_nested_spirals(rng, nsignal, nnoise, σ, dim)
-npoints = size(data.points,2)
+npoints = size(data.points, 2)
 print("The dataset contains ", npoints, " points, of dimension ", dim, ".")
 
 # ### Data display
 
-scatter(data.points[1,:],data.points[2,:])
+scatter(data.points[1, :], data.points[2, :])
 
 # ## Computation of the union of ellipsoids with the kPLM function
 
@@ -77,7 +77,7 @@ scatter(data.points[1,:],data.points[2,:])
 k = 20        # number of nearest neighbors
 c = 30        # number of ellipsoids
 iter_max = 20 # maximum number of iterations of the algorithm kPLM
-nstart = 5 ;   # number of initializations of the algorithm kPLM
+nstart = 5;   # number of initializations of the algorithm kPLM
 
 # ### Method
 
@@ -112,12 +112,19 @@ mh = build_distance_matrix(df)
 # The parameter "threshold" aims at removing ellipsoids born after time "threshold". Such ellipsoids are considered as irrelevant. This may be due to a bad initialisation of the algorithm that creates ellipsoids in bad directions with respect to the data.
 
 # +
-hc = hierarchical_clustering_lem(mh, infinity = Inf, threshold = Inf, 
-                                 store_colors = false, 
-                                 store_timesteps = false)
+hc = hierarchical_clustering_lem(
+    mh,
+    infinity = Inf,
+    threshold = Inf,
+    store_colors = false,
+    store_timesteps = false,
+)
 
-lims = (min(min(hc.birth...),min(hc.death...)),max(max(hc.birth...),max(hc.death[hc.death.!=Inf]...))+1)
-plot(hc,xlims = lims, ylims = lims)
+lims = (
+    min(min(hc.birth...), min(hc.death...)),
+    max(max(hc.birth...), max(hc.death[hc.death.!=Inf]...)) + 1,
+)
+plot(hc, xlims = lims, ylims = lims)
 # -
 
 # Note that the "+1" in the second argument of lims and lims2 hereafter is to separate
@@ -130,12 +137,19 @@ plot(hc,xlims = lims, ylims = lims)
 # We then have to select parameter "infinity". Connected components which lifetime is larger than "infinity" are components that we want not to die.
 
 # +
-hc2 = hierarchical_clustering_lem(mh, infinity = Inf, threshold = 3, 
-                                 store_colors = false, 
-                                 store_timesteps = false)
+hc2 = hierarchical_clustering_lem(
+    mh,
+    infinity = Inf,
+    threshold = 3,
+    store_colors = false,
+    store_timesteps = false,
+)
 
-lims2 = (min(min(hc2.birth...),min(hc2.death...)),max(max(hc2.birth...),max(hc2.death[hc2.death.!=Inf]...))+1)
-plot(hc2,xlims = lims2, ylims = lims2)
+lims2 = (
+    min(min(hc2.birth...), min(hc2.death...)),
+    max(max(hc2.birth...), max(hc2.death[hc2.death.!=Inf]...)) + 1,
+)
+plot(hc2, xlims = lims2, ylims = lims2)
 # -
 
 # We select "infinity = 15". Since there are clearly two connected components that have a lifetime much larger than others. This lifetime is larger than 15, whereas the lifetime of others is smaller than 15.
@@ -143,18 +157,22 @@ plot(hc2,xlims = lims2, ylims = lims2)
 # ### Clustering
 
 # +
-hc3 = hierarchical_clustering_lem(mh, infinity = 15, threshold = 3, 
-                                 store_colors = true, 
-                                 store_timesteps = true)
+hc3 = hierarchical_clustering_lem(
+    mh,
+    infinity = 15,
+    threshold = 3,
+    store_colors = true,
+    store_timesteps = true,
+)
 
-plot(hc3,xlims = lims2, ylims = lims2) # Using the sames xlims and ylims than the previous persistence diagram.
+plot(hc3, xlims = lims2, ylims = lims2) # Using the sames xlims and ylims than the previous persistence diagram.
 # -
 
 # ### Getting the number of components, colors of ellipsoids and times of evolution of the clustering
 
 nellipsoids = length(hc3.startup_indices) # Number of ellipsoids
 Col = hc3.Couleurs # Ellispoids colors
-Temps = hc3.Temps_step ; # Time at which a component borns or dies
+Temps = hc3.Temps_step; # Time at which a component borns or dies
 
 # Note : Col[i] contains the labels of the ellipsoids just before the time Temps[i]
 #
@@ -169,7 +187,7 @@ Temps = hc3.Temps_step ; # Time at which a component borns or dies
 # Therefore we need to compute new labels of the data points, with respect to the new ellipsoids.
 
 remain_indices = hc3.startup_indices
-color_points, dists = subcolorize(data.points, npoints, df, remain_indices) 
+color_points, dists = subcolorize(data.points, npoints, df, remain_indices)
 
 # ## Removing outliers
 
@@ -179,7 +197,12 @@ nsignal_vect = 1:npoints
 idxs = zeros(Int, npoints)
 sortperm!(idxs, dists, rev = false)
 costs = cumsum(dists[idxs])
-plot(nsignal_vect,costs, title = "Selection of the number of signal points",legend = false)
+plot(
+    nsignal_vect,
+    costs,
+    title = "Selection of the number of signal points",
+    legend = false,
+)
 xlabel!("Number of signal points")
 ylabel!("Cost")
 
@@ -191,7 +214,7 @@ ylabel!("Cost")
 nsignal = 2100
 
 if nsignal < npoints
-    for i in idxs[(nsignal + 1):npoints]
+    for i in idxs[(nsignal+1):npoints]
         color_points[i] = 0
     end
 end
@@ -202,8 +225,8 @@ end
 # Since "indexed_by_r2 = TRUE", we use sq_time and not its squareroot.
 
 # +
-sq_time = (0:200) ./200 .* (Temps[end-1] - Temps[1]) .+ Temps[1] # Depends on "Temps" vector.
-Col2 = Vector{Int}[] 
+sq_time = (0:200) ./ 200 .* (Temps[end-1] - Temps[1]) .+ Temps[1] # Depends on "Temps" vector.
+Col2 = Vector{Int}[]
 Colors2 = Vector{Int}[]
 
 idx = 0
@@ -214,8 +237,8 @@ updated = false
 
 for i = 1:length(sq_time)
     while sq_time[i] >= next_sqtime
-        println(idx," ",sq_time[i]," ",next_sqtime," ",Temps[idx+2])
-        idx +=1
+        println(idx, " ", sq_time[i], " ", next_sqtime, " ", Temps[idx+2])
+        idx += 1
         next_sqtime = Temps[idx+1]
         updated = true
     end
@@ -224,32 +247,30 @@ for i = 1:length(sq_time)
         new_colors2 = return_color(color_points, new_col2, remain_indices)
         updated = false
     end
-    println(i," ",new_col2)
-    push!(Col2, copy(new_col2)) ;
-    push!(Colors2, copy(new_colors2)) ;
+    println(i, " ", new_col2)
+    push!(Col2, copy(new_col2))
+    push!(Colors2, copy(new_colors2))
 end
 
 for i = 1:length(Col2)
     for j = 1:size(data.points)[2]
-        Colors2[i][j] = Colors2[i][j] * (dists[j] <= sq_time[i]) ; # If the cost of the point is smaller to the time : label 0 (not in the ellipsoid)
+        Colors2[i][j] = Colors2[i][j] * (dists[j] <= sq_time[i]) # If the cost of the point is smaller to the time : label 0 (not in the ellipsoid)
     end
 end
 
-μ = [df.μ[i] for i in remain_indices if i>0] ;
-ω = [df.weights[i] for i in remain_indices if i>0] ;
-Σ = [df.Σ[i] for i in remain_indices if i>0] ;
+μ = [df.μ[i] for i in remain_indices if i > 0];
+ω = [df.weights[i] for i in remain_indices if i > 0];
+Σ = [df.Σ[i] for i in remain_indices if i > 0];
 
-ncolors2 = length(Colors2) ;
+ncolors2 = length(Colors2);
 
-anim = @animate for i = [1:ncolors2; Iterators.repeated(ncolors2,30)...]
-    ellipsoids(data.points, Col2[i], Colors2[i], μ, ω, Σ, sq_time[i]; markersize=5)
+anim = @animate for i in [1:ncolors2; Iterators.repeated(ncolors2, 30)...]
+    ellipsoids(data.points, Col2[i], Colors2[i], μ, ω, Σ, sq_time[i]; markersize = 5)
     xlims!(-60, 60)
     ylims!(-60, 60)
-end ;
+end;
 # -
 
 # ### Animation - Clustering result
 
 gif(anim, "anim_kpdtm2.gif", fps = 5)
-
-

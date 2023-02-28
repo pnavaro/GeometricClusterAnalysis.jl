@@ -25,7 +25,7 @@ nstart = 10 # number of initializations of the algorithm kPLM
 gen = generate_3curves_noise(N,Nnoise,sigma,dim)
 P = gen$points
 true_clustering = gen$color
-plot_pointset(P,true_clustering,coord = c(1,2),save_plot = TRUE,filename="True_clustering.pdf",path=path)
+plot_pointset(P,true_clustering,coord = c(1,2),save_plot = TRUE,filename="True_clustering.png",path=path)
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -39,7 +39,7 @@ DTM = sort(TDA::dtm(P,P,k/nrow(P)))
 point = 1:nrow(P)
 
 ggplot() +geom_point(aes(x = point,y=DTM),col = "black")
-ggsave(filename = "valeur_DTM.pdf",path = path)
+ggsave(filename = "valeur_DTM.png",path = path)
 sig = 520 # Number of points to consider as signal
 
 
@@ -85,7 +85,7 @@ fp_hc = second_passage_hc(dist_func,distance_matrix,infinity=Inf,threshold = Inf
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-filename = "persistence_diagram.pdf"
+filename = "persistence_diagram.png"
 plot_birth_death(fp_hc$hierarchical_clustering,lim_min = -15,lim_max = -4,filename=filename,path=path)
 
 nb_means_removed = 5 # To choose, for the paper example : 5
@@ -98,7 +98,7 @@ if(nb_means_removed > 0){
 }
 
 fp_hc2 = second_passage_hc(dist_func,distance_matrix,infinity=Inf,threshold = threshold)
-filename = "persistence_diagram2.pdf"
+filename = "persistence_diagram2.png"
 
 bd = plot_birth_death(fp_hc2$hierarchical_clustering,lim_min = -15,lim_max = 10,filename=filename,path=path)
 sort_bd = sort(bd)
@@ -118,7 +118,7 @@ sp_hc = second_passage_hc(dist_func,distance_matrix,infinity=infinity,threshold 
 
 col = color_points_from_centers(P,k,sig,dist_func,sp_hc$hierarchical_clustering,plot = TRUE)
 
-filename= "clustering_kPLM.pdf"
+filename= "clustering_kPLM.png"
 ggsave(filename = filename,path=path)
 
 
@@ -156,7 +156,7 @@ nb_means_removed = 0 # To choose, for the paper example : 5
 
 fp_hc_bis = second_passage_hc(dist_func,distance_matrix,infinity=Inf,threshold = Inf)
 
-filename = "without_thresholding.pdf"
+filename = "without_thresholding.png"
 bd_bis = plot_birth_death(fp_hc_bis$hierarchical_clustering,lim_min = -15,lim_max = 10,filename=filename,path=path)
 sort_bd_bis = sort(bd_bis)
 lengthbd_bis = length(bd_bis)
@@ -167,5 +167,5 @@ sp_hc_bis = second_passage_hc(dist_func,distance_matrix,infinity=infinity_bis,th
 
 col = color_points_from_centers(P,k,sig,dist_func,sp_hc_bis$hierarchical_clustering,plot = TRUE)
 
-filename= "clustering_kPLM_bis.pdf"
+filename= "clustering_kPLM_bis.png"
 ggsave(filename = filename,path=path)

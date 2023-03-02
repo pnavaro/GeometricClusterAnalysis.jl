@@ -19,7 +19,8 @@ plot(P)
 
 k = 20 # Nombre de plus proches voisins
 c = 10 # Nombre de centres ou d'ellipsoides
-sig = 500 # Nombre de points que l'on considère comme du signal (les autres auront une étiquette 0 et seront considérés comme des données aberrantes)
+sig = 500 # Nombre de points que l'on considère comme du signal 
+# (les autres auront une étiquette 0 et seront considérés comme des données aberrantes)
 
 
 # MAIN 1 : Simple version -- Aucune contrainte sur les matrices de covariance.
@@ -36,8 +37,10 @@ LL2 = kplm(P,k,c,sig,iter_max = 10,nstart = 1,f_Sigma_det1)
 plot(P,col = LL2$color)
 
 
-# MAIN 3 : Constraint dim d -- Les matrices sont contraintes à avoir d-d_prim valeurs propres égales (les plus petites)
-# Ces d-dprim sont contraintes à être entre s2min et s2max, alors que les d_prim plus grandes valeurs propres sont contraintes à être supérieures à lambdamin.
+# MAIN 3 : Constraint dim d -- Les matrices sont contraintes à avoir d-d_prim 
+# valeurs propres égales (les plus petites)
+# Ces d-dprim sont contraintes à être entre s2min et s2max, alors que les d_prim 
+# plus grandes valeurs propres sont contraintes à être supérieures à lambdamin.
 
 aux_dim_d <- function(Sigma, s2min, s2max, lambdamin, d_prim){
   eig = eigen(Sigma)

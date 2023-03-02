@@ -215,3 +215,25 @@ end
 
 
 end
+
+@userplot PointSet
+
+@recipe function f(ps::PointSet)
+    points = ps.args[1]
+    colors = ps.args[2] 
+    framestyle --> :none
+    aspect_ratio --> true
+
+    for (i,l) in enumerate(unique(colors))
+        which = colors .== l
+        x = points[1, which]
+        y = points[2, which]
+        @series begin
+            seriestype := :scatter
+            label --> string(i)
+            markersize --> 2
+            x, y
+        end
+    end
+
+end

@@ -9,7 +9,7 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.14.1
 #   kernelspec:
-#     display_name: Julia 1.8.4
+#     display_name: Julia 1.8.5
 #     language: julia
 #     name: julia-1.8
 # ---
@@ -63,28 +63,16 @@ Base.show(io::IO, model::KpResult) = print(io, model)
 
 # +
 using RecipesBase
+import GeometricClusterAnalysis
 
-abstract type AbstractData end
-
-export Data
-
-struct Data{T} <: AbstractData
-
-    np::Int
-    nv::Int
-    points::Array{T,2}
-    labels::Vector{Int}
-
-end
-
-@recipe function f(data::Data)
+@recipe function f(data::GeometricClusterAnalysis.Data)
 
     x := data.points[1, :]
     y := data.points[2, :]
     if data.nv == 3
         z := data.points[3, :]
     end
-    c := data.labels
+    c := data.colors
     seriestype := :scatter
     legend := false
     palette --> :rainbow
@@ -449,36 +437,6 @@ end
 
 # ## Using the new klpm function on a simple example
 
-# ### Function to generate data
-
-function noisy_nested_spirals(rng, n_signal_points, n_outliers, σ, dimension)
-
-    nmid = n_signal_points ÷ 2
-
-    t1 = 6 .* rand(rng, nmid) .+ 2
-    t2 = 6 .* rand(rng, n_signal_points - nmid) .+ 2
-
-    x = zeros(n_signal_points)
-    y = zeros(n_signal_points)
-
-    λ = 5
-
-    x[1:nmid] = λ .* t1 .* cos.(t1)
-    y[1:nmid] = λ .* t1 .* sin.(t1)
-
-    x[(nmid+1):n_signal_points] = λ .* t2 .* cos.(t2 .- 0.8 * π)
-    y[(nmid+1):n_signal_points] = λ .* t2 .* sin.(t2 .- 0.8 * π)
-
-    p0 = hcat(x, y, zeros(Int8, n_signal_points, dimension - 2))
-    signal = p0 .+ σ .* randn(rng, n_signal_points, dimension)
-    noise = 120 .* rand(rng, n_outliers, dimension) .- 60
-
-    points = collect(transpose(vcat(signal, noise)))
-    labels = vcat(ones(nmid), 2 * ones(n_signal_points - nmid), zeros(n_outliers))
-
-    return Data{Float64}(n_signal_points + n_outliers, dimension, points, labels)
-end;
-
 # ### Data generation
 
 # +
@@ -488,15 +446,18 @@ dimension = 10      # dimension of the data
 σ = 0.5;  # standard deviation for the additive noise
 
 rng = MersenneTwister(1234);
-# -
 
-spirals = noisy_nested_spirals(rng, n_signal_points, n_outliers, σ, dimension);
+# +
+import GeometricClusterAnalysis
+
+spirals = GeometricClusterAnalysis.noisy_nested_spirals(rng, n_signal_points, n_outliers, σ, dimension);
+# -
 
 p = scatter(
     spirals.points[1, :],
     spirals.points[2, :];
     markershape = :diamond,
-    markercolor = spirals.labels,
+    markercolor = spirals.colors,
     label = "",
 )
 
@@ -523,7 +484,7 @@ first_centers = initiate_centers(rng, spirals.points, n_centers);
     λ,
 );
 
-#=
+# =
 
 print("Mean kplm of signal points : ", spirals_kplm.mean_squared_distance_function)
 λ_end = eigen(spirals_kplm.Σ[1]).values[end]
@@ -594,5 +555,3 @@ for i in 1:100
     first_centers = initiate_centers(rng,spirals.points,n_centers);
     spirals_kplm = kplm(rng,spirals.points,n_signal_points,n_nearest_neighbours,first_centers,iter_max,d,λ);
 end
-
-=#

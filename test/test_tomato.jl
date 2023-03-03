@@ -16,7 +16,7 @@
     @test GeometricClusterAnalysis.dtm(x, m0, r = 2) ≈ rcopy(R"TDA::dtm(P, P, m0, r = 2) ")
     @test GeometricClusterAnalysis.dtm(x, m0, r = 3) ≈ rcopy(R"TDA::dtm(P, P, m0, r = 3) ")
     @show signal = size(points, 1)
-    graph = GeometricClusterAnalysis.graph_radius(points, r)
+    graph = GeometricClusterAnalysis.graph_radius(x, r)
     @rput r
     @test graph ≈ rcopy(R"graph_radius(P,r)")
     birth = GeometricClusterAnalysis.dtm(x, m0)

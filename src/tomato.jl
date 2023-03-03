@@ -117,7 +117,7 @@ function graph_radius(points, r)
     n = size(points, 2)
     graph = zeros(Int, n, n)
     for i = 1:n, j = 1:n
-        graph[i, j] = (sum(points[:, j] .- points[:, i]).^2 <= r^2)
+        graph[i, j] = (sum((points[:, j] .- points[:, i]).^2) <= r^2)
     end
     return graph
 end

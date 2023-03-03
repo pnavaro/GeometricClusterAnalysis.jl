@@ -9,9 +9,8 @@ function dtm(x::Matrix{Float64}, m0; r = 2)
 
     n = size(x, 2)
     weight_bound = Float64(m0 * n)
-    @show size(x)
     kdtree = KDTree(x)
-    @show k = ceil(Int, weight_bound)
+    k = ceil(Int, weight_bound)
     idxs, dists = knn(kdtree, x, k, true)
 
     distance_tmp = 0.0

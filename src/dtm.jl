@@ -5,12 +5,13 @@ $(SIGNATURES)
 
 Distance to measure function for each points
 """
-function dtm(x, m0; r = 2)
+function dtm(x::Matrix{Float64}, m0; r = 2)
 
     n = size(x, 2)
     weight_bound = Float64(m0 * n)
+    @show size(x)
     kdtree = KDTree(x)
-    k = ceil(Int, weight_bound)
+    @show k = ceil(Int, weight_bound)
     idxs, dists = knn(kdtree, x, k, true)
 
     distance_tmp = 0.0
@@ -128,9 +129,9 @@ export power_function_buchet
 """
 $(SIGNATURES)
 """
-function power_function_buchet(points, birth_function; infinity = Inf, threshold = Inf)
+function power_function_buchet(points, m0; infinity = Inf, threshold = Inf)
 
-    birth = birth_function(points)
+    birth = dtm(points, m0)
     # Computing matrix
     distance_matrix = build_distance_matrix_power_function_buchet(birth, points)
     # Starting the hierarchical clustering algorithm
@@ -171,9 +172,9 @@ export dtm_filtration
 """
 $(SIGNATURES)
 """
-function dtm_filtration(points, birth_function; infinity = Inf, threshold = Inf)
+function dtm_filtration(points, m0; infinity = Inf, threshold = Inf)
 
-    birth = birth_function(points)
+    birth = dtm(points, m0)
     # Computing matrix
     distance_matrix = distance_matrix_dtm_filtration(birth, points)
     # Starting the hierarchical clustering algorithm

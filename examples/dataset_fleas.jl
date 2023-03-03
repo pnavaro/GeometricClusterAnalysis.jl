@@ -155,9 +155,11 @@ plot(p1, p2, layout = l, aspect_ratio = :equal)
 # +
 using GeometricClusterAnalysis
 
-nb_clusters, k, c, r, iter_max = 3, 10, 100, 1.9, 100
-signal = size(points, 1)
-col_tomato, _ = tomato_clustering(nb_clusters, points, k, c, signal, r, iter_max, nstart)
+
+nb_clusters, k, c, radius, iter_max = 3, 10, 100, 1.9, 100
+nsignal = size(points, 1)
+col_tomato, _ = tomato_clustering(nb_clusters, points, k, c, nsignal, radius, iter_max, nstart)
+println("NMI = $(mutualinfo(true_colors, col_tomato))")
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, col_tomato)
@@ -238,18 +240,17 @@ plot(p1, p2, layout = l)
 using GeometricClusterAnalysis
 
 m0 = k / size(x, 2)
-birth_function(x) = dtm(x, m0)
-birth = sort(birth_function(x))
+birth = sort(dtm(x, m0))
 @show threshold = birth[nsignal]
 
 distance_matrix = build_distance_matrix_power_function_buchet(birth, x)
 
 buchet_colors, returned_colors, hc1 =
-    power_function_buchet(x, birth_function; infinity = Inf, threshold = threshold)
+    power_function_buchet(x, m0; infinity = Inf, threshold = threshold)
 sort_bd = sort(hc1.death .- hc1.birth)
 infinity = mean((sort_bd[end-nb_clusters], sort_bd[end-nb_clusters+1]))
 buchet_colors, returned_colors, hc2 =
-    power_function_buchet(x, birth_function; infinity = infinity, threshold = threshold)
+    power_function_buchet(x, m0; infinity = infinity, threshold = threshold)
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, buchet_colors)
@@ -263,18 +264,17 @@ plot(p1, p2, layout = l)
 using GeometricClusterAnalysis
 
 m0 = k / size(x, 2)
-birth_function(x) = dtm(x, m0)
-birth = sort(birth_function(x))
+birth = sort(dtm(x, m0))
 @show threshold = birth[nsignal]
 
 distance_matrix = GeometricClusterAnalysis.distance_matrix_dtm_filtration(birth, x)
 
 dtm_colors, returned_colors, hc1 =
-    dtm_filtration(x, birth_function; infinity = Inf, threshold = threshold)
+    dtm_filtration(x, m0; infinity = Inf, threshold = threshold)
 sort_bd = sort(hc1.death .- hc1.birth)
 infinity = mean((sort_bd[end-nb_clusters], sort_bd[end-nb_clusters+1]))
 dtm_colors, returned_colors, hc2 =
-    dtm_filtration(x, birth_function; infinity = infinity, threshold = threshold)
+    dtm_filtration(x, m0; infinity = infinity, threshold = threshold)
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, dtm_colors)
@@ -288,3 +288,5 @@ l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, spectral_colors)
 plot(p1, p2, layout = l)
+
+

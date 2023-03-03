@@ -4,24 +4,9 @@ source(here("test","tomato.R"))
 source(here("test","fonctions_puissances.R"))
 source(here("test","kplm.R"))
 source(here("test","kpdtm.R"))
-source(here("test", "dtm_filtration.R"))
+source(here("test","dtm_filtration.R"))
 source(here("test","plot_pointclouds_centers.R"))
-
-
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                                # To generate sample points :
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-source(here("test","sample_3curves.R"))
 source(here("test","sample_14segments.R"))
-
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                                  # Clustering methods :
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 source(here("test","functions_for_evaluating_methods.R"))
 
 
@@ -40,44 +25,25 @@ ntimes = 100
 sigma = 0.02 # 0.02, 0.0001
 dim = 2
 
-
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 # Sampling :
 
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-#sampling_function = generate_parabols_noise
-#path = "results/Illustration_method_3_curves/"
 sampling_function = generate_14segments_noise
 path = "results/Illustration_method_14_segments/"
 
 
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 # True colors
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 sample = sampling_function(N,Nnoise,sigma,dim)
 
 filename = "true_clustering.png"
 plot_pointset(sample$points,sample$color,coord = c(1,2),save_plot = TRUE,filename,path)
 
-
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 # Different clustering for different methods
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 P = sample$points
 
 
-#k-PLM
+# ## k-PLM
 
 col = clustering_PLM(nb_clusters,P,k,c,sig,iter_max,nstart,nb_means_removed,indexed_by_r2 = TRUE)$label
 
@@ -85,16 +51,18 @@ filename = "clustering_kPLM.png"
 plot_pointset(sample$points,col,coord = c(1,2),save_plot = TRUE,filename,path)
 
 
-# k-PDTM
+aricode::NMI(col, sample$color)
+
+# ## k-PDTM
 
 col = clustering_PDTM(nb_clusters,P,k,c,sig,iter_max,nstart,nb_means_removed)$label
 
 filename = "clustering_kPDTM.png"
 plot_pointset(sample$points,col,coord = c(1,2),save_plot = TRUE,filename,path)
 
+aricode::NMI(col, sample$color)
 
-
-# q-witnessed distance
+# ## q-witnessed distance
 
 col = clustering_witnessed(nb_clusters,P,k,c,sig,iter_max,nstart)$label
 
@@ -102,7 +70,9 @@ filename = "clustering_witnessed.png"
 plot_pointset(sample$points,col,coord = c(1,2),save_plot = TRUE,filename,path)
 
 
-# power_function
+aricode::NMI(col, sample$color)
+
+# ## power_function
 
 col = clustering_power_function(nb_clusters,P,k,c,sig,iter_max,nstart)$label
 
@@ -110,7 +80,9 @@ filename = "clustering_power_function.png"
 plot_pointset(sample$points,col,coord = c(1,2),save_plot = TRUE,filename,path)
 
 
-# DTM filtration
+aricode::NMI(col, sample$color)
+
+# ## DTM filtration
 
 col = clustering_DTM_filtration(nb_clusters,P,k,c,sig,iter_max,nstart)$label
 
@@ -118,7 +90,9 @@ filename = "clustering_DTM_filtration.png"
 plot_pointset(sample$points,col,coord = c(1,2),save_plot = TRUE,filename,path)
 
 
-# ToMATo
+aricode::NMI(col, sample$color)
+
+# ## ToMaTo
 
 r = 0.12 # Radius for the Rips graph
 col = clustering_Tomato(nb_clusters,P,k,c,sig,r,iter_max,nstart)$label
@@ -127,7 +101,9 @@ filename = "clustering_ToMATo.png"
 plot_pointset(sample$points,col,coord = c(1,2),save_plot = TRUE,filename,path)
 
 
-# tclust
+aricode::NMI(col, sample$color)
+
+# ## tclust
 
 col = clustering_tclust(nb_clusters,P,Nnoise,iter_max,nstart)$label
 
@@ -135,7 +111,9 @@ filename = "clustering_tclust.png"
 plot_pointset(sample$points,col,coord = c(1,2),save_plot = TRUE,filename,path)
 
 
-# spectral
+aricode::NMI(col, sample$color)
+
+# ## spectral
 
 col = clustering_spectral(nb_clusters,P,Nnoise,iter_max,nstart)$label
 
@@ -143,15 +121,9 @@ filename = "clustering_spectral.png"
 plot_pointset(sample$points,col,coord = c(1,2),save_plot = TRUE,filename,path)
 
 
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+aricode::NMI(col, sample$color)
 
-# Computation of NMI and FDR
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
+# ## Computation of NMI and FDR
 
 # Methods :
 
@@ -159,7 +131,6 @@ plot_pointset(sample$points,col,coord = c(1,2),save_plot = TRUE,filename,path)
 method <- function(P,Nnoise){
   return(clustering_PLM(nb_clusters,P,k,c,sig,iter_max,nstart,nb_means_removed))
 } 
-#cbc_PLM = compute_bad_classif(sampling_function,method,N,Nnoise,sigma,dim,ntimes)
 
 cbc_PLM_NMI = rep(0,100)
 cbc_PLM_NMI_tot = rep(0,100)
@@ -170,8 +141,6 @@ for(i in 1:ntimes){
   cbc_PLM_NMI_tot[i] = ans$NMI_all_points
   cbc_PLM_FDR[i] = ans$FDR
 }
-
-
 
 # PDTM
 method <- function(P,Nnoise){
@@ -256,8 +225,6 @@ for(i in 1:length(les_cbc)){
   FDRs = c(FDRs,les_cbc[[i]]$FDR)
 }
 
-
-
 method = c("c-PLM","c-PDTM","witnessed distance","power function","DTM filtration","ToMATo","tclust","spectral")
 methods = c()
 for(i in 1:length(method)){
@@ -277,3 +244,5 @@ ggsave(filename = "violin_plots_NMI_all_polygonal_example.pdf",path = path)
 pp = ggplot2::ggplot(data = les_donnees, mapping = aes(y = FDR, x = method))+geom_violin()
 pp + geom_boxplot(width=0.1) + theme(axis.text.x = element_text(angle = 90, hjust = 1))  + labs(x = "Method", y = "FDR")
 ggsave(filename = "violin_plots_FDR_polygonal_example.pdf",path = path)
+
+

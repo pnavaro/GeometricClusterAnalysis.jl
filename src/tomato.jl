@@ -13,15 +13,15 @@ function tomato_density(kdtree, X::AbstractMatrix, k)
     f = []
     if dim == 2
         for i = 1:n
-            push!(f, k * (k + 1) / (2 * n * pi * sum(dists[i] .^ 2)))
+            push!(f, k * (k + 1) / (2n * π * sum(dists[i] .^ 2)))
         end
     elseif dim == 3
         for i = 1:n
-            push!(f, k * (k + 1) / (2 * n * (4 / 3) * pi * sum(dists[i] .^ 3)))
+            push!(f, k * (k + 1) / (2n * (4π / 3) * sum(dists[i] .^ 3)))
         end
     elseif dim == 1
         for i = 1:n
-            push!(f, k * (k + 1) / (2 * n * sum(dists[i])))
+            push!(f, k * (k + 1) / (2n * sum(dists[i])))
         end
     end
     return f
@@ -84,22 +84,6 @@ end
 
 """
 $(SIGNATURES)
-"""
-function hmatrix_tomato(graph, birth)
-    # graph : Matrix that contains 0 and 1, graph_i,j = 1 iff i and j are neighbours
-    c = size(graph, 1)
-    distance_matrix = fill(Inf, c, c)
-    if c != length(birth)
-        @error "graph should be of size lxl with l the length of birth"
-    end
-    for i = 1:c, j = 1:i
-        distance_matrix[i, j] = max(birth[i], birth[j]) * 1 / graph[i, j]
-    end
-    return distance_matrix
-end
-
-"""
-$(SIGNATURES)
 
 Nearest neighbours graph
 
@@ -107,12 +91,12 @@ Nearest neighbours graph
 """
 function graph_nn(points, k)
 
-    n = size(points, 1)
+    n = size(points, 2)
     graph = zeros(n, n)
     kdtree = KDTree(points)
 
     for i = 1:n
-        knear, dists = knn(kdtree, points[i, :], k + 1)
+        knear, dists = knn(kdtree, points[:, i], k + 1)
         graph[i, knear] .= 1
         graph[knear, i] .= 1
         graph[i, i] = 1
@@ -130,10 +114,10 @@ $(SIGNATURES)
 Rips graph with radius r
 """
 function graph_radius(points, r)
-    n = size(points, 1)
+    n = size(points, 2)
     graph = zeros(Int, n, n)
     for i = 1:n, j = 1:n
-        graph[i, j] = (sum((view(points, j, :) .- view(points, i, :)) .^ 2) <= r^2)
+        graph[i, j] = (sum(points[:, j] .- points[:, i]).^2 <= r^2)
     end
     return graph
 end
@@ -146,21 +130,21 @@ $(SIGNATURES)
 """
 function distance_matrix_tomato(graph, birth)
 
-    c = size(graph, 1)
-    distance_matrix = fill(Inf, c, c)
-    if c != length(birth)
+    if size(graph, 1) != length(birth)
         @error "graph should be of size lxl with l the length of birth"
     end
-    for i = 1:c, j = 1:i
-        distance_matrix[i, j] = max(birth[i], birth[j]) * 1 / graph[i, j]
+
+    distance_matrix = fill(Inf, size(graph))
+    for i = eachindex(birth), j = 1:i
+        distance_matrix[i, j] = max(birth[i], birth[j]) / graph[i, j]
     end
+
     return distance_matrix
 end
 
-function tomato(x, k, graph; infinity = Inf, threshold = Inf)
+function tomato(x, m0, graph; infinity = Inf, threshold = Inf)
 
     n = size(x, 2)
-    m0 = k / n
     birth = dtm(x, m0)
     # Computing matrix
     dm = distance_matrix_tomato(graph, birth)
@@ -182,17 +166,17 @@ end
 
 export tomato_clustering
 
-function tomato_clustering(nb_clusters, points, k, c, signal, r, iter_max, nstart)
+function tomato_clustering(nb_clusters, points, k, c, signal, radius, iter_max, nstart)
 
-    graph = graph_radius(points, r)
     x = collect(transpose(points))
+    graph = graph_radius(x, radius)
     m0 = k / size(x, 2)
     sort_dtm = sort(dtm(x, m0))
     threshold = sort_dtm[signal]
-    _, _, hc = tomato(x, k, graph; infinity = Inf, threshold = threshold)
+    _, _, hc = tomato(x, m0, graph; infinity = Inf, threshold = threshold)
     sort_bd = sort(hc.death .- hc.birth)
     infinity = mean([sort_bd[end-nb_clusters], sort_bd[end-nb_clusters+1]])
-    colors, _, _ = tomato(x, k, graph, infinity = infinity, threshold = threshold)
+    colors, _, _ = tomato(x, m0, graph, infinity = infinity, threshold = threshold)
     lifetime = reverse(sort_bd)
     colors, lifetime
 

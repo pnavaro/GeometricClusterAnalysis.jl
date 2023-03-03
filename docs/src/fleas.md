@@ -182,7 +182,7 @@ plot(p1, p2, layout = l)
 ## Witnessed
 
 ```@example fleas
-μ, ω, colors = k_witnessed_distance(x, k, c, signal, iter_max, nstart)
+μ, ω, colors = k_witnessed_distance(x, k, c, signal)
 distance_matrix = build_distance_matrix_power_function_buchet(sqrt.(ω), hcat(μ...))
 
 hc1 = hierarchical_clustering_lem(distance_matrix, infinity = Inf, threshold = Inf)
@@ -222,17 +222,16 @@ plot(p1, p2, layout = l)
 using GeometricClusterAnalysis
 
 m0 = k / size(x, 2)
-birth_function(x) = dtm(x, m0)
-birth = sort(birth_function(x))
+birth = sort(dtm(x, m0))
 threshold = birth[nsignal]
 
 distance_matrix = build_distance_matrix_power_function_buchet(birth, x)
 
-buchet_colors, returned_colors, hc1 = power_function_buchet(x, birth_function; 
+buchet_colors, returned_colors, hc1 = power_function_buchet(x, m0; 
          infinity = Inf, threshold = threshold)
 sort_bd = sort(hc1.death .- hc1.birth)
 infinity =  mean((sort_bd[end - nb_clusters],sort_bd[end - nb_clusters + 1]))
-buchet_colors, returned_colors, hc2 = power_function_buchet(x, birth_function; 
+buchet_colors, returned_colors, hc2 = power_function_buchet(x, m0; 
          infinity=infinity, threshold = threshold)
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
@@ -246,17 +245,16 @@ plot(p1, p2, layout = l)
 using GeometricClusterAnalysis
 
 m0 = k / size(x, 2)
-birth_function(x) = dtm(x, m0)
-birth = sort(birth_function(x))
+birth = sort(dtm(x, m0))
 threshold = birth[nsignal]
 
 distance_matrix =  GeometricClusterAnalysis.distance_matrix_dtm_filtration(birth, x)
 
-dtm_colors, returned_colors, hc1 = dtm_filtration(x, birth_function; 
+dtm_colors, returned_colors, hc1 = dtm_filtration(x, m0; 
          infinity = Inf, threshold = threshold)
 sort_bd = sort(hc1.death .- hc1.birth)
 infinity =  mean((sort_bd[end - nb_clusters],sort_bd[end - nb_clusters + 1]))
-dtm_colors, returned_colors, hc2 = dtm_filtration(x, birth_function; 
+dtm_colors, returned_colors, hc2 = dtm_filtration(x, m0; 
          infinity=infinity, threshold = threshold)
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)

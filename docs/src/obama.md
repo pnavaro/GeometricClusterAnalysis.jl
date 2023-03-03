@@ -1,7 +1,7 @@
 # Application to authors texts clustering
 
-Data from texts are stored in some variable `df`.
-The commands used for displaying data are the following.
+Data from texts are stored in some variable `df`.  The commands
+used for displaying data are the following.
 
 ```@example obama
 using CategoricalArrays
@@ -100,8 +100,9 @@ end
 
 ## Data clustering
 
-To cluster the data, we will use the following parameters.
-The true proportion of outliers is 20/209 since 15+5 texts were extracted from the bible or a speech from Obama.
+To cluster the data, we will use the following parameters.  The
+true proportion of outliers is 20/209 since 15+5 texts were extracted
+from the bible or a speech from Obama.
 
 ```@example obama
 k = 4
@@ -135,16 +136,23 @@ tb_poisson = trimmed_bregman_clustering(rng, points, k, alpha, poisson, maxiter,
 
 plot_clustering(points, tb_poisson.cluster, Y_labels)
 ```
-By using the Bregman divergence associated to the Poisson distribution, we see that the clustering method is performant with the parameters `k = 4` and `alpha = 20/209`.
-Indeed, the outliers are the texts from the bible and from the Obama speech.
-Moreover, the other texts are mostly well clustered.
+By using the Bregman divergence associated to the Poisson distribution,
+we see that the clustering method is performant with the parameters
+`k = 4` and `alpha = 20/209`.  Indeed, the outliers are the texts
+from the bible and from the Obama speech.  Moreover, the other texts
+are mostly well clustered.
 
 
 ## Performance comparison
 
-We measure the performance of two clustering methods (the one with the squared Euclidean distance and the one with the Bregman divergence associated to the Poisson distribution). For this, we use the normalised mutual information (NMI).
+We measure the performance of two clustering methods (the one with
+the squared Euclidean distance and the one with the Bregman divergence
+associated to the Poisson distribution). For this, we use the
+normalised mutual information (NMI).
 
-True labelling for which the texts from the bible and the Obama speech do have the same label:
+True labelling for which the texts from the bible and the Obama
+speech do have the same label:
+
 ```@example obama
 true_labels = copy(Y_labels)
 true_labels[Y_labels .== 2] .= 1
@@ -155,20 +163,30 @@ For trimmed k-means :
 mutualinfo(true_labels, tb_kmeans.cluster, normed = true)
 ```
 
-For trimmed clustering with the Bregman divergence associated to the Poisson distribution :
+For trimmed clustering with the Bregman divergence associated to
+the Poisson distribution :
 
 ```@example obama
 mutualinfo(true_labels, tb_poisson.cluster, normed = true)
 ```
 
-The mutualy normalised information is larger for the Bregman divergence associated to the Poisson distribution. This illustrates the fact that using the correct Bregman divergence helps improving the clustering, in comparison to the classical trimmed ``k``-means algorithm.
-Indeed, the number of appearance of a word in a text of a fixed number of words, written by the same author, can be modelled by a random variable of Poisson distribution.
-The independance between the number of appearance of the words is not realistic. However, since we do consider only some words (the 50 more frequent words), we make this approximation. We will use the Bregman divergence associated to the Poisson distribution.
+The mutualy normalised information is larger for the Bregman
+divergence associated to the Poisson distribution. This illustrates
+the fact that using the correct Bregman divergence helps improving
+the clustering, in comparison to the classical trimmed ``k``-means
+algorithm.  Indeed, the number of appearance of a word in a text
+of a fixed number of words, written by the same author, can be
+modelled by a random variable of Poisson distribution.  The
+independance between the number of appearance of the words is not
+realistic. However, since we do consider only some words (the 50
+more frequent words), we make this approximation. We will use the
+Bregman divergence associated to the Poisson distribution.
 
 ### Selecting the parameters ``k`` and ``\alpha``
 
 We display the risks curves as a function of ``k`` and ``\alpha``.
-In practive, it is important to realise this step since we are not supposed to know the data set in advance, nor the number of outliers.
+In practive, it is important to realise this step since we are not
+supposed to know the data set in advance, nor the number of outliers.
 
 ```@example obama
 vect_k = collect(1:6)
@@ -187,18 +205,38 @@ xlabel!("alpha")
 ylabel!("NMI")
 ```
 
-In order to select the parameters `k` and `alpha`, we will focus onf the different possible values for `alpha`. For `alpha` not smaller than 0.15, we see that we gain a lot going from 1 to 3 groups and from 2 to 3 groups. Therefore, we choose `k=3` and `alpha` of order `0.15` corresponding to the slope change, for the curve `k=3`.
+In order to select the parameters `k` and `alpha`, we will focus
+onf the different possible values for `alpha`. For `alpha` not
+smaller than 0.15, we see that we gain a lot going from 1 to 3
+groups and from 2 to 3 groups. Therefore, we choose `k=3` and `alpha`
+of order `0.15` corresponding to the slope change, for the curve
+`k=3`.
 
-For `alpha` smaller than 0.15, we see that we gain a lot going from 1 to 2 groups, from 2 to 3 groups and to 3 to 4 groups. However, we do not gain in terms of risk going from 4 to 5 groups or from 5 to 6 groups. Indeed, the curves associated to the parameters ``k = 4``, ``k = 5`` and ``k = 6`` are very close. So, we cluster the data in ``k = 4`` groups.
+For `alpha` smaller than 0.15, we see that we gain a lot going from
+1 to 2 groups, from 2 to 3 groups and to 3 to 4 groups. However,
+we do not gain in terms of risk going from 4 to 5 groups or from 5
+to 6 groups. Indeed, the curves associated to the parameters ``k =
+4``, ``k = 5`` and ``k = 6`` are very close. So, we cluster the
+data in ``k = 4`` groups.
 
-The curve associated to the parameter ``k = 4`` strongly decreases with a slope that stabilises around ``\alpha = 0.1``.
+The curve associated to the parameter ``k = 4`` strongly decreases
+with a slope that stabilises around ``\alpha = 0.1``.
 
-Then, since there is a slope jump at that curve ``k = 6``, we can choose the parameter `k = 6`, with `alpha = 0`. We do not consider any outlier.
+Then, since there is a slope jump at that curve ``k = 6``, we can
+choose the parameter `k = 6`, with `alpha = 0`. We do not consider
+any outlier.
 
-Note that the fact that our method is initialised by random centers implies that the curves representing the risk as a function of ``k`` and ``\alpha`` vary, quite strongly, from one time to another one.
-Consequently, the comment abovementionned does not necessarily corresponds to the figure. For more robustness, we should have increased the value of `nstart`, and so, the execution time. These curves for the selection of the parameters `k` and `alpha` are mostly indicative.
+Note that the fact that our method is initialised by random centers
+implies that the curves representing the risk as a function of ``k``
+and ``\alpha`` vary, quite strongly, from one time to another one.
+Consequently, the comment abovementionned does not necessarily
+corresponds to the figure. For more robustness, we should have
+increased the value of `nstart`, and so, the execution time. These
+curves for the selection of the parameters `k` and `alpha` are
+mostly indicative.
 
-Finaly, here are three clustering obtained after choosing 3 pairs of parameters.
+Finaly, here are three clustering obtained after choosing 3 pairs
+of parameters.
 
 ```@example obama
 maxiter = 50
@@ -221,4 +259,5 @@ tb = trimmed_bregman_clustering(rng, points, 6, 0.0, poisson, maxiter, nstart)
 plot_clustering(points, tb.cluster, Y_labels)
 ```
 
-We obtain 6 groups corresponding to the texts of the 4 authors and to the texts from the bible and from the Obama speech.
+We obtain 6 groups corresponding to the texts of the 4 authors and
+to the texts from the bible and from the Obama speech.

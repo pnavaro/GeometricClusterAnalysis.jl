@@ -67,29 +67,47 @@ function dtm(x, m0; r = 2)
 
 end
 
-export build_distance_matrix_power_function_buchet
+export k_witnessed_distance
 
 """
 $(SIGNATURES)
 """
-function build_distance_matrix_power_function_buchet(birth, points)
+function k_witnessed_distance(points, k, c, signal)
 
-    function height(a, b, c, d)
-        # a and b are two vectors, c and d two numerics
-        l = sum((a .- b) .^ 2)
+    d, n = size(points)
+    centers = [points[:, i] for i = 1:n]
+    μ, ω, colors = recolor(points, centers, k, signal)
+    Σ = [diagm(ones(d)) for i in eachindex(centers)]
+    return μ, ω, colors, Σ
+
+end
+
+export build_distance_matrix_power_function_buchet
+
+"""
+$(SIGNATURES)
+
+Auxiliary functions for the power-distance
+
+`a` and `b` are two vectors, `c` and `d` two numerics
+
+"""
+function build_distance_matrix_power_function_buchet(birth, means)
+
+    function height(p1::Vector{Float64}, p2::Vector{Float64}, b1::Float64, b2::Float64)
+        l = sum((p1 .- p2) .^ 2)
         res = l
-        if c == d
-            res = sqrt(c)
+        if b1 ≈ b2
+            res = sqrt(b1)
         end
-        ctmp = c
-        dtmp = d
-        c = min(ctmp, dtmp)
-        d = max(ctmp, dtmp)
+        ctmp, dtmp = b1, b2
+        b1 = min(ctmp, dtmp)
+        b2 = max(ctmp, dtmp)
         if l != 0.0
-            if l >= d - c
-                res = sqrt(((d - c)^2 + 2 * (d + c) * l + l^2) / (4 * l))
+            if l >= b2 - b1
+                res = sqrt(((b2 - b1)^2 + 2 * (b1 + b2) * l + l^2) / (4 * l))
             else
-                res = sqrt(d)
+                res = sqrt(b2)
             end
         end
         return res
@@ -97,11 +115,8 @@ function build_distance_matrix_power_function_buchet(birth, points)
 
     c = length(birth)
     distance_matrix = fill(Inf, (c, c))
-    for i = 1:c
-        for j = 1:i
-            distance_matrix[i, j] =
-                height(points[:, i], points[:, j], birth[i]^2, birth[j]^2)
-        end
+    for i = eachindex(birth), j = 1:i
+        distance_matrix[i, j] = height(means[:, i], means[:, j], birth[i]^2, birth[j]^2)
     end
 
     return distance_matrix

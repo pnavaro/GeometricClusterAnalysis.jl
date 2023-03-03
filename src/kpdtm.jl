@@ -71,21 +71,6 @@ function recolor(points, centers, k, nsignal)
 
 end
 
-export k_witnessed_distance
-
-"""
-$(SIGNATURES)
-"""
-function k_witnessed_distance(points, k, c, signal, iter_max, nstart)
-
-    d, n = size(points)
-    centers = [points[:, i] for i = 1:n]
-    μ, ω, colors = recolor(points, centers, k, signal)
-    d = size(points, 1)
-    Σ = [diagm(ones(d)) for i in eachindex(centers)]
-    return μ, ω, colors, Σ
-
-end
 
 """
 $(SIGNATURES)

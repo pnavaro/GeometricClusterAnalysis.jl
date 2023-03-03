@@ -162,9 +162,9 @@ function hierarchical_clustering_lem(
     c = sum(x .<= threshold)
 
     if c == 0
-        return [], [], [], []
+        HClust([], [], [], [], [], [])
     elseif c == 1
-        return [1], x[1], [Inf], ix[1]
+        return HClust([1], [], [], x[1], [Inf], ix[1])
     end
 
     startup_indices = ix[1:c] # Initial indices of the centers born at time mh_sort$x
@@ -178,7 +178,7 @@ function hierarchical_clustering_lem(
     step = 1
     matrice_dist = fill(Inf, c, c) # The new distance_matrix
 
-    for i = 1:c
+    for i = eachindex(birth)
         matrice_dist[i, i] = birth[i]
     end
 
@@ -204,14 +204,16 @@ function hierarchical_clustering_lem(
     store_timesteps && push!(timesteps, timestep)
 
     # ihi >= ihj since the matrix is triangular inferior with infinity value above the diagonal
+    @assert ihi >= ihj
 
     while (continu)
 
-        if timestep == matrice_dist[ihi, ihi] # Component ihi birth
+        if timestep ≈ matrice_dist[ihi, ihi] # Component ihi birth
             colors[ihi] = ihi
             matrice_dist[ihi, ihi] = Inf # No need to get born any more
             indice += 1
         else   # Components of the same color as ihi and of the same color as ihj merge
+            ihi, ihj, matrice_dist[ihi, ihi]
             coli0 = colors[ihi]
             colj0 = colors[ihj]
             coli = max(coli0, colj0)

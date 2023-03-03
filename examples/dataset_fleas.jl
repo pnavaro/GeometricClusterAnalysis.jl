@@ -2,12 +2,12 @@
 # ---
 # jupyter:
 #   jupytext:
-#     formats: ipynb,jl:light
+#     formats: ipynb,jl:light,md
 #     text_representation:
 #       extension: .jl
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.14.1
+#       jupytext_version: 1.14.5
 #   kernelspec:
 #     display_name: Julia 1.8.5
 #     language: julia
@@ -47,19 +47,18 @@ end
 # +
 function plot_pointset(points, color)
 
-    p = plot(; title = "Flea beatle measurements", xlabel = "x", ylabel = "y")
+    p = plot(; framestyle = :grid, aspect_ratio = true)
 
-    for c in unique(color)
+    for (i,c) in enumerate(unique(color))
 
         which = color .== c
         scatter!(
             p,
             points[which, 1],
             points[which, 2],
-            color = c,
+            color = i,
             markersize = 5,
-            label = "$c",
-            legendfontsize = 10,
+            label = "$i",
         )
 
     end
@@ -74,18 +73,17 @@ dataset = rcopy(R"tourr::flea")
 
 points = Matrix(Float64.(dataset[:, 1:6]))
 scale!(points)
-pairs = collect(enumerate(unique(dataset[:, 7])))
+labels = collect(enumerate(unique(dataset[:, 7])))
 
 true_colors = zeros(Int, length(dataset[:, 7]))
 for i in eachindex(true_colors, dataset[:, 7])
-    for j in eachindex(pairs)
-        p = pairs[j]
+    for j in eachindex(labels)
+        p = labels[j]
         if p[2] == dataset[i, 7]
             true_colors[i] = p[1]
         end
     end
 end
-true_colors
 
 # ## K-means 
 
@@ -107,12 +105,11 @@ plot(p1, p2, layout = l, aspect_ratio = :equal)
 
 features = collect(points')
 result = kmeans(features, 3)
+println("NMI = $(mutualinfo(true_colors, result.assignments))")
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, result.assignments)
 plot(p1, p2, layout = l, aspect_ratio = :equal)
-
-println("NMI = $(mutualinfo(true_colors, result.assignments))")
 
 # ## K-means from ClusterAnalysis.jl
 
@@ -190,17 +187,20 @@ threshold, infinity =
 hc =
     hierarchical_clustering_lem(distance_matrix, infinity = infinity, threshold = threshold)
 col_kplm = color_points_from_centers(x, k, nsignal, dist_func, hc)
+println("NMI = $(mutualinfo(true_colors, col_kplm))")
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, col_kplm)
 plot(p1, p2, layout = l)
 # -
 
+png("kplm")
+
 # ## Witnessed
 
 
 # +
-μ, ω, colors = k_witnessed_distance(x, k, c, signal, iter_max, nstart)
+μ, ω, colors = k_witnessed_distance(x, k, c, nsignal)
 
 distance_matrix = build_distance_matrix_power_function_buchet(sqrt.(ω), hcat(μ...))
 
@@ -210,6 +210,7 @@ sort!(bd)
 infinity = mean((bd[end-nb_clusters], bd[end-nb_clusters+1]))
 hc2 = hierarchical_clustering_lem(distance_matrix, infinity = infinity, threshold = Inf)
 witnessed_colors = return_color(colors, hc2.colors, hc2.startup_indices)
+println("NMI = $(mutualinfo(true_colors, witnessed_colors))")
 
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
@@ -220,6 +221,7 @@ plot(p1, p2, layout = l)
 
 # ## k-PDTM
 
+# +
 df_kpdtm = kpdtm(rng, x, k, c, nsignal, iter_max, nstart)
 distance_matrix = build_distance_matrix(df_kpdtm)
 hc1 = hierarchical_clustering_lem(distance_matrix, infinity = Inf, threshold = Inf)
@@ -228,10 +230,15 @@ sort!(bd)
 infinity = mean((bd[end-nb_clusters], bd[end-nb_clusters+1]))
 hc2 = hierarchical_clustering_lem(distance_matrix, infinity = infinity, threshold = Inf)
 kpdtm_colors = return_color(df_kpdtm.colors, hc2.colors, hc2.startup_indices)
+println("NMI = $(mutualinfo(true_colors, kpdtm_colors))")
+
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, kpdtm_colors)
 plot(p1, p2, layout = l)
+# -
+
+png("kpdtm")
 
 # ## Power function Buchet et al.
 #
@@ -241,7 +248,7 @@ using GeometricClusterAnalysis
 
 m0 = k / size(x, 2)
 birth = sort(dtm(x, m0))
-@show threshold = birth[nsignal]
+threshold = birth[nsignal]
 
 distance_matrix = build_distance_matrix_power_function_buchet(birth, x)
 
@@ -251,6 +258,7 @@ sort_bd = sort(hc1.death .- hc1.birth)
 infinity = mean((sort_bd[end-nb_clusters], sort_bd[end-nb_clusters+1]))
 buchet_colors, returned_colors, hc2 =
     power_function_buchet(x, m0; infinity = infinity, threshold = threshold)
+println("NMI = $(mutualinfo(true_colors, buchet_colors))")
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, buchet_colors)
@@ -275,6 +283,7 @@ sort_bd = sort(hc1.death .- hc1.birth)
 infinity = mean((sort_bd[end-nb_clusters], sort_bd[end-nb_clusters+1]))
 dtm_colors, returned_colors, hc2 =
     dtm_filtration(x, m0; infinity = infinity, threshold = threshold)
+println("NMI = $(mutualinfo(true_colors, dtm_colors))")
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, dtm_colors)
@@ -284,6 +293,7 @@ plot(p1, p2, layout = l)
 # ## Spectral with `specc`
 
 spectral_colors = rcopy(R"kernlab::specc(P, centers = 3)")
+println("NMI = $(mutualinfo(true_colors, spectral_colors))")
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, spectral_colors)

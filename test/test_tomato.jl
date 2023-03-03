@@ -1,7 +1,7 @@
 @testset "ToMaTo" begin
 
     R"dataset = tourr::flea"
-    R"source('tomato.R')"
+    R"source(here::here('R','tomato.R'))"
     R"P = scale(dataset[,1:6])"
     points = rcopy(R"P")
     true_colors = rcopy(R"c(rep(1,21),rep(2,22),rep(3,31))")

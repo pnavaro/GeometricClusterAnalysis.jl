@@ -5,8 +5,8 @@ source(here("R","functions_for_evaluating_methods.R"))
 #                                   Earthquake
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-source(here("test","hierarchical_clustering_complexes.R"))
-source(here("test","kplm.R"))
+source(here("R","hierarchical_clustering_complexes.R"))
+source(here("R","kplm.R"))
 source(here("R","plot_pointclouds_centers.R"))
 
 

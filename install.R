@@ -1,5 +1,5 @@
-deps <- c("aricode", "dbscan", "devtools", "here", 
-          "FNN", "tourr", "TDA", "tclust", "kernlab", 
+deps <- c("aricode", "dbscan", "devtools", "here",
+          "FNN", "tourr", "TDA", "tclust", "kernlab",
           "doParallel", "randomForest", "ade4")
 packages <- installed.packages()
 

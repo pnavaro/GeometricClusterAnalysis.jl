@@ -5,7 +5,7 @@ R"""
 # Check that Intersection_radius is the relevant intersection radius, for two ellipsoids.
 
 library(here)
-source(here("test","ellipsoids_intersection.R"))
+source(here("R","ellipsoids_intersection.R"))
 source(here("R","plot_pointclouds_centers.R"))
 
 

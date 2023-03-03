@@ -7,8 +7,8 @@
     R"""
     set.seed(0)
 
-    source("infinity_symbol.R")
-    source("colorize.R")
+    source(here::here('R', "infinity_symbol.R"))
+    source(here::here('R', "colorize.R"))
 
     N = 10
     Nnoise = 2

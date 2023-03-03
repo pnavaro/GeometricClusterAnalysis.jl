@@ -25,8 +25,8 @@ P = collect(points')
     @rput nstart
 
     R"""
-    source("colorize.R")
-    source("kplm.R")
+    source(here::here('R', "colorize.R"))
+    source(here::here('R', "kplm.R"))
     f_Sigma <- function(Sigma){return(Sigma)}
     LL <- kplm(P, k, c, signal, iter_max, nstart, f_Sigma)
     """
@@ -68,8 +68,8 @@ end
     @rput nstart
 
     R"""
-    source("colorize.R")
-    source("kplm.R")
+    source(here::here('R',"colorize.R"))
+    source(here::here('R',"kplm.R"))
     f_Sigma_det1 <- function(Sigma){return(Sigma/(det(Sigma))^(1/ncol(P)))}
     LL <- kplm(P, k, c, signal, iter_max, nstart, f_Sigma_det1)
     """
@@ -178,8 +178,8 @@ end
     @rput nstart
 
     R"""
-    source("colorize.R")
-    source("kplm.R")
+    source(here::here('R',"colorize.R"))
+    source(here::here('R',"kplm.R"))
 
 
     f_Sigma_dim_d <- function(Sigma){

@@ -20,11 +20,11 @@ using Test
     data = noisy_three_curves(rng, nsignal, nnoise, sigma, dim)
 
     R"""
-    source("ellipsoids_intersection.R")
-    source("fonctions_puissances.R")
-    source("hierarchical_clustering_complexes.R")
-    source("colorize.R") 
-    source("kplm.R")
+    source(here::here('R', "ellipsoids_intersection.R"))
+    source(here::here('R', "fonctions_puissances.R"))
+    source(here::here('R', "hierarchical_clustering_complexes.R"))
+    source(here::here('R', "colorize.R"))
+    source(here::here('R', "kplm.R"))
     """
 
     @rput k

@@ -9,9 +9,9 @@ using Random
 R"""
 
 library(here)
-source(here("test","kplm.R"))
-source(here("test","kpdtm.R"))
-source(here("test","fonctions_puissances.R"))
+source(here("R","kplm.R"))
+source(here("R","kpdtm.R"))
+source(here("R","fonctions_puissances.R"))
 source(here("R","Sample_3curves.R"))
 source(here("R","plot_pointclouds_centers.R"))
 

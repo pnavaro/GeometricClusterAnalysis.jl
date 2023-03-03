@@ -1,13 +1,13 @@
 library(here)
-source(here("test","hierarchical_clustering_complexes.R"))
-source(here("test","tomato.R"))
-source(here("test","fonctions_puissances.R"))
-source(here("test","kplm.R"))
-source(here("test","kpdtm.R"))
-source(here("test","dtm_filtration.R"))
-source(here("test","plot_pointclouds_centers.R"))
-source(here("test","sample_14segments.R"))
-source(here("test","functions_for_evaluating_methods.R"))
+source(here("R","hierarchical_clustering_complexes.R"))
+source(here("R","tomato.R"))
+source(here("R","fonctions_puissances.R"))
+source(here("R","kplm.R"))
+source(here("R","kpdtm.R"))
+source(here("R","dtm_filtration.R"))
+source(here("R","plot_pointclouds_centers.R"))
+source(here("R","sample_14segments.R"))
+source(here("R","functions_for_evaluating_methods.R"))
 
 
 nb_clusters = 14 # 3,2

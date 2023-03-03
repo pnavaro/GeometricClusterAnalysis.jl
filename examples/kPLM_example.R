@@ -5,9 +5,9 @@
 
 set.seed(0)
 
-source("test/infinity_symbol.R")
-source("test/colorize.R")
-source("test/kplm.R")
+source(here::here("R","infinity_symbol.R"))
+source(here::here("R","colorize.R"))
+source(here::here("R","kplm.R"))
 
 # Fonction main :
 

@@ -1,7 +1,3 @@
-source(here::here("test","ellipsoids_intersection.R"))
-
-# Auxiliary function - Important !!!
-
 
 hierarchical_clustering_lem <- function(distance_matrix, infinity = Inf, threshold = Inf,
     store_colors = FALSE, store_timesteps = FALSE) {

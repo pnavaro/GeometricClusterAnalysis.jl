@@ -4,10 +4,10 @@ library(here)
 library(magrittr)
 library(tclust)
 
-source(here("examples", "plot_clustering.R"))
-source(here("examples", "trimmed_bregman_clustering.R"))
-source(here("examples", "performance_measurements.R"))
-source(here("examples", "select_parameters.R"))
+source(here("R", "plot_clustering.R"))
+source(here("R", "trimmed_bregman_clustering.R"))
+source(here("R", "performance_measurements.R"))
+source(here("R", "select_parameters.R"))
 
 simule_poissond <- function(N, lambdas, proba) {
     dimd = ncol(lambdas)

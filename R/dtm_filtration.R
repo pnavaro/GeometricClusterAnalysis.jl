@@ -8,9 +8,6 @@
 # 'Efficient and Robust persistent homology for measures' Mickael Buchet,
 # Frederic Chazal, Steve Oudot, Donald R Sheehy
 
-library(here)
-source(here("test", "hierarchical_clustering_complexes.R"))
-
 library("FNN")
 
 # Auxiliary function for the DTM-Filtration

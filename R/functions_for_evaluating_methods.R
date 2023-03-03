@@ -1,8 +1,3 @@
-source(here::here("test", "tomato.R"))
-source(here::here("test", "hierarchical_clustering_complexes.R"))
-source(here::here("test", "kplm.R"))
-source(here::here("test", "kpdtm.R"))
-source(here::here("test", "dtm_filtration.R"))
 # A main function that take as an argument a clustering method, to compute its
 # performance via the FDR and NMI
 

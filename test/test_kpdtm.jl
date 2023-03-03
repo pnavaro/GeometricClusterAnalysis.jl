@@ -5,10 +5,10 @@
     R"""
     library(FNN)
     library(here)
-    source("ellipsoids_intersection.R")
-    source("fonctions_puissances.R")
-    source("hierarchical_clustering_complexes.R")
-    source("kpdtm.R")
+    source(here::here('R', "ellipsoids_intersection.R"))
+    source(here::here('R', "fonctions_puissances.R"))
+    source(here::here('R', "hierarchical_clustering_complexes.R"))
+    source(here::here('R', "kpdtm.R"))
     
     k = 10
     c = 10

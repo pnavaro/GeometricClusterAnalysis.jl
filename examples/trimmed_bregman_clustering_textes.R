@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 library(randomForest)
 
-source(here::here("examples","plot_clustering.R"))
-source(here::here("examples","trimmed_bregman_clustering_parallel.R"))
+source(here::here("R","plot_clustering.R"))
+source(here::here("R","trimmed_bregman_clustering_parallel.R"))
 
 
 data = t(read.table(here::here("docs", "src", "assets", "textes.txt")))

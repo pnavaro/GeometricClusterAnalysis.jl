@@ -7,10 +7,10 @@
 # points that are in intersecting ellipsoids are of the same color.
 
 library(here)
-source(here("test", "ellipsoids_intersection.R"))
-source(here("test", "hierarchical_clustering_complexes.R"))
-source(here("test", "kplm.R"))  # Also for the function colorize
-source(here("test", "kpdtm.R"))
+source(here("R", "ellipsoids_intersection.R"))
+source(here("R", "hierarchical_clustering_complexes.R"))
+source(here("R", "kplm.R"))  # Also for the function colorize
+source(here("R", "kpdtm.R"))
 source(here("R", "Sample_3curves.R"))
 source(here("R", "plot_pointclouds_centers.R"))
 

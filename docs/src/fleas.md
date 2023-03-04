@@ -12,6 +12,7 @@ Dataset from R package [tourr](http://ggobi.github.io/tourr/)
 
 ```@example fleas
 using Clustering
+using GeometricClusterAnalysis
 using Plots
 using Random
 using RCall
@@ -59,15 +60,10 @@ end
 
 ```@example fleas
 dataset = rcopy(R"tourr::flea")
-```
-
-```@example fleas
 points = Matrix(Float64.(dataset[:, 1:6]))
 scale!(points)
 labels = collect(enumerate(unique(dataset[:, 7])))
-```
 
-```@example fleas
 true_colors = zeros(Int, length(dataset[:, 7]))
 for i in eachindex(true_colors, dataset[:, 7])
     for j in eachindex(labels)
@@ -91,6 +87,9 @@ print(aricode::NMI(col_kmeans,true_color))
 """
 col_kmeans = @rget col_kmeans
 println("NMI = $(mutualinfo(true_colors, col_kmeans))")
+```
+
+```@example fleas
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, col_kmeans)
@@ -103,6 +102,9 @@ plot(p1, p2, layout = l, aspect_ratio = :equal)
 features = collect(points')
 result = kmeans(features, 3)
 println("NMI = $(mutualinfo(true_colors, result.assignments))")
+```
+
+```@example fleas
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, result.assignments)
@@ -122,6 +124,9 @@ k, nstart, maxiter = 3, 10, 10;
 
 model = ClusterAnalysis.kmeans(df, k, nstart = nstart, maxiter = maxiter)
 println("NMI = $(mutualinfo(true_colors, model.cluster))")
+```
+
+```@example fleas
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, model.cluster)
@@ -137,6 +142,9 @@ P = scale(dataset[,1:6])
 """
 tclust_color = Int.(rcopy(R"tclust::tclust(P,3,alpha = 0,restr.fact = 10)$cluster"))
 println("NMI = $(mutualinfo(true_colors,tclust_color))")
+```
+
+```@example fleas
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, tclust_color)
@@ -150,13 +158,13 @@ Frederic Chazal, Steve Oudot, Primoz Skraba, Leonidas J. Guibas
 
 
 ```@example fleas
-using GeometricClusterAnalysis
-
-
 nb_clusters, k, c, radius, iter_max = 3, 10, 100, 1.9, 100
 nsignal = size(points, 1)
 col_tomato, _ = tomato_clustering(nb_clusters, points, k, c, nsignal, radius, iter_max, nstart)
 println("NMI = $(mutualinfo(true_colors, col_tomato))")
+```
+
+```@example fleas
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, col_tomato)
@@ -167,16 +175,14 @@ plot(p1, p2, layout = l)
 
 ```@example fleas
 nb_clusters, k, c, iter_max, nstart = 3, 10, 50, 100, 10
-@show nsignal = size(points, 1)
+nsignal = size(points, 1)
 
 function f_Σ!(Σ) end
 
 rng = MersenneTwister(6625)
 
 x = collect(transpose(points))
-```
 
-```@example fleas
 dist_func = kplm(rng, x, k, c, nsignal, iter_max, nstart, f_Σ!)
 
 distance_matrix = build_distance_matrix(dist_func)
@@ -189,6 +195,9 @@ hc =
     hierarchical_clustering_lem(distance_matrix, infinity = infinity, threshold = threshold)
 col_kplm = color_points_from_centers(x, k, nsignal, dist_func, hc)
 println("NMI = $(mutualinfo(true_colors, col_kplm))")
+```
+
+```@example fleas
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, col_kplm)
@@ -210,7 +219,9 @@ infinity = mean((bd[end-nb_clusters], bd[end-nb_clusters+1]))
 hc2 = hierarchical_clustering_lem(distance_matrix, infinity = infinity, threshold = Inf)
 witnessed_colors = return_color(colors, hc2.colors, hc2.startup_indices)
 println("NMI = $(mutualinfo(true_colors, witnessed_colors))")
+```
 
+```@example fleas
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, witnessed_colors)
@@ -230,7 +241,9 @@ infinity = mean((bd[end-nb_clusters], bd[end-nb_clusters+1]))
 hc2 = hierarchical_clustering_lem(distance_matrix, infinity = infinity, threshold = Inf)
 kpdtm_colors = return_color(df_kpdtm.colors, hc2.colors, hc2.startup_indices)
 println("NMI = $(mutualinfo(true_colors, kpdtm_colors))")
+```
 
+```@example fleas
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, kpdtm_colors)
@@ -256,6 +269,9 @@ infinity = mean((sort_bd[end-nb_clusters], sort_bd[end-nb_clusters+1]))
 buchet_colors, returned_colors, hc2 =
     power_function_buchet(x, m0; infinity = infinity, threshold = threshold)
 println("NMI = $(mutualinfo(true_colors, buchet_colors))")
+```
+
+```@example fleas
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, buchet_colors)
@@ -266,8 +282,6 @@ plot(p1, p2, layout = l)
 
 
 ```@example fleas
-using GeometricClusterAnalysis
-
 m0 = k / size(x, 2)
 birth = sort(dtm(x, m0))
 @show threshold = birth[nsignal]
@@ -281,6 +295,9 @@ infinity = mean((sort_bd[end-nb_clusters], sort_bd[end-nb_clusters+1]))
 dtm_colors, returned_colors, hc2 =
     dtm_filtration(x, m0; infinity = infinity, threshold = threshold)
 println("NMI = $(mutualinfo(true_colors, dtm_colors))")
+```
+
+```@example fleas
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, dtm_colors)
@@ -292,6 +309,10 @@ plot(p1, p2, layout = l)
 ```@example fleas
 spectral_colors = rcopy(R"kernlab::specc(P, centers = 3)")
 println("NMI = $(mutualinfo(true_colors, spectral_colors))")
+```
+
+
+```@example fleas
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, spectral_colors)

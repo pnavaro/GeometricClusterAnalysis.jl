@@ -171,8 +171,8 @@ plot(hc3, xlims = lims2, ylims = lims2) # Using the sames xlims and ylims than t
 # ### Getting the number of components, colors of ellipsoids and times of evolution of the clustering
 
 nellipsoids = length(hc3.startup_indices) # Number of ellipsoids
-Col = hc3.Couleurs # Ellispoids colors
-Temps = hc3.Temps_step; # Time at which a component borns or dies
+Col = hc3.saved_colors # Ellispoids colors
+Temps = hc3.timesteps; # Time at which a component borns or dies
 
 # Note : Col[i] contains the labels of the ellipsoids just before the time Temps[i]
 #
@@ -229,35 +229,38 @@ sq_time = (0:200) ./ 200 .* (Temps[end-1] - Temps[1]) .+ Temps[1] # Depends on "
 Col2 = Vector{Int}[]
 Colors2 = Vector{Int}[]
 
-idx = 0
-new_colors2 = zeros(Int, npoints)
-new_col2 = zeros(Int, nellipsoids)
-next_sqtime = Temps[idx+1]
-updated = false
+let idx = 0
 
-for i = 1:length(sq_time)
-    while sq_time[i] >= next_sqtime
-        println(idx, " ", sq_time[i], " ", next_sqtime, " ", Temps[idx+2])
-        idx += 1
-        next_sqtime = Temps[idx+1]
-        updated = true
+    new_colors2 = zeros(Int, npoints)
+    new_col2 = zeros(Int, nellipsoids)
+    next_sqtime = Temps[idx+1]
+    updated = false
+    
+    for i = 1:length(sq_time)
+        while sq_time[i] >= next_sqtime
+            println(idx, " ", sq_time[i], " ", next_sqtime, " ", Temps[idx+2])
+            idx += 1
+            next_sqtime = Temps[idx+1]
+            updated = true
+        end
+        if updated
+            new_col2 = Col[idx+1]
+            new_colors2 = return_color(color_points, new_col2, remain_indices)
+            updated = false
+        end
+        println(i, " ", new_col2)
+        push!(Col2, copy(new_col2))
+        push!(Colors2, copy(new_colors2))
     end
-    if updated
-        new_col2 = Col[idx+1]
-        new_colors2 = return_color(color_points, new_col2, remain_indices)
-        updated = false
+    
+    for i = 1:length(Col2)
+        for j = 1:size(data.points)[2]
+            Colors2[i][j] = Colors2[i][j] * (dists[j] <= sq_time[i]) # If the cost of the point is smaller to the time : label 0 (not in the ellipsoid)
+        end
     end
-    println(i, " ", new_col2)
-    push!(Col2, copy(new_col2))
-    push!(Colors2, copy(new_colors2))
+
 end
-
-for i = 1:length(Col2)
-    for j = 1:size(data.points)[2]
-        Colors2[i][j] = Colors2[i][j] * (dists[j] <= sq_time[i]) # If the cost of the point is smaller to the time : label 0 (not in the ellipsoid)
-    end
-end
-
+    
 μ = [df.μ[i] for i in remain_indices if i > 0];
 ω = [df.weights[i] for i in remain_indices if i > 0];
 Σ = [df.Σ[i] for i in remain_indices if i > 0];
@@ -269,6 +272,7 @@ anim = @animate for i in [1:ncolors2; Iterators.repeated(ncolors2, 30)...]
     xlims!(-60, 60)
     ylims!(-60, 60)
 end;
+
 # -
 
 # ### Animation - Clustering result

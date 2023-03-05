@@ -22,36 +22,6 @@ using Random
 
 # ## Data generation
 
-# ### Function to generate data
-
-function noisy_nested_spirals(rng, nsignal, nnoise, σ, d)
-
-    nmid = nsignal ÷ 2
-
-    t1 = 6 .* rand(rng, nmid) .+ 2
-    t2 = 6 .* rand(rng, nsignal - nmid) .+ 2
-
-    x = zeros(nsignal)
-    y = zeros(nsignal)
-
-    λ = 5
-
-    x[1:nmid] = λ .* t1 .* cos.(t1)
-    y[1:nmid] = λ .* t1 .* sin.(t1)
-
-    x[(nmid+1):nsignal] = λ .* t2 .* cos.(t2 .- 0.8 * π)
-    y[(nmid+1):nsignal] = λ .* t2 .* sin.(t2 .- 0.8 * π)
-
-    p0 = hcat(x, y)
-    signal = p0 .+ σ .* randn(rng, nsignal, d)
-    noise = 120 .* rand(rng, nnoise, d) .- 60
-
-    points = collect(transpose(vcat(signal, noise)))
-    colors = vcat(ones(nmid), 2 * ones(nsignal - nmid), zeros(nnoise))
-
-    return Data{Float64}(nsignal + nnoise, d, points, colors)
-end;
-
 # ### Parameters
 
 nsignal = 2000 # number of signal points
@@ -68,7 +38,7 @@ print("The dataset contains ", npoints, " points, of dimension ", dim, ".")
 
 # ### Data display
 
-scatter(data.points[1, :], data.points[2, :])
+plot(data)
 
 # ## Computation of the union of ellipsoids with the kPLM function
 
@@ -120,10 +90,8 @@ hc = hierarchical_clustering_lem(
     store_timesteps = false,
 )
 
-lims = (
-    min(min(hc.birth...), min(hc.death...)),
-    max(max(hc.birth...), max(hc.death[hc.death.!=Inf]...)) + 1,
-)
+lims = (min(minimum(hc.birth), minimum(hc.death)),
+        max(maximum(hc.birth), maximum(hc.death[hc.death.!=Inf])) + 1)
 plot(hc, xlims = lims, ylims = lims)
 # -
 
@@ -145,10 +113,9 @@ hc2 = hierarchical_clustering_lem(
     store_timesteps = false,
 )
 
-lims2 = (
-    min(min(hc2.birth...), min(hc2.death...)),
-    max(max(hc2.birth...), max(hc2.death[hc2.death.!=Inf]...)) + 1,
-)
+lims2 = (min(minimum(hc2.birth), minimum(hc2.death)),
+         max(maximum(hc2.birth), maximum(hc2.death[hc2.death.!=Inf])) + 1)
+
 plot(hc2, xlims = lims2, ylims = lims2)
 # -
 
@@ -165,23 +132,27 @@ hc3 = hierarchical_clustering_lem(
     store_timesteps = true,
 )
 
-plot(hc3, xlims = lims2, ylims = lims2) # Using the sames xlims and ylims than the previous persistence diagram.
+# Using the sames xlims and ylims than the previous persistence diagram.
+plot(hc3, xlims = lims2, ylims = lims2) 
 # -
 
 # ### Getting the number of components, colors of ellipsoids and times of evolution of the clustering
 
-nellipsoids = length(hc3.startup_indices) # Number of ellipsoids
-Col = hc3.saved_colors # Ellispoids colors
-Temps = hc3.timesteps; # Time at which a component borns or dies
+# Number of ellipsoids
+nellipsoids = length(hc3.startup_indices) 
+# Ellispoids colors
+ellipsoids_colors = hc3.saved_colors 
+# Time at which a component borns or dies
+timesteps = hc3.timesteps; 
 
-# Note : Col[i] contains the labels of the ellipsoids just before the time Temps[i]
+# Note : ellipsoids_colors[i] contains the labels of the ellipsoids just before the time timesteps[i]
 #
 # Example : 
-# - Col[1] contains only 0 labels
+# - ellipsoids_colors[1] contains only 0 labels
 #
 # Moreover, if there are 2 connexed components in the remaining clustering :
-# - Col[end - 1] = Col[end] contains 2 different labels
-# - Col[end - 2] contains 3 different labels
+# - ellipsoids_colors[end - 1] = ellipsoids_colors[end] contains 2 different labels
+# - ellipsoids_colors[end - 2] contains 3 different labels
 
 # Using a parameter threshold not equal to $\infty$ erases some ellipsoids.
 # Therefore we need to compute new labels of the data points, with respect to the new ellipsoids.
@@ -225,7 +196,7 @@ end
 # Since "indexed_by_r2 = TRUE", we use sq_time and not its squareroot.
 
 # +
-sq_time = (0:200) ./ 200 .* (Temps[end-1] - Temps[1]) .+ Temps[1] # Depends on "Temps" vector.
+sq_time = (0:200) ./ 200 .* (timesteps[end-1] - timesteps[1]) .+ timesteps[1] # Depends on "timesteps" vector.
 Col2 = Vector{Int}[]
 Colors2 = Vector{Int}[]
 
@@ -233,30 +204,27 @@ let idx = 0
 
     new_colors2 = zeros(Int, npoints)
     new_col2 = zeros(Int, nellipsoids)
-    next_sqtime = Temps[idx+1]
+    next_sqtime = timesteps[idx+1]
     updated = false
     
-    for i = 1:length(sq_time)
+    for i = eachindex(sq_time)
         while sq_time[i] >= next_sqtime
-            println(idx, " ", sq_time[i], " ", next_sqtime, " ", Temps[idx+2])
             idx += 1
-            next_sqtime = Temps[idx+1]
+            next_sqtime = timesteps[idx+1]
             updated = true
         end
         if updated
-            new_col2 = Col[idx+1]
+            new_col2 = ellipsoids_colors[idx+1]
             new_colors2 = return_color(color_points, new_col2, remain_indices)
             updated = false
         end
-        println(i, " ", new_col2)
         push!(Col2, copy(new_col2))
         push!(Colors2, copy(new_colors2))
     end
     
-    for i = 1:length(Col2)
-        for j = 1:size(data.points)[2]
-            Colors2[i][j] = Colors2[i][j] * (dists[j] <= sq_time[i]) # If the cost of the point is smaller to the time : label 0 (not in the ellipsoid)
-        end
+    # If the cost of the point is smaller to the time : label 0 (not in the ellipsoid)
+    for i = 1:length(Col2), j = 1:data.np
+        Colors2[i][j] = Colors2[i][j] * (dists[j] <= sq_time[i]) 
     end
 
 end

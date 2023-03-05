@@ -69,7 +69,7 @@ end
 """
 $(SIGNATURES)
 """
-function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!, first_centers)
+function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!::Function, first_centers)
 
     # Initialisation
 

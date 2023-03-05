@@ -85,7 +85,13 @@ Trimmed_kPDTM <- function(P, k, c, sig, iter_max = 10, nstart = 1) {
     # BEGIN FOR
     for (n_times in 1:nstart) {
         old = list(centers = matrix(data = Inf, nrow = c, ncol = d))
-        first_centers_ind = 1:c  #sample(1:N,c,replace = FALSE)
+		if(n_times == 1){
+            first_centers_ind = 1:c
+		}
+	    else{
+            first_centers_ind = sample(1:N,c,replace = FALSE)
+		}
+
         new = list(cost = Inf, centers = matrix(P[first_centers_ind, ], c, d), color = rep(0,
             N), kept_centers = rep(TRUE, c), means = matrix(data = 0, nrow = c, ncol = d),
             weights = rep(0, c))
@@ -167,7 +173,6 @@ Trimmed_kPDTM <- function(P, k, c, sig, iter_max = 10, nstart = 1) {
     nb_kept_centers = sum(opt$kept_centers)
     centers = matrix(data = 0, nrow = nb_kept_centers, ncol = d)
     color_old = rep(0, N)
-    color = rep(0, N)
     index_center = 1
     for (i in 1:c) {
         if (sum(opt$color == i) != 0) {

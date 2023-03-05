@@ -115,7 +115,7 @@ function kpdtm(rng, points, k, c, nsignal, iter_max, nstart, first_centers)
 
         nstep = 0
 
-        while !(all(centers_old .== centers)) && (nstep <= iter_max)
+        while !(all(centers_old .≈ centers)) && (nstep <= iter_max)
 
             nstep += 1
 
@@ -148,7 +148,6 @@ function kpdtm(rng, points, k, c, nsignal, iter_max, nstart, first_centers)
                 distance_min[j] = cost
             end
 
-
             # Step 3 : Trimming and Update cost
 
             ix = sortperm(distance_min, rev = true)
@@ -174,7 +173,7 @@ function kpdtm(rng, points, k, c, nsignal, iter_max, nstart, first_centers)
                 end
             end
 
-        end
+        end # end while
 
         if cost < cost_opt
             cost_opt = cost
@@ -185,24 +184,21 @@ function kpdtm(rng, points, k, c, nsignal, iter_max, nstart, first_centers)
 
     end
 
-    centers = [centers_opt[i] for i = 1:c if kept_centers_opt[i]]
-
-    colors_old = zero(colors_opt)
-
-    k = 1
-    for i = 1:c
-        if kept_centers_opt[i]
-            colors_old[colors_opt.==i] .= k
-            k += 1
+    # Return centers and colors for non-empty clusters
+    nb_kept_centers = sum(kept_centers_opt)
+    centers = Vector{Float64}[]
+    index_center = 1
+    for i in 1:c
+        if sum(colors_opt .== i) != 0
+            push!(centers, centers_opt[i])
+            index_center += 1
         end
     end
 
     # Recompute colors with new centers
 
     c = length(centers)
-
     μ, ω, colors = recolor(points, centers, k, nsignal)
-
     Σ = [diagm(ones(d)) for i = 1:c]
 
     KpResult(k, centers, μ, ω, colors, Σ, cost)

@@ -472,7 +472,6 @@ d = 1
 
 nthreads()
 
-first_centers = initiate_centers(rng, spirals.points, n_centers);
 @time spirals_kplm = kplm(
     rng,
     spirals.points,
@@ -512,7 +511,7 @@ for i in 1:length(vect_c)
     print(" ")
     print(i)
     for l in 1:replicate
-    first_centers = initiate_centers(rng,spirals.points,vect_c[i])
+        first_centers = initiate_centers(rng,spirals.points,vect_c[i])
         for j in 1:length(vect_d)
             aux_res = kplm(rng,spirals.points,n_signal_points,n_nearest_neighbours,first_centers,iter_max,vect_d[j],λ).mean_squared_distance_function
             res[i,j] = min(res[i,j],aux_res)

@@ -210,7 +210,6 @@ p
 
 # +
 nb_clusters, k, c, iter_max, nstart = 3, 10, 50, 100, 10
-@show nsignal = size(points, 1)
 
 function f_Σ!(Σ) end
 
@@ -218,7 +217,6 @@ rng = MersenneTwister(6625)
 
 x = collect(transpose(points))
 
-# +
 dist_func = kplm(rng, x, k, c, nsignal, iter_max, nstart, f_Σ!)
 
 distance_matrix = build_distance_matrix(dist_func)
@@ -238,32 +236,26 @@ plot(p1, p2, layout = l)
 # -
 
 R"""
+f_Sigma <- function(Sigma){return(Sigma)}
+col_PLM_nonhier = kplm(P,10,3,nrow(P),100,10,f_Sigma)$color
+print(aricode::NMI(col_PLM_nonhier,true_color))
+"""
+
+R"""
 source(here::here("R", "kplm.R"))
 source(here::here("R", "ellipsoids_intersection.R"))
 col_PLM = clustering_PLM(3,P,10,50,nrow(P),100,10,nb_means_removed = 0)$label
 print(aricode::NMI(col_PLM,true_color))
 """
 
-R"""
-f_Sigma <- function(Sigma){return(Sigma)}
-col_PLM_nonhier = kplm(P,10,3,nrow(P),100,10,f_Sigma)$color
-print(aricode::NMI(col_PLM_nonhier,true_color))
-"""
-
 # ## Witnessed
 
 
-# +
 R"""
 source(here::here("R", "kpdtm.R"))
 col_witnessed = clustering_witnessed(3,P,10,50,nrow(P),100,10)$label
 print(aricode::NMI(col_witnessed,true_color))
 """
-
-l = @layout [a b]
-p1 = plot_pointset(points, true_colors)
-p2 = plot_pointset(points, Int.(rcopy(R"col_witnessed")))
-plot(p1, p2, layout = l)
 
 # +
 μ, ω, colors = k_witnessed_distance(x, k, c, nsignal)

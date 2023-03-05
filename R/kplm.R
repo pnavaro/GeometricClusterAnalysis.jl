@@ -81,7 +81,7 @@ kplm <- function(P, k, c, sig, iter_max = 10, nstart = 1, f_Sigma = function(Sig
 
 
         # BEGIN WHILE
-        while ((continu_Sigma || (!(all.equal(old$centers, new$centers) == TRUE))) &&
+        while ((all(continu_Sigma) || (!(all.equal(old$centers, new$centers) == TRUE))) &&
             (Nstep <= iter_max)) {
             Nstep = Nstep + 1
             old$centers = new$centers

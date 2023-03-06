@@ -1,4 +1,7 @@
 
+"""
+$(SIGNATURES)
+"""
 function fourteen_segments(n, σ, d)
 
     w = sqrt((1 - cos(2π/7))^2 + sin(2π/7)^2)

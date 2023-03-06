@@ -1,6 +1,8 @@
 # GeometricClusterAnalysis.jl
 
-Julia implementation of data clustering using geometric methods.
+Julia implementation of data clustering using its underlying geometric and topological features. 
+Data set is converted into a topological space. We use topological invariants to summarize 
+the complex structure of data.
 
 **WARNING**: This package is not registered and may be subject to breaking changes anytime. 
 

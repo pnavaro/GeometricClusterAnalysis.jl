@@ -20,7 +20,7 @@ dim = 2        # dimension of the data
 ### Data generation
 
 ```@example two-spirals
-rng = MersenneTwister(1234)
+rng = MersenneTwister(123)
 data = noisy_nested_spirals(rng, nsignal, nnoise, σ, dim)
 npoints = size(data.points,2)
 print("The dataset contains $npoints points, of dimension $dim .")
@@ -40,7 +40,7 @@ plot(data)
 k = 20        # number of nearest neighbors
 c = 30        # number of ellipsoids
 iter_max = 20 # maximum number of iterations of the algorithm kPLM
-nstart = 5    # number of initializations of the algorithm kPLM
+nstart = 10   # number of initializations of the algorithm kPLM
 ```
 
 ### Method
@@ -120,7 +120,7 @@ plot(hc,xlims = lims, ylims = lims)
     is to separate the components whose death time is $\infty$ to other
     components.
 
-We consider that ellipsoids born after time `threshold = 3` were not relevant.
+We consider that ellipsoids born after time `threshold = 4` were not relevant.
 
 ### Selection of parameter "infinity"
 
@@ -129,7 +129,7 @@ lifetime is larger than `infinity` are components that we want not to
 die.
 
 ```@example two-spirals
-hc2 = hierarchical_clustering_lem(mh, infinity = Inf, threshold = 3, 
+hc2 = hierarchical_clustering_lem(mh, infinity = Inf, threshold = 4, 
                                  store_colors = false, 
                                  store_timesteps = false)
 
@@ -139,15 +139,15 @@ lims2 = (min(minimum(hc2.birth), minimum(hc2.death)),
 plot(hc2,xlims = lims2, ylims = lims2)
 ```
 
-We select `infinity = 15`. Since there are clearly two connected
+We select `infinity = 10`. Since there are clearly two connected
 components that have a lifetime much larger than others. This
-lifetime is larger than 15, whereas the lifetime of others is smaller
+lifetime is larger than 10, whereas the lifetime of others is smaller
 than 15.
 
 ### Clustering
 
 ```@example two-spirals
-hc3 = hierarchical_clustering_lem(mh, infinity = 15, threshold = 3, 
+hc3 = hierarchical_clustering_lem(mh, infinity = 10, threshold = 4, 
                                  store_colors = true, 
                                  store_timesteps = true)
 
@@ -271,7 +271,7 @@ nothing #hide
 ### Animation - Clustering result
 
 ```@example two-spirals
-gif(anim, "assets/anim_kpdtm2.gif", fps = 5)
+gif(anim, "assets/anim_two_spirals.gif", fps = 5)
 nothing #hide
 ```
-![](assets/anim_kpdtm2.gif)
+![](assets/anim_two_spirals.gif)

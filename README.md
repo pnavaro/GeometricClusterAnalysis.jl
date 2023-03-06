@@ -1,8 +1,6 @@
 # GeometricClusterAnalysis.jl
 
-Julia implementation of data clustering using its underlying geometric and topological features. 
-Data set is converted into a topological space. We use topological invariants to summarize 
-the complex structure of data.
+Julia implementation of data clustering using underlying geometric and topological features. 
 
 **WARNING**: This package is not registered and may be subject to breaking changes anytime. 
 
@@ -27,7 +25,7 @@ Pkg.instantiate()
 include("examples/hierarchical_clustering_based_on_union_of_ellipsoids_on_two_spirals.jl")
 ```
 
-![](https://github.com/pnavaro/GeometricClusterAnalysis.jl/raw/gh-pages/dev/assets/anim_kpdtm2.gif)
+![](https://github.com/pnavaro/GeometricClusterAnalysis.jl/raw/gh-pages/dev/assets/anim_two_spirals.gif)
 
 ## Clustering Algorithms
 

@@ -9,16 +9,20 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.14.1
 #   kernelspec:
-#     display_name: Julia 1.8.4
+#     display_name: Julia 1.8.5
 #     language: julia
 #     name: julia-1.8
 # ---
 
-# # Hierarchical clustering based on a union of ellipsoids - Example of two spirals
+# # Hierarchical clustering based on a union of ellipsoids 
+#
+# ## Example of two spirals
 
 using GeometricClusterAnalysis
 using Plots
+using ProgressMeter
 using Random
+using Statistics
 
 # ## Data generation
 
@@ -27,11 +31,11 @@ using Random
 nsignal = 2000 # number of signal points
 nnoise = 400   # number of outliers
 dim = 2       # dimension of the data
-σ = 0.5;  # standard deviation for the additive noise
+σ = 0.5  # standard deviation for the additive noise
 
 # ### Data generation
 
-rng = MersenneTwister(1234)
+rng = MersenneTwister(123)
 data = noisy_nested_spirals(rng, nsignal, nnoise, σ, dim)
 npoints = size(data.points, 2)
 print("The dataset contains ", npoints, " points, of dimension ", dim, ".")
@@ -42,12 +46,12 @@ plot(data)
 
 # ## Computation of the union of ellipsoids with the kPLM function
 
-# ### Parameters
+# ### Parameters
 
 k = 20        # number of nearest neighbors
 c = 30        # number of ellipsoids
 iter_max = 20 # maximum number of iterations of the algorithm kPLM
-nstart = 5;   # number of initializations of the algorithm kPLM
+nstart = 10;   # number of initializations of the algorithm kPLM
 
 # ### Method
 
@@ -63,9 +67,9 @@ function f_Σ!(Σ) end
 
 df = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
 
-# ## Clustering based on the persistence of the union of ellipsoids filtration
+# ## Clustering based on the persistence of the union of ellipsoids filtration
 
-# ### Matrix of distances
+# ### Matrix of distances
 
 # This is a matrix that contains the birth times of the ellipsoids in the diagonal, and the intersecting times of pairs of ellipsoids in the lower left triangular part of the matrix.
 
@@ -98,7 +102,7 @@ plot(hc, xlims = lims, ylims = lims)
 # Note that the "+1" in the second argument of lims and lims2 hereafter is to separate
 # the components whose death time is $\infty$ to other components.
 
-# We consider that ellipsoids born after time "threshold = 3" were not relevant.
+# We consider that ellipsoids born after time "threshold = 4" were not relevant.
 
 # ### Selection of parameter "infinity"
 
@@ -108,7 +112,7 @@ plot(hc, xlims = lims, ylims = lims)
 hc2 = hierarchical_clustering_lem(
     mh,
     infinity = Inf,
-    threshold = 3,
+    threshold = 4,
     store_colors = false,
     store_timesteps = false,
 )
@@ -126,8 +130,8 @@ plot(hc2, xlims = lims2, ylims = lims2)
 # +
 hc3 = hierarchical_clustering_lem(
     mh,
-    infinity = 15,
-    threshold = 3,
+    infinity = 10,
+    threshold = 4,
     store_colors = true,
     store_timesteps = true,
 )
@@ -145,14 +149,14 @@ ellipsoids_colors = hc3.saved_colors
 # Time at which a component borns or dies
 timesteps = hc3.timesteps; 
 
-# Note : ellipsoids_colors[i] contains the labels of the ellipsoids just before the time timesteps[i]
+# Note : `ellipsoids_colors[i]` contains the labels of the ellipsoids just before the time `timesteps[i]`
 #
 # Example : 
-# - ellipsoids_colors[1] contains only 0 labels
+# - `ellipsoids_colors[1]` contains only 0 labels
 #
 # Moreover, if there are 2 connexed components in the remaining clustering :
-# - ellipsoids_colors[end - 1] = ellipsoids_colors[end] contains 2 different labels
-# - ellipsoids_colors[end - 2] contains 3 different labels
+# - `ellipsoids_colors[end - 1] = ellipsoids_colors[end]` contains 2 different labels
+# - `ellipsoids_colors[end - 2]` contains 3 different labels
 
 # Using a parameter threshold not equal to $\infty$ erases some ellipsoids.
 # Therefore we need to compute new labels of the data points, with respect to the new ellipsoids.
@@ -160,7 +164,7 @@ timesteps = hc3.timesteps;
 remain_indices = hc3.startup_indices
 color_points, dists = subcolorize(data.points, npoints, df, remain_indices)
 
-# ## Removing outliers
+# ## Removing outliers
 
 # ### Selection of the number of outliers
 
@@ -207,7 +211,7 @@ let idx = 0
     next_sqtime = timesteps[idx+1]
     updated = false
     
-    for i = eachindex(sq_time)
+    @showprogress 1 for i = eachindex(sq_time)
         while sq_time[i] >= next_sqtime
             idx += 1
             next_sqtime = timesteps[idx+1]
@@ -236,7 +240,7 @@ end
 ncolors2 = length(Colors2);
 
 anim = @animate for i in [1:ncolors2; Iterators.repeated(ncolors2, 30)...]
-    ellipsoids(data.points, Col2[i], Colors2[i], μ, ω, Σ, sq_time[i]; markersize = 5)
+    ellipsoids(data.points, Col2[i], Colors2[i], μ, ω, Σ, sq_time[i]; markersize = 3)
     xlims!(-60, 60)
     ylims!(-60, 60)
 end;
@@ -245,4 +249,4 @@ end;
 
 # ### Animation - Clustering result
 
-gif(anim, "anim_kpdtm2.gif", fps = 5)
+gif(anim, "anim_kplm.gif", fps = 5)

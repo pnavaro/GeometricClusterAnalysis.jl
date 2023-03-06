@@ -43,7 +43,7 @@ P = collect(points')
 
     @test vcat(model.centers'...) ≈ results[:centers]
     @test vcat(model.μ'...) ≈ results[:means]
-    @test model.weights ≈ results[:weights]
+    @test model.ω ≈ results[:weights]
     @test model.colors ≈ trunc.(Int, results[:color])
     @test model.cost ≈ results[:cost]
 
@@ -84,7 +84,7 @@ end
 
     @test vcat(model.centers'...) ≈ results[:centers]
     @test vcat(model.μ'...) ≈ results[:means]
-    @test model.weights ≈ results[:weights]
+    @test model.ω ≈ results[:weights]
     @test model.colors ≈ trunc.(Int, results[:color])
     @test model.cost ≈ results[:cost]
 
@@ -199,7 +199,7 @@ end
 
     @test vcat(model.centers'...) ≈ results[:centers]
     @test vcat(model.μ'...) ≈ results[:means]
-    @test model.weights ≈ results[:weights]
+    @test model.ω ≈ results[:weights]
     @test model.colors ≈ trunc.(Int, results[:color])
     @test model.cost ≈ results[:cost]
 

@@ -15,7 +15,7 @@ struct KpResult{T<:AbstractFloat}
     k::Int
     centers::Vector{Vector{T}}
     μ::Vector{Vector{T}}
-    weights::Vector{T}
+    ω::Vector{T}
     colors::Vector{Int}
     Σ::Vector{Matrix{T}}
     cost::T
@@ -120,7 +120,7 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!::Functi
         Σ = [diagm(ones(dimension)) for i = 1:n_centers]
         kept_centers = trues(n_centers)
         μ = [zeros(dimension) for i = 1:n_centers]
-        weights = zeros(n_centers)
+        ω = zeros(n_centers)
         fill!(colors, 0)
 
         nstep = 0
@@ -150,7 +150,7 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!::Functi
 
                         μ[i] .= vec(mean(view(points, :, idxs[tid]), dims = 2))
 
-                        weights[i] =
+                        ω[i] =
                             mean(
                                 sqmahalanobis(points[:, j], μ[i], inv(Σ[i])) for
                                 j in idxs[tid]
@@ -167,7 +167,7 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!::Functi
             for i = 1:n_centers
                 if kept_centers[i]
                     compute_dists!(costs, μ[i], points, Σ[i])
-                    costs .+= weights[i]
+                    costs .+= ω[i]
                     for j = 1:n_points
                         cost_min = costs[1, j]
                         if dist_min[j] >= cost_min
@@ -271,10 +271,10 @@ function kplm(rng, points, k, n_centers, signal, iter_max, nstart, f_Σ!::Functi
     end
 
     μ = deepcopy(centers)
-    weights = zeros(length(centers))
+    ω = zeros(length(centers))
 
-    colorize!(colors, μ, weights, points, k, signal, centers, Σ)
+    colorize!(colors, μ, ω, points, k, signal, centers, Σ)
 
-    return KpResult(k, centers, μ, weights, colors, Σ, cost_opt)
+    return KpResult(k, centers, μ, ω, colors, Σ, cost_opt)
 
 end

@@ -44,7 +44,7 @@ function update_means_and_weights_1(points, k)
     n_centers = 100
     centers = [points[i] for i = 1:n_centers]
     μ = [zeros(3) for i = 1:n_centers]
-    weights = zeros(n_centers)
+    ω = zeros(n_centers)
     Σ = [diagm(ones(3)) for i = 1:n_centers]
     dists = zeros(n_points)
     idxs = zeros(Int, n_points)
@@ -58,12 +58,12 @@ function update_means_and_weights_1(points, k)
 
         idxs .= sortperm(dists)
         μ[i] .= mean(view(points, idxs[1:k]))
-        weights[i] =
+        ω[i] =
             mean([mahalanobis(points[j], μ[i], inv(Σ[i])) for j in idxs[1:k]]) + log(det(Σ[i]))
 
     end
 
-    return μ, weights
+    return μ, ω
 
 end
 
@@ -78,7 +78,7 @@ function update_means_and_weights_2(points_matrix, k)
     n_centers = 100
     centers = [points_matrix[:, i] for i = 1:n_centers]
     μ = [zeros(3) for i = 1:n_centers]
-    weights = zeros(n_centers)
+    ω = zeros(n_centers)
     Σ = [diagm(ones(3)) for i = 1:n_centers]
 
     for i = 1:n_centers
@@ -88,12 +88,12 @@ function update_means_and_weights_2(points_matrix, k)
         balltree = BallTree(points_matrix, metric)
         idxs, dists = knn(balltree, centers[i], k)
         μ[i] .= vec(mean(points_matrix[:, idxs[1]], dims = 2))
-        weights[i] =
+        ω[i] =
             mean([sqmahalanobis(points[j], μ[i], invΣ) for j in idxs[1]]) + log(det(Σ[i]))
 
     end
 
-    return μ, weights
+    return μ, ω
 
 end
 # -

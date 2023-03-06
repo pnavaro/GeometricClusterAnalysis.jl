@@ -4,8 +4,19 @@ using RCall
 import Clustering: mutualinfo
 
 R"""
-library(here)
-source(here("examples","trimmed_bregman_clustering.R"))
+library(magrittr)
+source(here::here("R","trimmed_bregman_clustering.R"))
+
+simule_poissond <- function(N, lambdas, proba) {
+    dimd = ncol(lambdas)
+    Proba = sample(x = 1:length(proba), size = N, replace = TRUE, prob = proba)
+    Lambdas = lambdas[Proba, ]
+    return(list(points = matrix(rpois(dimd * N, Lambdas), N, dimd), labels = Proba))
+}
+
+sample_outliers = function(n_outliers, d, L = 1) {
+    return(matrix(L * runif(d * n_outliers), n_outliers, d))
+}
 
 n = 1000 
 n_outliers = 50 
@@ -51,7 +62,6 @@ println(sort(results2.centers, dims = 2))
 println(mutualinfo(results2.cluster, labels, normed = true))
 
 R"""
-
 kmeans = trimmed_bregman_clustering(x,k,alpha,euclidean_sq_distance_dimd,maxiter,nstart)
 print(sort(kmeans$centers))
 

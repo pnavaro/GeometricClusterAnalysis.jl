@@ -93,21 +93,21 @@ Distance matrix for the graph filtration
 """
 function build_distance_matrix(result; indexed_by_r2 = true)
 
-    c = length(result.weights)
+    c = length(result.ω)
 
     mh = zeros(c, c)
     fill!(mh, Inf)
 
     if c == 1
         if indexed_by_r2
-            return [first(result.weights)]
+            return [first(result.ω)]
         else # Indexed by r -- only for non-negative functions (k-PDTM and k-PLM with det = 1)
-            return [sqrt(first(result.weights))]
+            return [sqrt(first(result.ω))]
         end
     end
 
     for i = 1:c
-        mh[i, i] = result.weights[i]
+        mh[i, i] = result.ω[i]
     end
 
     for i = 2:c
@@ -117,8 +117,8 @@ function build_distance_matrix(result; indexed_by_r2 = true)
                 result.Σ[j],
                 result.μ[i],
                 result.μ[j],
-                result.weights[i],
-                result.weights[j],
+                result.ω[i],
+                result.ω[j],
             )
         end
     end

@@ -49,6 +49,6 @@
     @test jl.colors ≈ Int.(r[:color])
     @test vcat(jl.μ'...) ≈ r[:means]
     @test jl.cost ≈ results[:cost]
-    @test jl.weights ≈ results[:weights]
+    @test jl.ω ≈ results[:weights]
 
 end

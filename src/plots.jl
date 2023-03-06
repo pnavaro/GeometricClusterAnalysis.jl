@@ -92,7 +92,7 @@ function _ellipsoids_args(
     x = points[1, :]
     y = points[2, :]
     μ = dist_func.centers
-    ω = dist_func.weights
+    ω = dist_func.ω
     Σ = dist_func.Σ
 
     x, y, fillcolors, pointcolors, μ, ω, Σ, α
@@ -139,7 +139,7 @@ function color_points_from_centers(points, k, nsignal, model, hc)
     GeometricClusterAnalysis.colorize!(
         color_points,
         model.μ,
-        model.weights,
+        model.ω,
         points,
         k,
         nsignal,
@@ -147,7 +147,7 @@ function color_points_from_centers(points, k, nsignal, model, hc)
         matrices,
     )
 
-    c = length(model.weights)
+    c = length(model.ω)
     remain_indices_2 = vcat(remain_indices, zeros(Int, c + 1 - length(remain_indices)))
     color_points[color_points.==0] .= c + 1
     color_points .= [remain_indices_2[c] for c in color_points]

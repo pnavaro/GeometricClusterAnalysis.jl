@@ -35,7 +35,7 @@ using Plots
                 hcat(df.μ[i], df.μ[j]),
                 [df.colors[i], df.colors[j]],
                 [df.μ[i], df.μ[j]],
-                [df.weights[i], df.weights[j]],
+                [df.ω[i], df.ω[j]],
                 [df.Σ[i], df.Σ[j]],
                 mh[i, j],
             )

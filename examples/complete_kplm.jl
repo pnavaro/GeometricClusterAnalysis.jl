@@ -22,6 +22,7 @@
 using Plots
 using Random
 using LinearAlgebra
+using ProgressMeter
 import Statistics: cov, mean
 import Base.Threads: @threads, @sync, @spawn, nthreads, threadid
 
@@ -470,20 +471,16 @@ iter_max = 20 # maximum number of iterations of the algorithm kPLM
 
 d = 1
 
-nthreads()
-
 @time spirals_kplm = kplm(
     rng,
     spirals.points,
     n_signal_points,
     n_nearest_neighbours,
-    first_centers,
+    initiate_centers(rng, spirals.points, n_centers), 
     iter_max,
     d,
     λ,
 );
-
-# =
 
 print("Mean kplm of signal points : ", spirals_kplm.mean_squared_distance_function)
 λ_end = eigen(spirals_kplm.Σ[1]).values[end]
@@ -500,16 +497,14 @@ p = scatter(spirals.points[1,:], spirals.points[3,:]; markershape = :diamond,
 
 # +
 vect_c = [2,4,6,8,10,12,14,16,18,20,25,40,60,100] #,125,150,175,200,250]
-vect_d = [d for d in 0:10]
+vect_d = collect(0:10)
 replicate = 5
 
-res = Inf*ones(length(vect_c),length(vect_d))
+res = fill(Inf, (length(vect_c),length(vect_d)))
 matrix_c = zeros(length(vect_c),length(vect_d))
 matrix_d = zeros(length(vect_c),length(vect_d))
 
-for i in 1:length(vect_c)
-    print(" ")
-    print(i)
+@showprogress 1 for i in 1:length(vect_c)
     for l in 1:replicate
         first_centers = initiate_centers(rng,spirals.points,vect_c[i])
         for j in 1:length(vect_d)
@@ -545,12 +540,3 @@ for i in 2:11
     scatter!(D[i,:],res[i,:],label=string("n_centers = ",vect_c[i]))
 end
 title!("Fixed number of centers n_centers, increasing dimension d")
-
-# #### To debug
-
-for i in 1:100
-    print(i)
-    rng = MersenneTwister(i) 
-    first_centers = initiate_centers(rng,spirals.points,n_centers);
-    spirals_kplm = kplm(rng,spirals.points,n_signal_points,n_nearest_neighbours,first_centers,iter_max,d,λ);
-end

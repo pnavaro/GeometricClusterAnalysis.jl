@@ -188,6 +188,8 @@ col_dbscan = dbscan::dbscan(P, 1.5,minPts = 10)$cluster
 print(aricode::NMI(col_dbscan,true_color))
 """
 
+x = collect(transpose(points))
+
 clusters = dbscan(x, 1.5, min_neighbors = 5, min_cluster_size = 10)
 p = plot(aspect_ratio=true)
 for cluster in clusters
@@ -215,7 +217,6 @@ function f_Σ!(Σ) end
 
 rng = MersenneTwister(6625)
 
-x = collect(transpose(points))
 
 dist_func = kplm(rng, x, k, c, nsignal, iter_max, nstart, f_Σ!)
 
@@ -236,14 +237,14 @@ plot(p1, p2, layout = l)
 # -
 
 R"""
+source(here::here("R", "kplm.R"))
+source(here::here("R", "ellipsoids_intersection.R"))
 f_Sigma <- function(Sigma){return(Sigma)}
 col_PLM_nonhier = kplm(P,10,3,nrow(P),100,10,f_Sigma)$color
 print(aricode::NMI(col_PLM_nonhier,true_color))
 """
 
 R"""
-source(here::here("R", "kplm.R"))
-source(here::here("R", "ellipsoids_intersection.R"))
 col_PLM = clustering_PLM(3,P,10,50,nrow(P),100,10,nb_means_removed = 0)$label
 print(aricode::NMI(col_PLM,true_color))
 """

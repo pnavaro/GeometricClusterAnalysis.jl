@@ -1,13 +1,9 @@
+using Clustering
+using GeometricClusterAnalysis
 using LinearAlgebra
 using Random
 using RCall
 using Statistics
-using Clustering
-
-using Pkg
-Pkg.activate(@__DIR__)
-
-using KPLMCenters
 
 rng = MersenneTwister(1234)
 
@@ -20,10 +16,9 @@ noise_max = 7
 
 k = 20
 
-points = infinity_symbol(rng, signal, noise, σ, dimension, noise_min, noise_max)
+data = infinity_symbol(rng, signal, noise, σ, dimension, noise_min, noise_max)
 
-points_array = hcat(points...); # Transform array of vectors points to a matrix
-@time result = kmeans(points_array, k); # run K-means for the 10 clusters
+@time result = kmeans(data.points, k); # run K-means for the 10 clusters
 
 function aux_dim_d(Σ, s2min, s2max, λmin, d_prim)
 
@@ -64,8 +59,7 @@ end
 nstart, iter_max = 1, 10
 c = 100
 
-@time centers, μ, weights, colors, Σ, cost =
-    kplm(rng, points, k, c, signal, iter_max, nstart, f_Σ_dim_d)
+@time result = kplm(rng, data.points, k, c, signal, iter_max, nstart, f_Σ_dim_d)
 
 
 @rput d_prim
@@ -92,7 +86,7 @@ aux_dim_d <- function(Sigma, s2min, s2max, lambdamin, d_prim){
 }
 """
 
-P = vcat(points'...)
+P = collect(transpose(data.points))
 
 @rput P
 @rput k
@@ -102,8 +96,8 @@ P = vcat(points'...)
 @rput nstart
 
 R"""
-source("test/colorize.R")
-source("test/kplm.R")
+source(here::here("R", "colorize.R"))
+source(here::here("R", "kplm.R"))
 
 f_Sigma_dim_d <- function(Sigma){
   return(aux_dim_d(Sigma, s2min, s2max, lambdamin, d_prim))

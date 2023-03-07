@@ -63,7 +63,7 @@ for i = 1:length(Col)
     end
 end
 centers = [df.μ[i] for i in remain_indices if i > 0]
-weights = [df.weights[i] for i in remain_indices if i > 0]
+weights = [df.ω[i] for i in remain_indices if i > 0]
 covariances = [df.Σ[i] for i in remain_indices if i > 0]
 
 α = Temps[end-1]

@@ -234,7 +234,7 @@ let idx = 0
 end
     
 μ = [df.μ[i] for i in remain_indices if i > 0];
-ω = [df.weights[i] for i in remain_indices if i > 0];
+ω = [df.ω[i] for i in remain_indices if i > 0];
 Σ = [df.Σ[i] for i in remain_indices if i > 0];
 
 ncolors2 = length(Colors2);

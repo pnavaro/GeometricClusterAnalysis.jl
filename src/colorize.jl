@@ -4,7 +4,7 @@ export colorize!, colorize
 
 """
 
-    colorize!( colors, μ, weights, points, k, signal, centers, Σ)
+    colorize!( colors, μ, ω, points, k, signal, centers, Σ)
 
 Fonction auxiliaire qui, étant donnés k centres, calcule les "nouvelles 
 distances tordues" de tous les points de P, à tous les centres
@@ -23,7 +23,7 @@ en ajoutant "inverted = true".
 
 
 """
-function colorize!(colors, μ, weights, points, k, signal, centers, Σ)
+function colorize!(colors, μ, ω, points, k, signal, centers, Σ)
 
     dimension, n_points = size(points)
     n_centers = length(centers)
@@ -31,7 +31,7 @@ function colorize!(colors, μ, weights, points, k, signal, centers, Σ)
     dists = zeros(Float64, n_points)
     idxs = zeros(Int, n_points)
 
-    # Step 1 : Update μ and weights
+    # Step 1 : Update μ and ω
 
     for i = 1:n_centers
 
@@ -45,7 +45,7 @@ function colorize!(colors, μ, weights, points, k, signal, centers, Σ)
 
         μ[i] .= vec(mean(points[:, idxs[1:k]], dims = 2))
 
-        weights[i] =
+        ω[i] =
             mean(sqmahalanobis(points[:, j], μ[i], invΣ) for j in idxs[1:k]) +
             log(det(Σ[i]))
 
@@ -57,7 +57,7 @@ function colorize!(colors, μ, weights, points, k, signal, centers, Σ)
         cost = Inf
         best_index = 1
         for i = 1:n_centers
-            newcost = sqmahalanobis(points[:, j], μ[i], inv(Σ[i])) + weights[i]
+            newcost = sqmahalanobis(points[:, j], μ[i], inv(Σ[i])) + ω[i]
             if newcost <= cost
                 cost = newcost
                 best_index = i
@@ -89,7 +89,7 @@ function colorize(points, k, signal, centers, Σ)
     dists = zeros(Float64, n_points)
     idxs = zeros(Int, n_points)
 
-    # Step 1 : Update μ and weights
+    # Step 1 : Update μ and ω
 
     μ = Vector{Float64}[]
     ω = Float64[]
@@ -144,14 +144,13 @@ end
 export subcolorize
 
 """
+$(SIGNATURES)
 
-    subcolorize(points, signal, result, startup_indices)
-
-Fonction auxiliaire qui, étant donnés le nuage de points,
-le nombre de points du signal, le résultat de kpdtm ou de kplm 
-et les indices de départ de la méthode de hclust.jl, calcule les "nouvelles 
-distances tordues" de tous les points de P, à tous les centres dont les indices sont dans les indices de départ.
-On leur associe le centre le plus proche.
+Auxiliary function that, given the point cloud,
+the number of points of the signal, the result of kpdtm or kplm 
+and the starting indices of the hclust method, computes the "new 
+twisted distances" from all points of P, to all centers whose indices are in the starting indices.
+The nearest center is associated with them.
 """
 function subcolorize(points, signal, result, startup_indices)
     # To be used when some centers are removed, 
@@ -164,7 +163,7 @@ function subcolorize(points, signal, result, startup_indices)
     idxs = zeros(Int, n_points)
 
     μ = result.μ
-    ω = result.weights
+    ω = result.ω
     Σ = result.Σ
 
     # To ensure that no point has label associated to points not in Indice_depart, 

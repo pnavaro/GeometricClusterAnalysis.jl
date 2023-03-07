@@ -30,7 +30,7 @@ dataset = noisy_fourteen_segments(n, nnoise, sigma, dim)
 plot(dataset, aspect_ratio=true, palette = :default, framestyle = :none)
 
 
-dataset.points
+points = dataset.points
 
 # ## k-PLM
 
@@ -92,10 +92,9 @@ Clustering.mutualinfo(dataset.colors, dtm_colors)
 
 # ## ToMaTo
 
-for radius in 0.01:0.01:0.2
-    tomato_colors = clustering_tomato(points, nb_clusters, k, c, nsignal, radius, iter_max, nstart)
-    println(Clustering.mutualinfo(dataset.colors, tomato_colors))
-end
+radius = 0.12
+tomato_colors = clustering_tomato(points, nb_clusters, k, c, nsignal, radius, iter_max, nstart)
+println(Clustering.mutualinfo(dataset.colors, tomato_colors))
 l = @layout [a b]
 p1 = plot(dataset, aspect_ratio = true, framestyle = :none, markersize = 2)
 p2 = pointset(points, tomato_colors)

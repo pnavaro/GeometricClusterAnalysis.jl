@@ -254,7 +254,7 @@ for i in eachindex(saved_point_colors), j = 1:data.np
 end
 
 μ = [df.μ[i] for i in remain_indices if i>0]
-ω = [df.weights[i] for i in remain_indices if i>0]
+ω = [df.ω[i] for i in remain_indices if i>0]
 Σ = [df.Σ[i] for i in remain_indices if i>0]
 
 n = length(saved_ellipsoid_colors)

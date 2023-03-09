@@ -4,6 +4,33 @@ export tomato_density, tomato_clustering
 
 
 """
+tomato = Tomato()
+
+fit(tomato, data)
+
+plot_diagram(tomato)
+```
+
+```julia
+tomato = Tomato(density_type="DTM", k=100)
+fit(tomato, data)
+plot_diagram(tomato)
+```
+
+
+"""
+struct Tomato
+
+    graph_type :: Symbol
+    density_type :: Symbol
+    n_clusters :: Int
+    "minimum prominence of a cluster so it doesn’t get merged. Writing to it automatically adjusts labels."
+    merge_threshold :: Int
+
+end
+
+
+"""
 $(SIGNATURES)
 """
 function tomato_density(kdtree, X::AbstractMatrix, k)

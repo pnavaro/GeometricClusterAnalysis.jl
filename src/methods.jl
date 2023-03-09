@@ -1,22 +1,25 @@
+# -*- coding: utf-8 -*-
 export clustering_kplm
 
+# +
 function clustering_kplm( points, nb_clusters, k, c, nsignal, iter_max, nstart; nb_means_removed = 0)
     
     function f_Σ!(Σ) end
 
     rng = MersenneTwister(6625)
 
-    dist_func = kplm(rng, points, k, c, nsignal, iter_max, nstart, f_Σ!)
+    distance_function = kplm(rng, points, k, c, nsignal, iter_max, nstart, f_Σ!)
 
-    distance_matrix = build_distance_matrix(dist_func)
+    distance_matrix = build_distance_matrix(distance_function)
 
-    threshold, infinity = compute_threshold_infinity(dist_func, distance_matrix, nb_means_removed, nb_clusters)
+    threshold, infinity = compute_threshold_infinity(distance_function, distance_matrix, nb_means_removed, nb_clusters)
 
     hc = hierarchical_clustering_lem(distance_matrix, infinity = infinity, threshold = threshold)
 
     return color_points_from_centers(points, k, nsignal, dist_func, hc)
-    
+
 end
+# -
 
 export clustering_kpdtm
 
@@ -36,7 +39,7 @@ function clustering_kpdtm(points, nb_clusters, k, c, nsignal,
     hc = hierarchical_clustering_lem(distance_matrix,infinity = infinity, threshold = threshold)
 
     return color_points_from_centers(points, k, nsignal, dist_func, hc)
-    
+
 end
 
 export clustering_witnessed
@@ -53,7 +56,7 @@ function clustering_witnessed(points, nb_clusters, k, c, nsignal, iter_max, nsta
     hc2 = hierarchical_clustering_lem(distance_matrix, infinity = infinity, threshold = Inf)
     
     return_color(colors, hc2.colors, hc2.startup_indices)
-    
+
 end
 
 export clustering_power_function
@@ -89,7 +92,7 @@ function clustering_dtm_filtration(points, nb_clusters, k, c, nsignal, iter_max,
     dtm_colors, returned_colors, hc2 = dtm_filtration(points, m0;
          infinity=infinity, threshold = threshold)
     return dtm_colors
-    
+
 end
 
 export clustering_tomato

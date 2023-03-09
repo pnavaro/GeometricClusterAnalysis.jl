@@ -19,6 +19,15 @@
 using GeometricClusterAnalysis
 using Random
 
+# +
+model = ClusteringModel(data)
+
+result1 = fit(model, method = kPLM(k, c, α, iter_max, nstart, f_Σ!))
+result2 = fit(model, method = kPDTM(k, c, α, iter_max, nstart, f_Σ!))
+
+build_distance_matrix()
+# -
+
 # ### Parameters
 
 nsignal = 2000 # number of signal points

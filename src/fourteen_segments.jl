@@ -2,7 +2,7 @@
 """
 $(SIGNATURES)
 """
-function fourteen_segments(n, σ, d)
+function fourteen_segments(rng::AbstractRNG, n::Int, σ, d::Int)
 
     w = sqrt((1 - cos(2π / 7))^2 + sin(2π / 7)^2)
     l = 7 * (1 + w)
@@ -11,7 +11,7 @@ function fourteen_segments(n, σ, d)
     threshold[8:13] .= 7 .+ (1:6) .* w
     threshold ./= l
 
-    x = σ * randn(d, n)
+    x = σ * randn(rng, (d, n))
     c = zeros(Int, n)
     vectu = rand(n)
     vectv = rand(n)
@@ -128,21 +128,55 @@ export noisy_fourteen_segments
 """
 $(SIGNATURES)
 
-- `n` : number of signal points 
+- `nsignal` : number of signal points 
 - `nnoise` : number of additionnal outliers
 
-sampled accordingly to generate noise signal points are X = Y+Z with Y
-uniform on the 14 segments Z normal with mean 0 and covariance matrix
-σ*I_d (with I_d the identity matrix of ``R^d``)
+sampled accordingly to generate noise signal points are ``X = Y+Z`` with ``Y``
+uniform on the 14 segments ``Z`` normal with mean 0 and covariance matrix
+``σ*I_d`` (with I_d the identity matrix of ``R^d``)
 So, d is the dimension of the data and σ, the standard deviation of the additive
 Gaussian noise.  When ``d>2, Y_i = 0`` for ``i>=2`` ; with the notation
 ``Y=(Y_i)_{i=1..d}``
 """
-function noisy_fourteen_segments(n, nnoise, σ, d)
+function noisy_fourteen_segments(rng::AbstractRNG, nsignal::Int, nnoise::Int, σ, d)
 
-    generate_noise(n, d, xmin, xmax) = (xmax - xmin) .* rand(d, n) .+ xmin
-    x, c = fourteen_segments(n, σ, d)
+    generate_noise(n, d, xmin, xmax) = (xmax - xmin) .* rand(rng, (d, n)) .+ xmin
+    x, c = fourteen_segments(rng, nsignal, σ, d)
     noise = generate_noise(nnoise, d, -2, 2)
     return Data{Float64}(n + nnoise, d, hcat(x, noise), vcat(c, zeros(Int, nnoise)))
+
+end
+
+"""
+$(SIGNATURES)
+
+- `npoints` : total number of points 
+- `α` : fraction of outliers
+"""
+function noisy_fourteen_segments(rng::AbstractRNG, npoints::Int, α, σ, d::Int)
+
+    nnoise = trunc(Int, α * npoints)
+    nsignal = npoints - nnoise
+    noisy_fourteen_segments(rng, nsinal, nnoise, σ, d)
+
+end
+
+"""
+$(SIGNATURES)
+"""
+function noisy_fourteen_segments(npoints::Int, α, σ, d::Int)
+
+    rng = MersenneTwister()
+    noisy_fourteen_segments(rng, npoints, α, σ, d)
+
+end
+
+"""
+$(SIGNATURES)
+"""
+function noisy_fourteen_segments(nsignal::Int, nnoise::Int, d::Int)
+
+    rng = MersenneTwister()
+    noisy_fourteen_segments(rng, nsignal, nnoise, σ, d)
 
 end

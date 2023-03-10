@@ -2,7 +2,10 @@ using Random
 
 export infinity_symbol
 
-function infinity_symbol(rng, n_points, n_noise, σ, dimension, noise_min, noise_max)
+"""
+$(SIGNATURES)
+"""
+function infinity_symbol(rng::AbstractRNG, nsignal::Int, nnoise::Int, σ, dimension::Int, noise_min, noise_max)
 
     long = (3π / 2 + 2) * (sqrt(2) + sqrt(9 / 8))
     threshold = zeros(5)
@@ -12,14 +15,14 @@ function infinity_symbol(rng, n_points, n_noise, σ, dimension, noise_min, noise
     threshold[4] = threshold[3] + sqrt(2) / long
     threshold[5] = threshold[4] + sqrt(9 / 8) / long
 
-    p = σ .* randn(rng, n_points, dimension)
+    p = σ .* randn(rng, nsignal, dimension)
 
-    vect_u = rand(rng, n_points)
-    vect_v = rand(rng, n_points)
+    vect_u = rand(rng, nsignal)
+    vect_v = rand(rng, nsignal)
 
     points = Vector{Float64}[]
 
-    for i = 1:n_points
+    for i = 1:nsignal
 
         p[i, 1] = p[i, 1] - 2
 
@@ -76,15 +79,44 @@ function infinity_symbol(rng, n_points, n_noise, σ, dimension, noise_min, noise
 
     end
 
-    if n_noise > 0
-        noise = noise_min .+ (noise_max - noise_min) .* rand(rng, n_noise, dimension)
-        for i = 1:n_noise
+    if nnoise > 0
+        noise = noise_min .+ (noise_max - noise_min) .* rand(rng, nnoise, dimension)
+        for i = 1:nnoise
             push!(points, noise[i, :])
         end
     end
 
-    colors = vcat(ones(Int, n_points), zeros(Int, n_noise))
+    colors = vcat(ones(Int, nsignal), zeros(Int, nnoise))
 
-    return Data{Float64}(n_points + n_noise, dimension, hcat(points...), colors)
+    return Data{Float64}(nsignal + nnoise, dimension, hcat(points...), colors)
 
 end
+
+"""
+$(SIGNATURES)
+"""
+function infinity_symbol(nsignal::Int, nnoise::Int, σ, dimension::Int, noise_min, noise_max)
+    rng = MersenneTwister()
+    infinity_symbol(nsignal, nnoise, σ, dimension, noise_min, noise_max)
+end
+
+"""
+$(SIGNATURES)
+"""
+function infinity_symbol(npoints::Int, α::Float64, σ, dimension::Int, noise_min, noise_max)
+    @assert α < 1.0
+    nnoise = trunc(Int, α * npoints)
+    nsignal = npoints - nnoise
+    infinity_symbol(nsignal, nnoise, σ, dimension, noise_min, noise_max)
+end
+
+"""
+$(SIGNATURES)
+"""
+function infinity_symbol(rng::AbstractRNG, npoints::Int, α::Float64, σ, dimension::Int, noise_min, noise_max)
+    @assert α < 1.0
+    nnoise = trunc(Int, α * npoints)
+    nsignal = npoints - nnoise
+    infinity_symbol(rng, nsignal, nnoise, σ, dimension, noise_min, noise_max)
+end
+

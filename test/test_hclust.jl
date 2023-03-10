@@ -48,7 +48,7 @@ using Test
 
     @test vcat(df.centers'...) ≈ dist_func[:centers]
     @test vcat(df.μ'...) ≈ dist_func[:means]
-    @test df.ω	 ≈ dist_func[:weights]
+    @test df.ω ≈ dist_func[:weights]
     @test df.colors ≈ trunc.(Int, dist_func[:color])
     @test df.cost ≈ dist_func[:cost]
 

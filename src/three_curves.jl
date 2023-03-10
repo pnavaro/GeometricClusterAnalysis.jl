@@ -1,7 +1,32 @@
 export noisy_three_curves
 
 """
-    noisy_three_curves(npoints, nnoise, sigma, d)
+$(SIGNATURES)
+"""
+function noisy_three_curves(npoints::Int, α, sigma, d::Int)
+
+    rng = MersenneTwister()
+    nnoise = trunc(Int, α * npoints)
+    nsignal = npoints - nnoise
+
+    noisy_three_curves(rng, nsignal, nnoise, sigma, d)
+end
+
+
+"""
+$(SIGNATURES)
+"""
+function noisy_three_curves(rng::AbstractRNG, npoints::Int, α, sigma, d::Int)
+
+    nnoise = trunc(Int, α * npoints)
+    nsignal = npoints - nnoise
+
+    noisy_three_curves(rng, nsignal, nnoise, sigma, d)
+
+end
+
+"""
+$(SIGNATURES)
 
 - `nsignal` : number of signal points
 - `nnoise` : number of additionnal outliers 
@@ -13,8 +38,7 @@ Signal points are ``x = y+z`` with
 `d` is the dimension of the data and sigma, the standard deviation of the additive Gaussian noise.
 When ``d>2, y_i = 0`` for ``i>=2``; with the notation ``y=(y_i)_{i=1..d}``
 """
-
-function noisy_three_curves(rng, nsignal, nnoise, sigma, d)
+function noisy_three_curves(rng::AbstractRNG, nsignal::Int, nnoise::Int, sigma, d::Int)
 
     nmid = nsignal ÷ 2
 
@@ -32,7 +56,7 @@ function noisy_three_curves(rng, nsignal, nnoise, sigma, d)
     points = collect(transpose(vcat(signal, noise)))
     colors = vcat(curve1, curve2, zeros(nnoise))
 
-    return Data{Float64}(nsignal + nnoise, d, points, colors)
+    Data{Float64}(nsignal + nnoise, d, points, colors)
 
 end
 

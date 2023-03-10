@@ -21,11 +21,11 @@ plot_diagram(tomato)
 """
 struct Tomato
 
-    graph_type :: Symbol
-    density_type :: Symbol
-    n_clusters :: Int
+    graph_type::Symbol
+    density_type::Symbol
+    n_clusters::Int
     "minimum prominence of a cluster so it doesn’t get merged. Writing to it automatically adjusts labels."
-    merge_threshold :: Int
+    merge_threshold::Int
 
 end
 
@@ -144,7 +144,7 @@ function graph_radius(points, r)
     n = size(points, 2)
     graph = zeros(Int, n, n)
     for i = 1:n, j = 1:n
-        graph[i, j] = (sum((points[:, j] .- points[:, i]).^2) <= r^2)
+        graph[i, j] = (sum((points[:, j] .- points[:, i]) .^ 2) <= r^2)
     end
     return graph
 end
@@ -162,7 +162,7 @@ function distance_matrix_tomato(graph, birth)
     end
 
     distance_matrix = fill(Inf, size(graph))
-    for i = eachindex(birth), j = 1:i
+    for i in eachindex(birth), j = 1:i
         distance_matrix[i, j] = max(birth[i], birth[j]) / graph[i, j]
     end
 

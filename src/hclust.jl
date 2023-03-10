@@ -178,7 +178,7 @@ function hierarchical_clustering_lem(
     step = 1
     matrice_dist = fill(Inf, c, c) # The new distance_matrix
 
-    for i = eachindex(birth)
+    for i in eachindex(birth)
         matrice_dist[i, i] = birth[i]
     end
 

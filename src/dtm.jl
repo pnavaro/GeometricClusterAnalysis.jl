@@ -72,11 +72,11 @@ export k_witnessed_distance
 """
 $(SIGNATURES)
 """
-function k_witnessed_distance(points, k, c, signal)
+function k_witnessed_distance(points, k::Int, c::Int, nsignal::Int)
 
     d, n = size(points)
     centers = [points[:, i] for i = 1:n]
-    μ, ω, colors = recolor(points, centers, k, signal)
+    μ, ω, colors = recolor(points, centers, k, nsignal)
     Σ = [diagm(ones(d)) for i in eachindex(centers)]
     return μ, ω, colors, Σ
 
@@ -115,7 +115,7 @@ function build_distance_matrix_power_function_buchet(birth, means)
 
     c = length(birth)
     distance_matrix = fill(Inf, (c, c))
-    for i = eachindex(birth), j = 1:i
+    for i in eachindex(birth), j = 1:i
         distance_matrix[i, j] = height(means[:, i], means[:, j], birth[i]^2, birth[j]^2)
     end
 

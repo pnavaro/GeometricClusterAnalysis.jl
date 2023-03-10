@@ -220,11 +220,11 @@ end
 
 @recipe function f(ps::PointSet)
     points = ps.args[1]
-    colors = ps.args[2] 
+    colors = ps.args[2]
     framestyle --> :none
     aspect_ratio --> true
 
-    for (i,l) in enumerate(unique(colors))
+    for (i, l) in enumerate(unique(colors))
         which = colors .== l
         x = points[1, which]
         y = points[2, which]

@@ -1,6 +1,21 @@
 export noisy_nested_spirals
 
-function noisy_nested_spirals(rng, nsignal, nnoise, sigma, d)
+"""
+$(SIGNATURES)
+"""
+function noisy_nested_spirals(rng::AbstractRNG, npoints::Int, α::AbstractFloat, sigma, d)
+
+    nnoise = trunc(Int, α * npoints)
+    nsignal = npoints - nnoise
+    noisy_nested_spirals(rng, nsignal, nnoise, sigma, d)
+
+end
+
+
+"""
+$(SIGNATURES)
+"""
+function noisy_nested_spirals(rng::AbstractRNG, nsignal::Int, nnoise::Int, sigma, d)
 
     nmid = nsignal ÷ 2
 
@@ -19,11 +34,11 @@ function noisy_nested_spirals(rng, nsignal, nnoise, sigma, d)
     y[(nmid+1):nsignal] = λ .* t2 .* sin.(t2 .- 0.8 * π)
 
     p0 = hcat(x, y)
-    signal = p0 .+ sigma .* randn(rng, nsignal, d)
+    signal = p0 .+ sigma * randn(rng, nsignal, d)
     noise = 120 .* rand(rng, nnoise, d) .- 60
 
     points = collect(transpose(vcat(signal, noise)))
-    colors = vcat(ones(nmid), 2 * ones(nsignal - nmid), zeros(nnoise))
+    colors = vcat(ones(Int, nmid), 2 * ones(Int, nsignal - nmid), zeros(Int, nnoise))
 
     return Data{Float64}(nsignal + nnoise, d, points, colors)
 end

@@ -75,7 +75,19 @@ end
 """
 $(SIGNATURES)
 """
-function kpdtm(rng, points, k, c, nsignal, iter_max, nstart)
+function kpdtm(rng::AbstractRNG, points, k::Int, c::Int, α::Real, iter_max::Int, nstart::Int)
+
+    d, n = size(points)
+    first_centers = first(randperm(rng, n), c)
+    nsignal = trunc(Int, α * n)
+    kpdtm(rng, points, k, c, nsignal, iter_max, nstart, first_centers)
+
+end
+
+"""
+$(SIGNATURES)
+"""
+function kpdtm(rng::AbstractRNG, points, k::Int, c::Int, nsignal::Int, iter_max::Int, nstart::Int)
 
     d, n = size(points)
     first_centers = first(randperm(rng, n), c)
@@ -86,7 +98,7 @@ end
 """
 $(SIGNATURES)
 """
-function kpdtm(rng, points, k, c, nsignal, iter_max, nstart, first_centers)
+function kpdtm(rng::AbstractRNG, points, k::Int, c::Int, nsignal::Int, iter_max::Int, nstart::Int, first_centers)
 
     d, n = size(points)
 
@@ -182,13 +194,13 @@ function kpdtm(rng, points, k, c, nsignal, iter_max, nstart, first_centers)
             kept_centers_opt .= kept_centers
         end
 
-    end
+    end # end for
 
     # Return centers and colors for non-empty clusters
     nb_kept_centers = sum(kept_centers_opt)
     centers = Vector{Float64}[]
     index_center = 1
-    for i in 1:c
+    for i = 1:c
         if sum(colors_opt .== i) != 0
             push!(centers, centers_opt[i])
             index_center += 1

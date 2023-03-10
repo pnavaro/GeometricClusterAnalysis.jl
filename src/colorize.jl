@@ -3,37 +3,31 @@ import Statistics: mean
 export colorize!, colorize
 
 """
+$(SIGNATURES)
 
-    colorize!( colors, μ, ω, points, k, signal, centers, Σ)
+Auxiliary function which, given k centers, computes the "new 
+twisted distances" of all points of P, at all centers
+We color with the color of the nearest center.
+The "distance" to a center is the square of the Mahalanobis norm at the local mean 
+local mean around the center plus a weight which depends on a local variance around the center 
+of the center to which we add the ``log(det(Σ))``
 
-Fonction auxiliaire qui, étant donnés k centres, calcule les "nouvelles 
-distances tordues" de tous les points de P, à tous les centres
-On colorie de la couleur du centre le plus proche.
-La "distance" à un centre est le carré de la norme de Mahalanobis à la moyenne 
-locale "mean" autour du centre + un poids qui dépend d'une variance locale autour 
-du centre auquel on ajoute le log(det(Σ))
-
-On utilise souvent la fonction mahalanobis.
-mahalanobis(P,c,Σ) calcule le carré de la norme de Mahalanobis 
-(p-c)^T Σ^{-1}(p-c), pour tout point p, ligne de P.
-C'est bien le carré ; 
-par ailleurs la fonction inverse la matrice Σ ; 
-on peut décider de lui passer l'inverse de la matrice Σ, 
-en ajoutant "inverted = true".
-
+We often use the mahalanobis function.
+`mahalanobis(x,c,Σ)` computes the square of the Mahalanobis norm 
+``(p-c)^T Σ^{-1}(p-c)``, for any point ``p``, column of ``x``.
 
 """
-function colorize!(colors, μ, ω, points, k, signal, centers, Σ)
+function colorize!(colors, μ, ω, points, k, nsignal::Int, centers, Σ)
 
-    dimension, n_points = size(points)
-    n_centers = length(centers)
+    dimension, npoints = size(points)
+    ncenters = length(centers)
 
-    dists = zeros(Float64, n_points)
-    idxs = zeros(Int, n_points)
+    dists = zeros(Float64, npoints)
+    idxs = zeros(Int, npoints)
 
     # Step 1 : Update μ and ω
 
-    for i = 1:n_centers
+    for i = 1:ncenters
 
         invΣ = inv(Σ[i])
 
@@ -53,10 +47,10 @@ function colorize!(colors, μ, ω, points, k, signal, centers, Σ)
 
     # Step 2 : Update colors
 
-    for j = 1:n_points
+    for j = 1:npoints
         cost = Inf
         best_index = 1
-        for i = 1:n_centers
+        for i = 1:ncenters
             newcost = sqmahalanobis(points[:, j], μ[i], inv(Σ[i])) + ω[i]
             if newcost <= cost
                 cost = newcost
@@ -70,8 +64,8 @@ function colorize!(colors, μ, ω, points, k, signal, centers, Σ)
     # Step 3 : Trimming and Update cost
 
     sortperm!(idxs, dists, rev = true)
-    if signal < n_points
-        for i in idxs[1:(n_points-signal)]
+    if nsignal < npoints
+        for i in idxs[1:(npoints-nsignal)]
             colors[i] = 0
         end
     end
@@ -80,20 +74,20 @@ function colorize!(colors, μ, ω, points, k, signal, centers, Σ)
 
 end
 
-function colorize(points, k, signal, centers, Σ)
+function colorize(points, k, nsignal, centers, Σ)
 
-    dimension, n_points = size(points)
-    n_centers = length(centers)
+    dimension, npoints = size(points)
+    ncenters = length(centers)
 
-    colors = zeros(Int, n_points)
-    dists = zeros(Float64, n_points)
-    idxs = zeros(Int, n_points)
+    colors = zeros(Int, npoints)
+    dists = zeros(Float64, npoints)
+    idxs = zeros(Int, npoints)
 
     # Step 1 : Update μ and ω
 
     μ = Vector{Float64}[]
     ω = Float64[]
-    for i = 1:n_centers
+    for i = 1:ncenters
 
         invΣ = inv(Σ[i])
 
@@ -114,10 +108,10 @@ function colorize(points, k, signal, centers, Σ)
 
     # Step 2 : Update colors
 
-    for j = 1:n_points
+    for j = 1:npoints
         cost = Inf
         best_index = 1
-        for i = 1:n_centers
+        for i = 1:ncenters
             newcost = sqmahalanobis(points[:, j], μ[i], inv(Σ[i])) + ω[i]
             if newcost <= cost
                 cost = newcost
@@ -131,8 +125,8 @@ function colorize(points, k, signal, centers, Σ)
     # Step 3 : Trimming and Update cost
 
     sortperm!(idxs, dists, rev = true)
-    if signal < n_points
-        for i in idxs[1:(n_points-signal)]
+    if nsignal < npoints
+        for i in idxs[1:(npoints-nsignal)]
             colors[i] = 0
         end
     end
@@ -152,15 +146,15 @@ and the starting indices of the hclust method, computes the "new
 twisted distances" from all points of P, to all centers whose indices are in the starting indices.
 The nearest center is associated with them.
 """
-function subcolorize(points, signal, result, startup_indices)
+function subcolorize(points, nsignal::Int, result, startup_indices)
     # To be used when some centers are removed, 
     # after using hierarchical_clustering_lem and before using return_color.
-    dimension, n_points = size(points)
-    n_centers = length(result.centers)
+    dimension, npoints = size(points)
+    ncenters = length(result.centers)
 
-    colors = zeros(Int, n_points)
-    dists = zeros(Float64, n_points)
-    idxs = zeros(Int, n_points)
+    colors = zeros(Int, npoints)
+    dists = zeros(Float64, npoints)
+    idxs = zeros(Int, npoints)
 
     μ = result.μ
     ω = result.ω
@@ -169,16 +163,16 @@ function subcolorize(points, signal, result, startup_indices)
     # To ensure that no point has label associated to points not in Indice_depart, 
     # we put infinite weight to these points
 
-    #ω[(1:n_centers) .∈ Ref(startup_indices)] .= Inf
-    not_removed = (1:n_centers) .∈ Ref(startup_indices)
-    ω = [(not_removed[j] ? ω[j] : Inf) for j = 1:n_centers]
+    #ω[(1:ncenters) .∈ Ref(startup_indices)] .= Inf
+    not_removed = (1:ncenters) .∈ Ref(startup_indices)
+    ω = [(not_removed[j] ? ω[j] : Inf) for j = 1:ncenters]
 
     # Update colors
 
-    for j = 1:n_points
+    for j = 1:npoints
         cost = Inf
         best_index = 1
-        for i = 1:n_centers
+        for i = 1:ncenters
             newcost = sqmahalanobis(points[:, j], μ[i], inv(Σ[i])) + ω[i]
             if newcost <= cost
                 cost = newcost
@@ -192,8 +186,8 @@ function subcolorize(points, signal, result, startup_indices)
     # Trimming and Update cost
 
     sortperm!(idxs, dists, rev = true)
-    if signal < n_points
-        for i in idxs[1:(n_points-signal)]
+    if nsignal < npoints
+        for i in idxs[1:(npoints-nsignal)]
             colors[i] = 0
         end
     end

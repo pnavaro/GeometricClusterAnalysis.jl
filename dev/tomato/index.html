@@ -5,14 +5,20 @@ using GeometricClusterAnalysis
 using NearestNeighbors
 using StatsBase
 
-spiral = readdlm(joinpath(@__DIR__, &quot;spiral_w_o_density.txt&quot;))
+spiral = readdlm(joinpath(pkgdir(GeometricClusterAnalysis), &quot;data&quot;, &quot;spiral_w_o_density.txt&quot;))
 
 options = (ms = 1, aspect_ratio = :equal, markerstrokewidth = 0.1)
 
+X = spiral&#39;
+kdtree = KDTree(X)
+
+k = 87
+df = tomato_density(kdtree, X, k)
+
 r = 87
-kdtree = KDTree(spiral&#39;)
-idxs = inrange(kdtree, spiral&#39;, r)
+idxs = inrange(kdtree, X, r)
 τ = 7.5e-7
+
 sol = tomato_clustering(idxs, df, τ)
 s1, s2 = getindex.(sol, 2)
 scatter(spiral[s1, 1], spiral[s2, 2]; options...)
@@ -22,4 +28,4 @@ fit(tomato, data)
 
 plot_diagram(tomato)</code></pre><pre><code class="language-julia hljs">tomato = Tomato(density_type=&quot;DTM&quot;, k=100)
 fit(tomato, data)
-plot_diagram(tomato)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../obama/">« Application to authors texts clustering</a><a class="docs-footer-nextpage" href="../types/">Types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Friday 10 March 2023 15:12">Friday 10 March 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+plot_diagram(tomato)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../obama/">« Application to authors texts clustering</a><a class="docs-footer-nextpage" href="../types/">Types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Saturday 11 March 2023 10:36">Saturday 11 March 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

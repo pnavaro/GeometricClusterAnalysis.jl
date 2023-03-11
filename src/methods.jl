@@ -1,5 +1,18 @@
 # -*- coding: utf-8 -*-
 
+function fix_color!(color)
+
+    for (i, c) in enumerate(sort(unique(color)))
+        for j in eachindex(color)
+            if color[j] == c
+               color[j] = i
+            end
+        end
+    end
+
+end
+
+
 export color_points_from_centers
 
 function color_points_from_centers(points, k, nsignal, model, hc)
@@ -27,13 +40,7 @@ function color_points_from_centers(points, k, nsignal, model, hc)
     color_points[color_points.==0] .= c + 1
     color_final = return_color(color_points, hc.colors, remain_indices)
 
-    for (i, color) in enumerate(sort(unique(color_final)))
-        for j in eachindex(color_final)
-            if color_final[j] == color
-               color_final[j] = i
-            end
-        end
-    end
+    fix_color!(color_final)
 
     return color_final
 

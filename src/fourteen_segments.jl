@@ -140,10 +140,10 @@ Gaussian noise.  When ``d>2, Y_i = 0`` for ``i>=2`` ; with the notation
 """
 function noisy_fourteen_segments(rng::AbstractRNG, nsignal::Int, nnoise::Int, σ, d)
 
-    generate_noise(n, d, xmin, xmax) = (xmax - xmin) .* rand(rng, (d, n)) .+ xmin
     x, c = fourteen_segments(rng, nsignal, σ, d)
-    noise = generate_noise(nnoise, d, -2, 2)
-    return Data{Float64}(n + nnoise, d, hcat(x, noise), vcat(c, zeros(Int, nnoise)))
+    xmin, xmax = -2, 2
+    noise = (xmax - xmin) .* rand(rng, d, nnoise) .+ xmin
+    return Data{Float64}(nsignal + nnoise, d, hcat(x, noise), vcat(c, zeros(Int, nnoise)))
 
 end
 
@@ -153,19 +153,21 @@ $(SIGNATURES)
 - `npoints` : total number of points 
 - `α` : fraction of outliers
 """
-function noisy_fourteen_segments(rng::AbstractRNG, npoints::Int, α, σ, d::Int)
+function noisy_fourteen_segments(rng::AbstractRNG, npoints::Int, α :: AbstractFloat, σ, d::Int)
 
+    @assert α < 1.0
     nnoise = trunc(Int, α * npoints)
     nsignal = npoints - nnoise
-    noisy_fourteen_segments(rng, nsinal, nnoise, σ, d)
+    noisy_fourteen_segments(rng, nsignal, nnoise, σ, d)
 
 end
 
 """
 $(SIGNATURES)
 """
-function noisy_fourteen_segments(npoints::Int, α, σ, d::Int)
+function noisy_fourteen_segments(npoints::Int, α :: AbstractFloat, σ, d::Int)
 
+    @assert α < 1.0
     rng = MersenneTwister()
     noisy_fourteen_segments(rng, npoints, α, σ, d)
 
@@ -174,7 +176,7 @@ end
 """
 $(SIGNATURES)
 """
-function noisy_fourteen_segments(nsignal::Int, nnoise::Int, d::Int)
+function noisy_fourteen_segments(nsignal::Int, nnoise::Int, σ, d::Int)
 
     rng = MersenneTwister()
     noisy_fourteen_segments(rng, nsignal, nnoise, σ, d)

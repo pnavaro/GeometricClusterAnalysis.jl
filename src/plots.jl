@@ -126,38 +126,6 @@ function _ellipsoids_args(
 
 end
 
-export color_points_from_centers
-
-function color_points_from_centers(points, k, nsignal, model, hc)
-
-    remain_indices = hc.startup_indices
-
-    matrices = [model.Σ[i] for i in remain_indices]
-    remain_centers = [model.centers[i] for i in remain_indices]
-    color_points = zeros(Int, size(points)[2])
-
-    GeometricClusterAnalysis.colorize!(
-        color_points,
-        model.μ,
-        model.ω,
-        points,
-        k,
-        nsignal,
-        remain_centers,
-        matrices,
-    )
-
-    c = length(model.ω)
-    remain_indices_2 = vcat(remain_indices, zeros(Int, c + 1 - length(remain_indices)))
-    color_points[color_points.==0] .= c + 1
-    color_points .= [remain_indices_2[c] for c in color_points]
-    color_points[color_points.==0] .= c + 1
-    color_final = return_color(color_points, hc.colors, remain_indices)
-
-    return color_final
-
-end
-
 
 @recipe function f(results::TrimmedBregmanResult)
 

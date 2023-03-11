@@ -2,6 +2,10 @@
 
 ## Three curves
 
+```@docs
+noisy_three_curves
+```
+
 ```@example fake
 using Random
 using Plots
@@ -21,33 +25,45 @@ plot(dataset, palette = :rainbow)
 
 ## Infinity symbol
 
+```@docs
+infinity_symbol
+```
+
 ```@example fake
 
-signal = 500 
-noise = 50
+nsignal = 500 
+nnoise = 50
 σ = 0.05
 dimension = 3
 noise_min = -5
 noise_max = 5
 
-dataset = infinity_symbol(rng, signal, noise, σ, dimension, noise_min, noise_max)
+dataset = infinity_symbol(rng, nsignal, nnoise, σ, dimension, noise_min, noise_max)
 
 plot(dataset)
 ```
 
 ## Fourteen segments
 
+```@docs
+noisy_fourteen_segments
+```
+
 ```@example fake
 using LinearAlgebra
-n = 490 
+nsignal = 490 
 nnoise = 200 
 d = 2
 sigma = 0.02 .* Matrix(I, d, d)
-dataset = noisy_fourteen_segments(n, nnoise, sigma, d)
+dataset = noisy_fourteen_segments(nsignal, nnoise, sigma, d)
 plot(dataset, aspect_ratio=1, palette = :lightrainbow)
 ```
 
 ## Two spirals
+
+```@docs
+noisy_nested_spirals
+```
 
 ```@example fake
 nsignal = 2000 # number of signal points

@@ -10,14 +10,20 @@ using GeometricClusterAnalysis
 using NearestNeighbors
 using StatsBase
 
-spiral = readdlm(joinpath(@__DIR__, "spiral_w_o_density.txt"))
+spiral = readdlm(joinpath(pkgdir(GeometricClusterAnalysis), "data", "spiral_w_o_density.txt"))
 
 options = (ms = 1, aspect_ratio = :equal, markerstrokewidth = 0.1)
 
+X = spiral'
+kdtree = KDTree(X)
+
+k = 87
+df = tomato_density(kdtree, X, k)
+
 r = 87
-kdtree = KDTree(spiral')
-idxs = inrange(kdtree, spiral', r)
+idxs = inrange(kdtree, X, r)
 τ = 7.5e-7
+
 sol = tomato_clustering(idxs, df, τ)
 s1, s2 = getindex.(sol, 2)
 scatter(spiral[s1, 1], spiral[s2, 2]; options...)

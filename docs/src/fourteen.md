@@ -14,15 +14,15 @@ nsignal = n
 nnoise = 200 
 dim = 2
 
-sigma = 0.02 .* Matrix(I, dim, dim)
+σ = 0.02 .* Matrix(I, dim, dim)
 
-dataset = noisy_fourteen_segments(n, nnoise, sigma, dim)
+dataset = noisy_fourteen_segments(nsignal, nnoise, σ, dim)
 
 plot(dataset, aspect_ratio=true, palette = :default, framestyle = :none)
 ```
 
 ```@example fourteen
-nb_clusters = 14
+nclusters = 14
 k = 10
 c = 50
 iter_max = 100
@@ -34,7 +34,8 @@ nb_means_removed = 10
 
 ```@example fourteen
 
-col_kplm = clustering_kplm( dataset.points, nb_clusters, k, c, nsignal, iter_max, nstart; nb_means_removed = 0)
+col_kplm = clustering_kplm( dataset.points, nclusters, k, c, nsignal, iter_max, nstart; 
+   nb_means_removed = nb_means_removed)
 
 l = @layout [a b]
 p1 = pointset(dataset.points, dataset.colors)
@@ -50,7 +51,7 @@ Clustering.mutualinfo(dataset.colors, col_kplm)
 ## k-PDTM
 
 ```@example fourteen
-col_kpdtm = clustering_kpdtm(dataset.points, nb_clusters, k, c, nsignal, iter_max, nstart)
+col_kpdtm = clustering_kpdtm(dataset.points, nclusters, k, c, nsignal, iter_max, nstart)
 l = @layout [a b]
 p1 = plot(dataset, aspect_ratio = true, framestyle = :none, markersize = 2)
 p2 = pointset(dataset.points, col_kpdtm, legend = false)
@@ -64,7 +65,7 @@ Clustering.mutualinfo(dataset.colors, col_kpdtm)
 ## Q-witnessed distance
 
 ```@example fourteen
-witnessed_colors = clustering_witnessed(dataset.points, nb_clusters, k, c, 
+witnessed_colors = clustering_witnessed(dataset.points, nclusters, k, c, 
                                         nsignal, iter_max, nstart)
 l = @layout [a b]
 p1 = plot(dataset, aspect_ratio = true, framestyle = :none, markersize = 2)
@@ -79,7 +80,7 @@ Clustering.mutualinfo(dataset.colors, witnessed_colors)
 ## Power function
 
 ```@example fourteen
-buchet_colors = clustering_power_function(dataset.points, nb_clusters, k, c, 
+buchet_colors = clustering_power_function(dataset.points, nclusters, k, c, 
                                           nsignal, iter_max, nstart)
 l = @layout [a b]
 p1 = plot(dataset, aspect_ratio = true, framestyle = :none, markersize = 2)
@@ -94,7 +95,7 @@ Clustering.mutualinfo(dataset.colors, buchet_colors)
 ## DTM filtration
 
 ```@example fourteen
-dtm_colors = clustering_dtm_filtration(dataset.points, nb_clusters, k, c, nsignal, iter_max, nstart)
+dtm_colors = clustering_dtm_filtration(dataset.points, nclusters, k, c, nsignal, iter_max, nstart)
 l = @layout [a b]
 p1 = plot(dataset, aspect_ratio = true, framestyle = :none, markersize = 2)
 p2 = pointset(dataset.points, dtm_colors)
@@ -110,7 +111,7 @@ Clustering.mutualinfo(dataset.colors, dtm_colors)
 
 ```@example fourteen
 radius = 0.12
-tomato_colors = clustering_tomato(dataset.points, nb_clusters, k, c, nsignal, radius, iter_max, nstart)
+tomato_colors = clustering_tomato(dataset.points, nclusters, k, c, nsignal, radius, iter_max, nstart)
 l = @layout [a b]
 p1 = plot(dataset, aspect_ratio = true, framestyle = :none, markersize = 2)
 p2 = pointset(dataset.points, tomato_colors)

@@ -1,4 +1,44 @@
 # -*- coding: utf-8 -*-
+
+export color_points_from_centers
+
+function color_points_from_centers(points, k, nsignal, model, hc)
+
+    remain_indices = hc.startup_indices
+    matrices = [model.Σ[i] for i in remain_indices]
+    remain_centers = [model.centers[i] for i in remain_indices]
+    color_points = zeros(Int, size(points)[2])
+
+    GeometricClusterAnalysis.colorize!(
+        color_points,
+        model.μ,
+        model.ω,
+        points,
+        k,
+        nsignal,
+        remain_centers,
+        matrices,
+    )
+
+    c = length(model.ω)
+    remain_indices_2 = vcat(remain_indices, zeros(Int, c + 1 - length(remain_indices)))
+    color_points[color_points.==0] .= c + 1
+    color_points .= [remain_indices_2[c] for c in color_points]
+    color_points[color_points.==0] .= c + 1
+    color_final = return_color(color_points, hc.colors, remain_indices)
+
+    for (i, color) in enumerate(sort(unique(color_final)))
+        for j in eachindex(color_final)
+            if color_final[j] == color
+               color_final[j] = i
+            end
+        end
+    end
+
+    return color_final
+
+end
+
 export clustering_kplm
 
 # +
@@ -28,13 +68,13 @@ function clustering_kplm(
         nb_clusters,
     )
 
-    hc = hierarchical_clustering_lem(
+    hclust = hierarchical_clustering_lem(
         distance_matrix,
         infinity = infinity,
         threshold = threshold,
     )
 
-    return color_points_from_centers(points, k, nsignal, dist_func, hc)
+    return color_points_from_centers(points, k, nsignal, distance_function, hclust)
 
 end
 # -
@@ -56,24 +96,24 @@ function clustering_kpdtm(
 
     rng = MersenneTwister(6625)
 
-    dist_func = kplm(rng, points, k, c, nsignal, iter_max, nstart, f_Σ!)
+    distance_function = kplm(rng, points, k, c, nsignal, iter_max, nstart, f_Σ!)
 
-    distance_matrix = build_distance_matrix(dist_func)
+    distance_matrix = build_distance_matrix(distance_function)
 
     threshold, infinity = compute_threshold_infinity(
-        dist_func,
+        distance_function,
         distance_matrix,
         nb_means_removed,
         nb_clusters,
     )
 
-    hc = hierarchical_clustering_lem(
+    hclust = hierarchical_clustering_lem(
         distance_matrix,
         infinity = infinity,
         threshold = threshold,
     )
 
-    return color_points_from_centers(points, k, nsignal, dist_func, hc)
+    return color_points_from_centers(points, k, nsignal, distance_function, hclust)
 
 end
 

@@ -5,6 +5,7 @@ $(SIGNATURES)
 """
 function noisy_nested_spirals(npoints::Int, α::AbstractFloat, σ, dimension::Int)
 
+    @assert α < 1.0
     rng = MersenneTwister()
     noisy_nested_spirals(rng, npoints, α, σ, dimension)
 
@@ -24,8 +25,9 @@ end
 """
 $(SIGNATURES)
 """
-function noisy_nested_spirals(rng::AbstractRNG, npoints::Int, α, σ, dimension::Int)
+function noisy_nested_spirals(rng::AbstractRNG, npoints::Int, α::AbstractFloat, σ, dimension::Int)
 
+    @assert α < 1.0
     nnoise = trunc(Int, α * npoints)
     nsignal = npoints - nnoise
     noisy_nested_spirals(rng, nsignal, nnoise, σ, dimension)
@@ -45,7 +47,7 @@ Signal points are ``x = y+z`` with
 `d` is the dimension of the data and sigma, the standard deviation of the additive Gaussian noise.
 When ``d>2, y_i = 0`` for ``i>=2``; with the notation ``y=(y_i)_{i=1..d}``
 """
-function noisy_nested_spirals(rng, nsignal, nnoise, σ, dimension)
+function noisy_nested_spirals(rng::AbstractRNG, nsignal::Int, nnoise::Int, σ, dimension::Int)
 
     nmid = nsignal ÷ 2
 

@@ -42,6 +42,7 @@ include("examples/hierarchical_clustering_based_on_union_of_ellipsoids_on_two_sp
 ## See Also
 
 Julia packages providing other clustering methods:
+ - [RobustTDA.jl](https://github.com/sidv23/RobustTDA.jl)
  - [Clustering.jl](https://github.com/JuliaStats/Clustering.jl)
  - [ClusterAnalysis.jl](https://github.com/AugustoCL/ClusterAnalysis.jl)
  - [QuickShiftClustering.jl](https://github.com/rened/QuickShiftClustering.jl)

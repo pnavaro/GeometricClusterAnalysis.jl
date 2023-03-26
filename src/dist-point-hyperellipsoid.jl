@@ -17,6 +17,7 @@ function query(point, hyperellipsoid)
         y[i] = diff' *  hyperellipsoid.axis[i]
     end
 
+    # Compute the closest hyperellipsoid point in the axis-aligned
     # coordinate system.
     result = Distance(0.0, 0.0, [zeros(d), zeros(d)])
     x = zeros(d)

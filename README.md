@@ -22,7 +22,7 @@ julia --project
 ```julia
 import Pkg
 Pkg.instantiate()
-include("examples/hierarchical_clustering_based_on_union_of_ellipsoids_on_two_spirals.jl")
+include("examples/two_spirals.jl")
 ```
 
 ![](https://github.com/pnavaro/GeometricClusterAnalysis.jl/raw/gh-pages/dev/assets/anim_two_spirals.gif)

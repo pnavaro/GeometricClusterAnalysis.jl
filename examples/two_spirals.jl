@@ -7,7 +7,6 @@
 
 using GeometricClusterAnalysis
 using Plots
-using ProgressMeter
 using Random
 using Statistics
 
@@ -198,7 +197,7 @@ let idx = 0
     next_sqtime = timesteps[idx+1]
     updated = false
     
-    @showprogress 1 for i = eachindex(sq_time)
+    for i = eachindex(sq_time)
         while sq_time[i] >= next_sqtime
             idx += 1
             next_sqtime = timesteps[idx+1]

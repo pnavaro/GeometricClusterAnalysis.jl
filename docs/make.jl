@@ -2,12 +2,24 @@ using Documenter
 using DocumenterCitations
 using GeometricClusterAnalysis
 using Plots
+using Literate
 
 ENV["GKSwstype"] = "100"
 
 using DocumenterCitations
 
 bib = CitationBibliography(joinpath(@__DIR__, "references.bib"), sorting = :nyt)
+
+doc_outputdir  = joinpath(@__DIR__, "src")
+nb_outputdir   = joinpath(doc_outputdir, "notebooks")
+
+fourteen_lines = joinpath(@__DIR__, "..", "examples", "fourteen_lines.jl") 
+Literate.markdown(fourteen_lines, doc_outputdir, execute = false, credit = false)
+Literate.notebook(fourteen_lines, nb_outputdir, execute = false)
+
+two_spirals = joinpath(@__DIR__, "..", "examples", "two_spirals.jl") 
+Literate.markdown(two_spirals, doc_outputdir, execute = false, credit = false)
+Literate.notebook(two_spirals, nb_outputdir, execute = false)
 
 makedocs(
     bib,
@@ -30,7 +42,7 @@ makedocs(
         "Fleas dataset" => "fleas.md",
         "Three Curves" => "three_curves.md",
         "Two Spirals" => "two_spirals.md",
-        "Fourteen curves" => "fourteen.md",
+        "Fourteen lines" => "fourteen_lines.md",
         "Trimmed Bregman Clustering" =>
             ["trimmed-bregman.md", "poisson1.md", "poisson2.md", "obama.md"],
         "ToMaTo" => "tomato.md",

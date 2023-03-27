@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # # Different clustering for different methods
 
+#md # [![](https://mybinder.org/badge_logo.svg)](@__BINDER_ROOT_URL__/notebooks/example.ipynb)
+#md # [![](https://img.shields.io/badge/show-nbviewer-579ACA.svg)](@__NBVIEWER_ROOT_URL__/notebooks/example.ipynb)
+
 import Clustering
 using GeometricClusterAnalysis
 using LinearAlgebra
@@ -29,6 +32,7 @@ dataset = noisy_fourteen_segments(n, nnoise, sigma, dim)
 
 plot(dataset, aspect_ratio=true, palette = :default, framestyle = :none)
 
+# +
 
 points = dataset.points
 

@@ -1,6 +1,6 @@
 # Fake datasets
 
-## Three curves
+## Three curves dataset
 
 ```@docs
 noisy_three_curves
@@ -23,7 +23,7 @@ dataset = noisy_three_curves( rng, nsignal, nnoise, sigma, dim)
 plot(dataset, palette = :rainbow)
 ```
 
-## Infinity symbol
+## Infinity symbol dataset
 
 ```@docs
 infinity_symbol
@@ -43,7 +43,7 @@ dataset = infinity_symbol(rng, nsignal, nnoise, σ, dimension, noise_min, noise_
 plot(dataset)
 ```
 
-## Fourteen segments
+## Fourteen segments dataset
 
 ```@docs
 noisy_fourteen_segments
@@ -59,7 +59,7 @@ dataset = noisy_fourteen_segments(nsignal, nnoise, sigma, d)
 plot(dataset, aspect_ratio=1, palette = :lightrainbow)
 ```
 
-## Two spirals
+## Two spirals dataset
 
 ```@docs
 noisy_nested_spirals

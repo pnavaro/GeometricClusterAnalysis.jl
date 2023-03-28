@@ -45,13 +45,13 @@ nstart = 10;   # number of initializations of the algorithm kPLM
 
 function f_Σ!(Σ) end
 
-# The parameter "indexed_by_r2 = TRUE" is the default parameter in the function kplm. We should not modify it since some birth times are negative.
+# The parameter "indexed_by_r2 = true" is the default parameter in the function kplm. We should not modify it since some birth times are negative.
 #
 # It is due to the logarithm of the determinant of some matrices that are negative. This problem can be solved by adding constraints to the matrices, with the argument "f_Σ!". In particular, forcing eigenvalues to be non smaller than 1 works.
 
 # ### Application of the method
 
-df = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
+distance_function = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
 
 # ## Clustering based on the persistence of the union of ellipsoids filtration
 
@@ -59,7 +59,7 @@ df = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
 
 # This is a matrix that contains the birth times of the ellipsoids in the diagonal, and the intersecting times of pairs of ellipsoids in the lower left triangular part of the matrix.
 
-mh = build_distance_matrix(df)
+distance_matrix = build_distance_matrix(distance_function)
 
 # ### Selection of parameter "threshold"
 
@@ -71,17 +71,17 @@ mh = build_distance_matrix(df)
 #
 # The parameter "threshold" aims at removing ellipsoids born after time "threshold". Such ellipsoids are considered as irrelevant. This may be due to a bad initialisation of the algorithm that creates ellipsoids in bad directions with respect to the data.
 
-hc = hierarchical_clustering_lem(
-    mh,
+hc1 = hierarchical_clustering_lem(
+    distance_matrix,
     infinity = Inf,
     threshold = Inf,
     store_colors = false,
     store_timesteps = false,
 )
 
-lims = (min(minimum(hc.birth), minimum(hc.death)),
-        max(maximum(hc.birth), maximum(hc.death[hc.death.!=Inf])) + 1)
-plot(hc, xlims = lims, ylims = lims)
+lims = (min(minimum(hc1.birth), minimum(hc1.death)),
+        max(maximum(hc1.birth), maximum(hc1.death[hc1.death.!=Inf])) + 1)
+plot(hc1, xlims = lims, ylims = lims)
 
 # Note that the "+1" in the second argument of lims and lims2 hereafter is to separate
 # the components whose death time is $\infty$ to other components.
@@ -93,7 +93,7 @@ plot(hc, xlims = lims, ylims = lims)
 # We then have to select parameter "infinity". Connected components which lifetime is larger than "infinity" are components that we want not to die.
 
 hc2 = hierarchical_clustering_lem(
-    mh,
+    distance_matrix,
     infinity = Inf,
     threshold = 4,
     store_colors = false,
@@ -110,7 +110,7 @@ plot(hc2, xlims = lims2, ylims = lims2)
 # ### Clustering
 
 hc3 = hierarchical_clustering_lem(
-    mh,
+    distance_matrix,
     infinity = 10,
     threshold = 4,
     store_colors = true,
@@ -142,7 +142,7 @@ timesteps = hc3.timesteps;
 # Therefore we need to compute new labels of the data points, with respect to the new ellipsoids.
 
 remain_indices = hc3.startup_indices
-color_points, dists = subcolorize(data.points, npoints, df, remain_indices)
+points_colors, distances = subcolorize(data.points, npoints, distance_function, remain_indices)
 
 # ## Removing outliers
 
@@ -150,8 +150,8 @@ color_points, dists = subcolorize(data.points, npoints, df, remain_indices)
 
 nsignal_vect = 1:npoints
 idxs = zeros(Int, npoints)
-sortperm!(idxs, dists, rev = false)
-costs = cumsum(dists[idxs])
+sortperm!(idxs, distances, rev = false)
+costs = cumsum(distances[idxs])
 plot(
     nsignal_vect,
     costs,
@@ -169,59 +169,21 @@ nsignal = 2100
 
 if nsignal < npoints
     for i in idxs[(nsignal+1):npoints]
-        color_points[i] = 0
+        points_colors[i] = 0
     end
 end
-
-# ### Preparation of the animation
-
-# Since "indexed_by_r2 = TRUE", we use sq_time and not its squareroot.
-
-sq_time = (0:200) ./ 200 .* (timesteps[end-1] - timesteps[1]) .+ timesteps[1] # Depends on "timesteps" vector.
-Col2 = Vector{Int}[]
-Colors2 = Vector{Int}[]
-
-let idx = 0
-
-    new_colors2 = zeros(Int, npoints)
-    new_col2 = zeros(Int, nellipsoids)
-    next_sqtime = timesteps[idx+1]
-    updated = false
-    
-    for i = eachindex(sq_time)
-        while sq_time[i] >= next_sqtime
-            idx += 1
-            next_sqtime = timesteps[idx+1]
-            updated = true
-        end
-        if updated
-            new_col2 = ellipsoids_colors[idx+1]
-            new_colors2 = return_color(color_points, new_col2, remain_indices)
-            updated = false
-        end
-        push!(Col2, copy(new_col2))
-        push!(Colors2, copy(new_colors2))
-    end
-    
-    # If the cost of the point is smaller to the time : label 0 (not in the ellipsoid)
-    for i = 1:length(Col2), j = 1:data.np
-        Colors2[i][j] = Colors2[i][j] * (dists[j] <= sq_time[i]) 
-    end
-
-end
-    
-μ = [df.μ[i] for i in remain_indices if i > 0];
-ω = [df.ω[i] for i in remain_indices if i > 0];
-Σ = [df.Σ[i] for i in remain_indices if i > 0];
-
-ncolors2 = length(Colors2);
-
-anim = @animate for i in [1:ncolors2; Iterators.repeated(ncolors2, 30)...]
-    ellipsoids(data.points, Col2[i], Colors2[i], μ, ω, Σ, sq_time[i]; markersize = 3)
-    xlims!(-60, 60)
-    ylims!(-60, 60)
-end;
 
 # ### Animation - Clustering result
+
+ellipsoids_frames, points_frames, μ, ω, Σ, sq_time = create_ellipsoids_animation( 
+    distance_function, timesteps, ellipsoids_colors, points_colors, distances, remain_indices )
+
+nframes = length(points_frames)
+
+anim = @animate for i in [1:nframes; Iterators.repeated(nframes, 30)...]
+    ellipsoids(data.points, ellipsoids_frames[i], points_frames[i], μ, ω, Σ, sq_time[i]; markersize = 3)
+    xlims!(-60, 60)
+    ylims!(-60, 60)
+end
 
 gif(anim, "anim_kplm.gif", fps = 5)

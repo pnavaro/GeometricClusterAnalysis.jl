@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # # Different clustering for different methods
 
 #md # [![](https://mybinder.org/badge_logo.svg)](@__BINDER_ROOT_URL__/notebooks/example.ipynb)
@@ -32,13 +31,9 @@ dataset = noisy_fourteen_segments(n, nnoise, sigma, dim)
 
 plot(dataset, aspect_ratio=true, palette = :default, framestyle = :none)
 
-# +
-
 points = dataset.points
 
 # ## k-PLM
-
-# +
 
 col_kplm = clustering_kplm( dataset.points, nb_clusters, k, c, nsignal, iter_max, nstart; nb_means_removed = 0)
 
@@ -46,7 +41,6 @@ l = @layout [a b]
 p1 = pointset(dataset.points, dataset.colors)
 p2 = pointset(dataset.points, col_kplm)
 plot(p1, p2, layout = l, legend = false)
-# -
 
 import Clustering
 Clustering.mutualinfo(dataset.colors, col_kplm)

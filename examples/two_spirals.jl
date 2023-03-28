@@ -71,7 +71,6 @@ mh = build_distance_matrix(df)
 #
 # The parameter "threshold" aims at removing ellipsoids born after time "threshold". Such ellipsoids are considered as irrelevant. This may be due to a bad initialisation of the algorithm that creates ellipsoids in bad directions with respect to the data.
 
-# +
 hc = hierarchical_clustering_lem(
     mh,
     infinity = Inf,
@@ -83,7 +82,6 @@ hc = hierarchical_clustering_lem(
 lims = (min(minimum(hc.birth), minimum(hc.death)),
         max(maximum(hc.birth), maximum(hc.death[hc.death.!=Inf])) + 1)
 plot(hc, xlims = lims, ylims = lims)
-# -
 
 # Note that the "+1" in the second argument of lims and lims2 hereafter is to separate
 # the components whose death time is $\infty$ to other components.
@@ -94,7 +92,6 @@ plot(hc, xlims = lims, ylims = lims)
 
 # We then have to select parameter "infinity". Connected components which lifetime is larger than "infinity" are components that we want not to die.
 
-# +
 hc2 = hierarchical_clustering_lem(
     mh,
     infinity = Inf,
@@ -107,13 +104,11 @@ lims2 = (min(minimum(hc2.birth), minimum(hc2.death)),
          max(maximum(hc2.birth), maximum(hc2.death[hc2.death.!=Inf])) + 1)
 
 plot(hc2, xlims = lims2, ylims = lims2)
-# -
 
 # We select "infinity = 15". Since there are clearly two connected components that have a lifetime much larger than others. This lifetime is larger than 15, whereas the lifetime of others is smaller than 15.
 
 # ### Clustering
 
-# +
 hc3 = hierarchical_clustering_lem(
     mh,
     infinity = 10,
@@ -124,7 +119,6 @@ hc3 = hierarchical_clustering_lem(
 
 # Using the sames xlims and ylims than the previous persistence diagram.
 plot(hc3, xlims = lims2, ylims = lims2) 
-# -
 
 # ### Getting the number of components, colors of ellipsoids and times of evolution of the clustering
 
@@ -171,7 +165,6 @@ ylabel!("Cost")
 #
 # We set the label of the (npoints - nsignal) points with largest cost to 0. These points are considered as outliers.
 
-# +
 nsignal = 2100
 
 if nsignal < npoints
@@ -179,13 +172,11 @@ if nsignal < npoints
         color_points[i] = 0
     end
 end
-# -
 
 # ### Preparation of the animation
 
 # Since "indexed_by_r2 = TRUE", we use sq_time and not its squareroot.
 
-# +
 sq_time = (0:200) ./ 200 .* (timesteps[end-1] - timesteps[1]) .+ timesteps[1] # Depends on "timesteps" vector.
 Col2 = Vector{Int}[]
 Colors2 = Vector{Int}[]
@@ -230,8 +221,6 @@ anim = @animate for i in [1:ncolors2; Iterators.repeated(ncolors2, 30)...]
     xlims!(-60, 60)
     ylims!(-60, 60)
 end;
-
-# -
 
 # ### Animation - Clustering result
 

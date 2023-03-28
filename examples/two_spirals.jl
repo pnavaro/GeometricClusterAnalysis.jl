@@ -148,18 +148,10 @@ points_colors, distances = subcolorize(data.points, npoints, distance_function, 
 
 # ### Selection of the number of outliers
 
-nsignal_vect = 1:npoints
 idxs = zeros(Int, npoints)
 sortperm!(idxs, distances, rev = false)
 costs = cumsum(distances[idxs])
-plot(
-    nsignal_vect,
-    costs,
-    title = "Selection of the number of signal points",
-    legend = false,
-)
-xlabel!("Number of signal points")
-ylabel!("Cost")
+plot( costs, legend = false, xlabel = "number of points", ylabel = "cost")
 
 # We choose "nsignal", the number of points at which there is a slope change in the cost curve.
 #
@@ -167,11 +159,7 @@ ylabel!("Cost")
 
 nsignal = 2100
 
-if nsignal < npoints
-    for i in idxs[(nsignal+1):npoints]
-        points_colors[i] = 0
-    end
-end
+points_colors[idxs[(nsignal+1):end]] .= 0
 
 # ### Animation - Clustering result
 

@@ -24,7 +24,7 @@ dim = 2       # dimension of the data
 rng = MersenneTwister(123)
 data = noisy_nested_spirals(rng, nsignal, nnoise, σ, dim)
 npoints = size(data.points, 2)
-print("The dataset contains ", npoints, " points, of dimension ", dim, ".")
+println("The dataset contains $npoints points, of dimension $dim.")
 
 # ### Data display
 
@@ -37,7 +37,7 @@ plot(data)
 k = 20        # number of nearest neighbors
 c = 30        # number of ellipsoids
 iter_max = 20 # maximum number of iterations of the algorithm kPLM
-nstart = 10;   # number of initializations of the algorithm kPLM
+nstart = 10;  # number of initializations of the algorithm kPLM
 
 # ### Method
 
@@ -45,7 +45,7 @@ nstart = 10;   # number of initializations of the algorithm kPLM
 
 function f_Σ!(Σ) end
 
-# The parameter "indexed_by_r2 = true" is the default parameter in the function kplm. We should not modify it since some birth times are negative.
+# The parameter `indexed_by_r2 = true` is the default parameter in the function kplm. We should not modify it since some birth times are negative.
 #
 # It is due to the logarithm of the determinant of some matrices that are negative. This problem can be solved by adding constraints to the matrices, with the argument "f_Σ!". In particular, forcing eigenvalues to be non smaller than 1 works.
 

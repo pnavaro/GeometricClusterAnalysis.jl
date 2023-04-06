@@ -1,9 +1,8 @@
-image: registry.plmlab.math.cnrs.fr/navaro/julia-rcall:1.7.2
+image: registry.plmlab.math.cnrs.fr/navaro/julia-rcall:1.8.5
 
 
 before_script:
-  # workaround for https://github.com/JuliaDocs/Documenter.jl/issues/686
-  # - apt-get -qq update; apt-get -y install git
+  - Rscript install.R
   - julia --project=@. -e "import Pkg; Pkg.build()"
 
 default:

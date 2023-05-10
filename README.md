@@ -42,9 +42,10 @@ include("examples/two_spirals.jl")
 ## See Also
 
 Julia packages providing other clustering methods:
- - [RobustTDA.jl](https://github.com/sidv23/RobustTDA.jl)
  - [Clustering.jl](https://github.com/JuliaStats/Clustering.jl)
  - [ClusterAnalysis.jl](https://github.com/AugustoCL/ClusterAnalysis.jl)
- - [QuickShiftClustering.jl](https://github.com/rened/QuickShiftClustering.jl)
- - [SpectralClustering.jl](https://github.com/lucianolorenti/SpectralClustering.jl)
  - [ClusteringToMaTo.jl](https://github.com/pnavaro/ClusteringToMaTo.jl)
+ - [ParallelKMeans.jl](https://github.com/PyDataBlog/ParallelKMeans.jl)
+ - [QuickShiftClustering.jl](https://github.com/rened/QuickShiftClustering.jl)
+ - [RobustTDA.jl](https://github.com/sidv23/RobustTDA.jl)
+ - [SpectralClustering.jl](https://github.com/lucianolorenti/SpectralClustering.jl)

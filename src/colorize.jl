@@ -35,9 +35,9 @@ function colorize!(colors, μ, ω, points, k, nsignal::Int, centers, Σ)
             dists[j] = sqmahalanobis(x, centers[i], invΣ)
         end
 
-        idxs .= sortperm(dists)
+        partialsortperm!(idxs, dists, 1:k)
 
-        μ[i] .= vec(mean(points[:, idxs[1:k]], dims = 2))
+        μ[i] .= vec(mean(view(points, :, idxs[1:k]), dims = 2))
 
         ω[i] =
             mean(sqmahalanobis(points[:, j], μ[i], invΣ) for j in idxs[1:k]) +
@@ -95,7 +95,7 @@ function colorize(points, k, nsignal, centers, Σ)
             dists[j] = sqmahalanobis(x, centers[i], invΣ)
         end
 
-        idxs .= sortperm(dists)
+        partialsortperm!(idxs, dists, 1:k)
 
         push!(μ, vec(mean(points[:, idxs[1:k]], dims = 2)))
         push!(
@@ -124,7 +124,7 @@ function colorize(points, k, nsignal, centers, Σ)
 
     # Step 3 : Trimming and Update cost
 
-    sortperm!(idxs, dists, rev = true)
+    partialsortperm!(idxs, dists, 1:(npoints-nsignal), rev = true)
     if nsignal < npoints
         for i in idxs[1:(npoints-nsignal)]
             colors[i] = 0
@@ -185,7 +185,7 @@ function subcolorize(points, nsignal::Int, result, startup_indices)
 
     # Trimming and Update cost
 
-    sortperm!(idxs, dists, rev = true)
+    partialsortperm!(idxs, dists, 1:(npoints-nsignal), rev = true)
     if nsignal < npoints
         for i in idxs[1:(npoints-nsignal)]
             colors[i] = 0

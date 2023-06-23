@@ -92,6 +92,7 @@ function trimmed_bregman_clustering(
     new_centers = zeros(d, k)
     opt_cluster_nonempty = trues(k)
     nstep = 0
+    ix = zeros(Int, n)
 
     for n_times = 1:nstart
 
@@ -122,7 +123,7 @@ function trimmed_bregman_clustering(
             end
 
             if a > 0
-                ix = sortperm(divergence_min, rev = true)
+                sortperm!(ix, divergence_min, rev = true)
                 for i in ix[1:a]
                     cluster[i] = 0
                 end
@@ -165,7 +166,7 @@ function trimmed_bregman_clustering(
     end
 
     if a > 0
-        ix = sortperm(divergence_min, rev = true)
+        sortperm!(ix, divergence_min, rev = true)
         for i in ix[1:a]
             opt_cluster[i] = 0
         end
@@ -236,6 +237,7 @@ function trimmed_bregman_clustering(
 
     divergence_min = fill(Inf, n)
     divergence = similar(divergence_min)
+    ix = zeros(Int, n)
 
     while non_stopping
 
@@ -256,7 +258,7 @@ function trimmed_bregman_clustering(
         end
 
         if a > 0
-            ix = sortperm(divergence_min, rev = true)
+            sortperm!(ix, divergence_min, rev = true)
             for i in ix[1:a]
                 cluster[i] = 0
             end
@@ -290,7 +292,7 @@ function trimmed_bregman_clustering(
     end
 
     if a > 0
-        ix = sortperm(divergence_min, rev = true)
+        sortperm!(ix, divergence_min, rev = true)
         for i in ix[1:a]
             cluster[i] = 0
         end

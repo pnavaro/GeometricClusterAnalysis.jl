@@ -33,7 +33,6 @@ import GeometricClusterAnalysis: sqmahalanobis
             dist = mahalanobis(P,centers[i,],Sigma[[i]])
             nn = sort(dist, index.return=TRUE)
             ix = nn$ix[1:k]
-            print(ix)
             means[i,] = colMeans(matrix(P[ix,],k,d))
       }
     """

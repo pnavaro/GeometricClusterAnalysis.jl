@@ -61,9 +61,9 @@ function recolor(points, centers, k, nsignal)
     end
 
     # Step 3 : Trimming and Update cost
-    ix = sortperm(distance_min, rev = true)
 
     if nsignal < n
+        ix = sortperm(distance_min, rev = true)
         colors[ix[1:(n-nsignal)]] .= 0
     end
 
@@ -112,6 +112,7 @@ function kpdtm(rng::AbstractRNG, points, k::Int, c::Int, nsignal::Int, iter_max:
     kept_centers = trues(c)
 
     distance_min = zeros(n)
+    ix = zeros(Int, n)
 
     for n_times = 1:nstart
 
@@ -162,14 +163,13 @@ function kpdtm(rng::AbstractRNG, points, k::Int, c::Int, nsignal::Int, iter_max:
 
             # Step 3 : Trimming and Update cost
 
-            ix = sortperm(distance_min, rev = true)
+            sortperm!(ix, distance_min, rev = true)
 
             if nsignal < n
                 colors[ix[1:(n-nsignal)]] .= 0
             end
 
-            ds = distance_min[ix][(n-nsignal+1):end]
-            cost = mean(ds)
+            cost = mean(view(distance_min, ix[(n-nsignal+1):end]))
 
             # Step 4 : Update centers
 

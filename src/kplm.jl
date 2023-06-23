@@ -168,7 +168,7 @@ function kplm(
 
                         compute_dists!(dists[tid], centers[i], points, Σ[i])
 
-                        idxs[tid] .= sortperm(dists[tid])[1:k]
+                        idxs[tid] .= partialsortperm(dists[tid], 1:k)
 
                         μ[i] .= vec(mean(view(points, :, idxs[tid]), dims = 2))
 
@@ -225,7 +225,7 @@ function kplm(
 
                             compute_dists!(dists[tid], centers[i], points, Σ[i])
 
-                            idxs[tid] .= sortperm(dists[tid])[1:k]
+                            idxs[tid] .= partialsortperm(dists[tid], 1:k)
 
                             μ[i] .= vec(mean(points[:, idxs[tid]], dims = 2))
 

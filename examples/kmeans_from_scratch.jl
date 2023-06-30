@@ -9,9 +9,9 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.14.4
 #   kernelspec:
-#     display_name: Julia 1.8.5
+#     display_name: Julia 1.9.0
 #     language: julia
-#     name: julia-1.8
+#     name: julia-1.9
 # ---
 
 # +

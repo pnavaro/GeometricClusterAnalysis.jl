@@ -14,3 +14,4 @@ clustering_kmeans.png
 clustering_tclust.png
 True_clustering.png
 clustering_ToMATo.png
+examples/kmeans_from_scratch.ipynb

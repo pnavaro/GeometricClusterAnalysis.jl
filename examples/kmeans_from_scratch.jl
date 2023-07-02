@@ -7,9 +7,9 @@
 #       extension: .jl
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.14.4
+#       jupytext_version: 1.14.5
 #   kernelspec:
-#     display_name: Julia 1.9.0
+#     display_name: Julia 1.9.1
 #     language: julia
 #     name: julia-1.9
 # ---
@@ -118,6 +118,3 @@ result = kmeans_simple(data, 4)
 scatter(data[1, :], data[2, :])
 # draw the centroids
 scatter!(result[1][1, :], result[1][2, :])
-# -
-
-

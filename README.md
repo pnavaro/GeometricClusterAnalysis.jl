@@ -41,7 +41,7 @@ include("examples/two_spirals.jl")
 
 ## See Also
 
-Julia packages providing other clustering methods:
+Julia packages providing clustering methods:
  - [Clustering.jl](https://github.com/JuliaStats/Clustering.jl)
  - [ClusterAnalysis.jl](https://github.com/AugustoCL/ClusterAnalysis.jl)
  - [ClusteringToMaTo.jl](https://github.com/pnavaro/ClusteringToMaTo.jl)

@@ -15,3 +15,4 @@ clustering_tclust.png
 True_clustering.png
 clustering_ToMATo.png
 examples/kmeans_from_scratch.ipynb
+examples/plot_distance_to_measure.ipynb

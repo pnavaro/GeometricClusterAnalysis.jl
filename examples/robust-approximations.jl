@@ -7,7 +7,7 @@
 #       extension: .jl
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.14.4
+#       jupytext_version: 1.14.5
 #   kernelspec:
 #     display_name: Julia 1.9.1
 #     language: julia
@@ -48,7 +48,7 @@
 # +
 using GeometricClusterAnalysis
 using NearestNeighbors
-using Plots
+using CairoMakie
 using Random
 
 nsignal = 500
@@ -62,7 +62,7 @@ rng = MersenneTwister(1234)
 
 dataset = infinity_symbol(rng, nsignal, nnoise, σ, dimension, noise_min, noise_max)
 
-plot(dataset)
+scatter(dataset.points[1,:], dataset.points[2,:])
 # -
 
 # The target is the distance function $d_{\mathcal{K}}$. The graph of $-d_{\mathcal{K}}$ is the following:
@@ -122,7 +122,7 @@ function dtm(kdtree, x, y, q)
     return dtm_result
 end
 
-q = 20
+q = 10
 
 zs = [-dtm(kdtree, x, y, q) for x in xs, y in ys]
 
@@ -187,11 +187,13 @@ function sample_on_circle(n_obs, n_out; is_plot = false)
     data = hcat(x, y)
 
     if is_plot
-        p = plot(; aspect_ratio = :equal, legend = :bottomleft)
-        scatter!(p, x_obs, y_obs, color="cyan", label = "data")
-        scatter!(p, x_out, y_out, color="orange", label = "outliers")
-        title!(p, "$(n_obs)-sampling of the unit circle with $(n_out) outliers")
-        display(p)
+        f = Figure()
+        ax = Axis(f[1, 1], 
+                  title = "$(n_obs)-sampling of the unit circle with $(n_out) outliers",
+                  aspect = 1)
+        scatter!( ax, x_obs, y_obs, color="cyan", label = "data")
+        scatter!( ax, x_out, y_out, color="orange", label = "outliers")
+        display(f)      
     end
     return data
 end
@@ -209,26 +211,16 @@ x = sample_on_circle(n_obs, n_out; is_plot=true);  # sample points with outliers
 q = 40
 kdtree = KDTree(x')
 
-zs = [-dtm(kdtree, px, py, q) for (px,py) in eachrow(x)]
-
-
-q = 20
-
-zs = [-dtm(kdtree, x, y, q) for x in xs, y in ys]
-
-surface(xs, ys, zs, cb = false)
-
-# +
 # compute the values of the DTM of parameter q
-
-dtm_values = dtm.fit_transform(X)
+dtm_values = [dtm(kdtree, px, py, q) for (px,py) in eachrow(x)]
 
 # plot of  the opposite of the DTM
-fig, ax = plt.subplots()
-plot=ax.scatter(X[:,0], X[:,1], c=-DTM_values)
-fig.colorbar(plot)
-ax.axis('equal')
-ax.set_title('Values of -DTM on X with parameter q='+str(q));
+f = Figure()
+ax = Axis(f[1, 1], 
+                  title = "Values of -DTM on X with parameter q=$q",
+                  aspect = 1)
+scatter!(ax, x[:,1], x[:,2], color=-dtm_values)
+f
 # -
 
 # ## Approximating $\mathcal{K}$ with a union of $k$ balls - or -  the $k$-power-distance-to-measure ($k$-PDTM)
@@ -250,7 +242,6 @@ ax.set_title('Values of -DTM on X with parameter q='+str(q));
 #
 # Note that these centers $c^*_1,c^*_2,\ldots,c^*_k$ are not necessarily uniquely defined. The following algorithm provides local minimisers of the criterion $R$.
 
-# +
 def mean_var(X,x,q,kdt):
     '''
     An auxiliary function.
@@ -277,6 +268,7 @@ def mean_var(X,x,q,kdt):
     Var = np.var(X[NN],axis=1).sum(axis=-1)
     return Mean, Var
 
+# +
 from sklearn.neighbors import KDTree
 import random # For the random centers from which the algorithm starts
 

@@ -7,7 +7,7 @@
 #       extension: .jl
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.14.4
 #   kernelspec:
 #     display_name: Julia 1.9.1
 #     language: julia
@@ -47,8 +47,9 @@
 
 # +
 using GeometricClusterAnalysis
-using Random
+using NearestNeighbors
 using Plots
+using Random
 
 nsignal = 500
 nnoise = 50
@@ -65,20 +66,39 @@ plot(dataset)
 # -
 
 # The target is the distance function $d_{\mathcal{K}}$. The graph of $-d_{\mathcal{K}}$ is the following:
-# <img src=Images/nappe_distance_sans_bruit.png width=300>
+
+# +
+function dtm(kdtree, x, y)
+
+    idxs, dists = nn(kdtree, [x, y])  # get the closest point
+    dtm_result = sqrt(sum(dists * dists))
+    
+    return dtm_result
+end
+
+xs = LinRange(-5, 5, 100)
+ys = LinRange(-5, 5, 100)
+kdtree = KDTree(dataset.points[:,1:nsignal])
+
+zs = [-dtm(kdtree, x, y) for x in xs, y in ys]
+
+surface(xs, ys, zs, cb = false)
+# -
 
 # We have generated a noisy sample $\mathbb X$. Then, $d_{\mathbb X}$ is a terrible approximation of $d_{\mathcal{K}}$. Indeed, the graph of $-d_{\mathbb X}$ is the following:
-# <img src=Images/nappe_distance_avec_bruit.png width=300>
 
-# Nonetheless, there exist robust approximations of the distance-to-compact function, such as the distance-to-measure (DTM) function $d_{\mathbb X,q}$ (that depends on a regularity parameter $q$) [**Chazal11**]. The graph of $-d_{\mathbb X,q}$ for some $q$ is the following:
-# <img src=Images/nappe_dtm_avec_bruit.png width=300>
+# +
+kdtree = KDTree(dataset.points)
 
-# In this page, we define two functions, the $k$-PDTM $d_{\mathbb X,q,k}$ and the $k$-PLM $d'_{\mathbb X,q,k}$. The sublevel sets of the $k$-PDTM are unions of $k$ balls. The sublevel sets of the $k$-PLM are unions of $k$ ellipsoids.
-# The graphs of $-d_{\mathbb X,q,k}$ and $-d'_{\mathbb X,q,k}$ for some $q$ and $k$ are the following:
-# <img src=Images/sous_niveau_kPDTM2.png width=300> and <img src=Images/sous_niveau_kPDTM_cov2.png width=400>
+zs = [-dtm(kdtree, x, y) for x in xs, y in ys]
+
+surface(xs, ys, zs, cb = false)
+# -
 
 # ## The distance-to-measure (DTM)
-
+#
+# Nonetheless, there exist robust approximations of the distance-to-compact function, such as the distance-to-measure (DTM) function $d_{\mathbb X,q}$ (that depends on a regularity parameter $q$) [**Chazal11**]. 
+#
 # The distance-to-measure function (DTM) is a surrogate for the distance-to-compact, robust to noise. It was introduced in 2009 [**Chazal11**]. It depends on some regularity parameter $q\in\{0,1,\ldots,n\}$. The distance-to-measure function $d_{\mathbb{X},q}$ is defined by 
 #     <a id="equation_DTM">
 # $$
@@ -89,63 +109,119 @@ plot(dataset)
 #
 # Equivalently, the DTM coincides with the mean distance between $x$ and its $q$ nearest neighbours:
 # $$d_{\mathbb{X},q}^2(x) = \frac{1}{q}\sum_{i=1}^q\|x-X^{(i)}\|^2.$$
+#
+# The graph of $-d_{\mathbb X,q}$ for some $q$ is the following:
+#
+
+# +
+function dtm(kdtree, x, y, q)
+
+    idxs, dists = knn(kdtree, [x, y], q)
+    dtm_result = sqrt(sum(dists .* dists))
+    
+    return dtm_result
+end
+
+q = 20
+
+zs = [-dtm(kdtree, x, y, q) for x in xs, y in ys]
+
+surface(xs, ys, zs, cb = false)
+# -
+
+# In this page, we define two functions, the $k$-PDTM $d_{\mathbb X,q,k}$ and the $k$-PLM $d'_{\mathbb X,q,k}$. The sublevel sets of the $k$-PDTM are unions of $k$ balls. The sublevel sets of the $k$-PLM are unions of $k$ ellipsoids.
+# The graphs of $-d_{\mathbb X,q,k}$ and $-d'_{\mathbb X,q,k}$ for some $q$ and $k$ are the following:
+
+# +
+function f_Σ!(Σ) end
+
+k, c = 20, 20
+iter_max, nstart = 100, 10   
+
+df_kpdtm = kpdtm(rng, dataset.points, k, c, nsignal, iter_max, nstart)
+
+# -
+
+# and 
+
+# +
+function f_Σ!(Σ) end
+
+k, c = 20, 20
+iter_max, nstart = 100, 10   
+
+df_kplm = kplm(rng, dataset.points, k, c, nsignal, iter_max, nstart, f_Σ!)
+
+# -
 
 # ### Example - DTM computation for a noisy sample on a circle
 
 # The points are generated on the circle accordingly to the following function **SampleOnCircle**. This whole example was picked from the page **DTM-based filtrations: demo** of Raphaël Tinarrage.
 
 # +
-import numpy as np
-import matplotlib.pyplot as plt
+using Random
 
-def SampleOnCircle(N_obs = 100, N_out = 0, is_plot = False):
-    '''
-    Sample N_obs points (observations) points from the uniform distribution on the unit circle in R^2, 
-        and N_out points (outliers) from the uniform distribution on the unit square  
-        
-    Input: 
-    N_obs: number of sample points on the circle
-    N_noise: number of sample points on the square
-    is_plot = True or False : draw a plot of the sampled points            
+"""
+Sample `n_obs` points (observations) points from the uniform distribution on the unit circle in ``R^2``, 
+    and `n_out` points (outliers) from the uniform distribution on the unit square  
     
-    Output : 
-    data : a (N_obs + N_out)x2 matrix, the sampled points concatenated 
-    '''
-    rand_uniform = np.random.rand(N_obs)*2-1    
-    X_obs = np.cos(2*np.pi*rand_uniform)
-    Y_obs = np.sin(2*np.pi*rand_uniform)
+Input: 
+- `n_obs` : number of sample points on the circle
+- `n_noise` : number of sample points on the square
+- `is_plot = true or false` : draw a plot of the sampled points            
 
-    X_out = np.random.rand(N_out)*2-1
-    Y_out = np.random.rand(N_out)*2-1
+Output : 
+- `data` : a (`n_obs` + `n_out`) x 2 matrix, the sampled points concatenated 
+"""
+function sample_on_circle(n_obs, n_out; is_plot = false)
+    
+    rand_uniform = rand(n_obs) .* 2 .- 1    
+    x_obs = cos.(2pi .* rand_uniform)
+    y_obs = sin.(2pi .* rand_uniform)
 
-    X = np.concatenate((X_obs, X_out))
-    Y = np.concatenate((Y_obs, Y_out))
-    data = np.stack((X,Y)).transpose()
+    x_out = rand(n_out) .* 2 .- 1
+    y_out = rand(n_out) .* 2 .- 1
 
-    if is_plot:
-        fig, ax = plt.subplots()
-        plt_obs = ax.scatter(X_obs, Y_obs, c='tab:cyan');
-        plt_out = ax.scatter(X_out, Y_out, c='tab:orange');
-        ax.axis('equal')
-        ax.set_title(str(N_obs)+'-sampling of the unit circle with '+str(N_out)+' outliers')
-        ax.legend((plt_obs, plt_out), ('data', 'outliers'), loc='lower left')
+    x = vcat(x_obs, x_out)
+    y = vcat(y_obs, y_out)
+    data = hcat(x, y)
+
+    if is_plot
+        p = plot(; aspect_ratio = :equal, legend = :bottomleft)
+        scatter!(p, x_obs, y_obs, color="cyan", label = "data")
+        scatter!(p, x_out, y_out, color="orange", label = "outliers")
+        title!(p, "$(n_obs)-sampling of the unit circle with $(n_out) outliers")
+        display(p)
+    end
     return data
+end
 # -
 
-' Sampling on the circle with outlier '
-N_obs = 150                                     # number of points sampled on the circle
-N_out = 100                                     # number of outliers 
-X = SampleOnCircle(N_obs, N_out, is_plot=True)  # sample points with outliers 
+# Sampling on the circle with outlier
+
+n_obs = 150                                     # number of points sampled on the circle
+n_out = 100                                     # number of outliers 
+x = sample_on_circle(n_obs, n_out; is_plot=true);  # sample points with outliers 
+
+# Compute the DTM on X
 
 # +
-' Compute the DTM on X '
-
-from gudhi.point_cloud.dtm import DistanceToMeasure
-
-# compute the values of the DTM of parameter q
 q = 40
-dtm = DistanceToMeasure(q)
-DTM_values = dtm.fit_transform(X)
+kdtree = KDTree(x')
+
+zs = [-dtm(kdtree, px, py, q) for (px,py) in eachrow(x)]
+
+
+q = 20
+
+zs = [-dtm(kdtree, x, y, q) for x in xs, y in ys]
+
+surface(xs, ys, zs, cb = false)
+
+# +
+# compute the values of the DTM of parameter q
+
+dtm_values = dtm.fit_transform(X)
 
 # plot of  the opposite of the DTM
 fig, ax = plt.subplots()

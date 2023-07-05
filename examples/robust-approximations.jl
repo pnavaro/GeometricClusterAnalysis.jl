@@ -237,14 +237,10 @@ f
 
 include("optima_kpdtm.jl")
 
-X = hcat([[-1., -1], [-2, -1], [-3, -2], [2, 2], [3, 2], [4, 3]]...)
-sig = size(X, 2) # There is no trimming, all sample points are assigned to a cluster
-centers, means, variances, colors, cost = optima_for_kPDTM(X, 3, 2, sig, 1, 1)
-
 q = 40
 k = 250
 sig = size(data, 2)
-centers, means, variances, colors, cost = optima_for_kPDTM(data, q, k, sig, 1, 1)
+centers, means, variances, colors, cost = optima_for_kPDTM(data, q, k, sig, 1, 1);
 
 # We compute the $k$-PDTM on the same sample of points.
 #
@@ -261,15 +257,11 @@ iter_max = 100
 nstart = 10
 kPDTM_values, centers, means, variances, colors, cost = kPDTM(data, data, q, k, sig, iter_max = iter_max, nstart = nstart)  
 
-# plot of  the opposite of the DTM
-
-centers
-
 fig = Figure(; resolution=(500,500))
 ax = Axis(fig[1, 1],
     title = "Values of -kPDTM on X with parameter q=$(q) and k=$(k).",
 )
-scatter!(ax, data[1,:], data[2, :], color=-dtm_values)
+scatter!(ax, data[1,:], data[2, :], color=-kPDTM_values)
 for μ in means
     scatter!(ax, μ[1], μ[2], color = "black", marker=:utriangle)
 end
@@ -290,17 +282,11 @@ fig
 #
 # The following algorithm provides local minimisers of the criterion $R'$.
 
-include("optima_kplm.jl")
-X = hcat([[-1, -1], [-2, -1], [-3, -2], [2, 2], [3, 2], [4, 3]]...)
-sig = size(X,2) # There is no trimming, all sample points are assigned to a cluster
-centers, Σ, μ, ω, colors, cost = optima_for_kPLM(X, 3, 2, sig, iter_max = 1, nstart = 1)
-
-
-centers, Σ, μ, ω, colors, cost
-
 # We compute the $k$-PLM on the same sample of points.
 #
 # The sub-level sets of the $k$-PLM are unions of $k$ ellispoids which centers are represented by triangles.
+
+include("optima_kplm.jl")
 
 q = 40
 k = 250
@@ -319,6 +305,7 @@ colsize!(fig.layout, 1, Aspect(1, 1.0)) # reduce size colorbar
 
 fig
 
+
 # ## Detecting outliers - Trimmed versions of the $k$-PDTM and the $k$-PLM
 
 # The criterions $R$ and $R'$ are of the form $\sum_{X\in\mathbb{X}}\min_{i\in\{1,2,\ldots,k\}}\gamma(X,\theta_i)$ for some cost function $\gamma$ and some parameters $\theta_i$ ($c_i$ or $(c_i,\Sigma_i)$). Morally, points $X$ for which $\min_{i\in\{1,2,\ldots,k\}}\gamma(X,\theta_i)$ is small are close to the optimal centers, and then should be close to the compact set $\mathcal{K}$. Then, points $X$ such that $\min_{i\in\{1,2,\ldots,k\}}\gamma(X,\theta_i)$ is large should be considered as outliers, and should be removed from the sample of points $\mathbb X$. 
@@ -331,116 +318,102 @@ fig
 
 # The $o = n-sig$ outliers are represented in red in the following figures.
 
-' Compute the trimmed k-PDTM on X ' 
+# Compute the trimmed k-PDTM on  data 
 # compute the values of the k-PDTM of parameter q
 q = 5
 k = 100
 sig = 150 # Amount of signal points - We will remove o = 250 - 150 points from the sample
 iter_max = 100
 nstart = 10
-kPDTM_values, centers, means, variances, colors, cost = kPDTM(X,X,q,k,sig,iter_max,nstart)  
+kPDTM_values, centers, means, variances, colors, cost = kPDTM(data,data,q,k,sig,
+iter_max = iter_max, nstart = nstart)  
 # plot of  the opposite of the k-PDTM
-fig, ax = plt.subplots()
-plot = ax.scatter(X[:,0], X[:,1], c=-kPDTM_values)
-fig.colorbar(plot)
-for i in range(means.shape[0]):
-    ax.scatter(means[i,0],means[i,1],c = "black",marker = "^")
-for j in range(X.shape[0]):
-    if (colors[j]==-1):
-        ax.scatter(X[j,0], X[j,1], c="red")
-ax.axis('equal')
-ax.set_title('Values of -kPDTM on X with parameter q='+str(q)+' and k='+str(k)+'.');
+fig = Figure(; resolution=(500,500))
+ax = Axis(fig[1, 1],
+    title = "Values of -kPDTM on X with parameter q=$(q) and k=$(k).",
+)
+scatter!(ax, data[1,:], data[2, :], color=-kPDTM_values)
+scatter!(ax, getindex.(means,1), getindex.(means, 2), color = "black", marker=:utriangle)
+fig
 
-' Compute the trimmed k-PLM on X ' 
+# Compute the trimmed k-PLM on data
 # compute the values of the k-PLM of parameter q
 q = 10
 k = 100
 sig = 150
 iter_max = 10
 nstart = 1
-kPLM_values, centers, Sigma, means, weights, colors, cost = kPLM(X,X,q,k,sig,iter_max,nstart)  
+kPLM_values, centers, Sigma, means, weights, colors, cost = kPLM(data,data,q,k,sig;
+iter_max = iter_max, nstart = nstart)  
 # plot of  the opposite of the k-PLM
-fig, ax = plt.subplots()
-plot = ax.scatter(X[:,0], X[:,1], c=-kPLM_values)
-fig.colorbar(plot)
-for i in range(means.shape[0]):
-    ax.scatter(means[i,0],means[i,1],c = "black",marker = "^")
-for j in range(X.shape[0]):
-    if (colors[j]==-1):
-        ax.scatter(X[j,0], X[j,1], c="red")
-ax.axis('equal')
-ax.set_title('Values of -kPLM on X with parameter q='+str(q)+' and k='+str(k)+'.');
+fig = Figure(; resolution = (500, 400))
+ax = Axis(fig[1,1], aspect = 1, 
+     title = "Values of kPLM on data with parameter q=$(q) and k=$(k).")
+scatter!(ax, data[1,:], data[2,:], color = -kPLM_values)
+Colorbar(fig[1, 2], limits = extrema(-kPLM_values), colormap = :rainbow)
+scatter!(ax, getindex.(means,1), getindex.(means, 2), color = "black", marker = :utriangle)
+colsize!(fig.layout, 1, Aspect(1, 1.0)) # reduce size colorbar
+
+fig
 
 # ## The sublevel sets
 
-# ### Functions to plot ellipsoids and disks
-
-import math
-import matplotlib
-
-def Trace_ellipses(Sigma,center,alpha):
-    w, v =  np.linalg.eig(Sigma)
-    index = np.argsort(-abs(w))
-    return(matplotlib.patches.Ellipse(center, 2*np.sqrt(alpha*w[index[0]]), 2*np.sqrt(alpha*w[index[1]]), angle= -180/math.pi*np.sign(v[index[0]][1])*math.acos(v[index[0]][0])))
-
-def Trace_balls(center,alpha):
-    return(matplotlib.patches.Circle(center, np.sqrt(alpha)))
-
 # ### Sublevel sets of the $k$-PDTM
-
-' Compute the sublevel sets of the k-PDTM on X ' 
 
 q = 5
 k = 100
 sig = 150
 iter_max = 10
 nstart = 1
-kPDTM_values, centers, means, variances, colors, cost = kPDTM(X,X,q,k,sig,iter_max,nstart)  
-# plot of  the opposite of the k-PDTM
-fig, ax = plt.subplots()
-plot = ax.scatter(X[:,0], X[:,1], c=-kPDTM_values)
-fig.colorbar(plot)
+kPDTM_values, centers, means, variances, colors, cost = kPDTM(data,data,q,k,sig,
+iter_max = iter_max, nstart = nstart)  
 
+fig = Figure()
+ax = Axis(fig[1,1], aspect = 1,
+title = "Sublevel sets of the kPDTM on X with parameters q=$q and k=$k .")
+scatter!(ax, data[1,:], data[2,:], color = -kPDTM_values)
+Colorbar(fig[1,2])
 alpha = 0.2 # Level for the sub-level set of the k-PLM
-Circle = [Trace_balls(means[i,],max(0,alpha*alpha - variances[i])) for i in range(means.shape[0])]
-for cir in Circle:
-    ax.add_artist(cir)
-    cir.set_alpha(0.3) # For transparency
-    cir.set_facecolor("black")
+for (μ,ω) in zip(means, variances)
+    poly!(ax, Circle(Point2(μ), max(0,alpha*alpha - ω)), 
+    color= "green",  transparency = true)
+end
+fig
 
-for i in range(means.shape[0]):
-    ax.scatter(means[i,0],means[i,1],c = "black",marker = "^")
-
-ax.axis('equal')
-ax.set_title('Sublevel sets of the kPDTM on X with parameters q='+str(q)+' and k='+str(k)+'.');
 
 # ### Sublevel sets of the $k$-PLM
 
-' Compute the sublevel sets of the k-PLM on X ' 
+# Compute the sublevel sets of the k-PLM on X  
 
 q = 10
 k = 100
 sig = 150
 iter_max = 10
 nstart = 1
-kPLM_values, centers, Sigma, means, weights, colors, cost = kPLM(X,X,q,k,sig,iter_max,nstart)  
-# plot of  the opposite of the k-PLM
-fig, ax = plt.subplots()
-plot = ax.scatter(X[:,0], X[:,1], c=-kPLM_values)
-fig.colorbar(plot)
+kPLM_values, centers, Sigma, means, weights, colors, cost = kPLM(data,data,q,k,sig,
+iter_max = iter_max, nstart = nstart) ;
 
-alpha = 10 # Level for the sub-level set of the k-PLM
-Ellipses = [Trace_ellipses(Sigma[i],means[i,],max(0,alpha - weights[i])) for i in range(means.shape[0])]
-for ell in Ellipses:
-    ax.add_artist(ell)
-    ell.set_alpha(0.3) # For transparency
-    ell.set_facecolor("black")
+α = 10 # Level for the sub-level set of the k-PLM
+f = Figure()
+ax = Axis(f[1,1], aspect = 1, 
+title = "Sublevel sets of the kPLM on X with parameters q=$q and k=$k .")
+function covellipse(μ, Σ, α)
+    λ, U = eigen(Σ)
+    S = 0.1 .* α * U * diagm(.√λ)
+    θ = range(0, 2π; length = 100)
+    A = S * [cos.(θ)'; sin.(θ)']
+    x = μ[1] .+ A[1, :]
+    y = μ[2] .+ A[2, :]
 
-for i in range(means.shape[0]):
-    ax.scatter(means[i,0],means[i,1],c = "black",marker = "^")
-
-ax.axis('equal')
-ax.set_title('Sublevel sets of the kPLM on X with parameters q='+str(q)+' and k='+str(k)+'.');
+    Makie.Polygon([Point2f(px, py) for (px,py) in zip(x, y)])
+    
+end
+scatter!(ax, data[1,:], data[2,:], color=-kPLM_values)
+Colorbar(fig[1,2], colormap=:rainbow)
+for (μ, Σ, ω) in zip(means, Sigma, weights)
+    poly!(ax, covellipse(μ, Σ, max(0, α - ω)), color = "blue" )
+end
+f
 
 # ## References :
 #

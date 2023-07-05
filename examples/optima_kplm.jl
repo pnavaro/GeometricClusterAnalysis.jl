@@ -69,7 +69,7 @@ function optima_for_kPLM(data, q, k, sig; iter_max = 10, nstart = 1)
 
     for starts in 1:nstart
             
-        first_centers = 1:k #rand(1:n, k)) # Indices of the centers from which the algorithm starts
+        first_centers = rand(1:n, k) # Indices of the centers from which the algorithm starts
         for (i,j) in enumerate(first_centers) # Indices of the centers from which the algorithm starts
             centers[i] .= data[:, j]
         end

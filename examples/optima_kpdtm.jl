@@ -88,8 +88,8 @@ function optima_for_kPDTM(data, q, k, sig, iter_max, nstart)
     for starts in 1:nstart
         
         kept_centers = trues(k)
-        first_centers_ind = 1:k #rand(1:n, k) # Indices of the centers from which the algorithm starts
-        centers = data[:, first_centers_ind]
+        first_centers = rand(1:n, k) # Indices of the centers from which the algorithm starts
+        centers = data[:, first_centers]
         old_centers = similar(centers)
         fill!(old_centers, Inf)
         mu, sigma = mean_var(data, centers, q, kdtree)

@@ -2,12 +2,11 @@
 # ---
 # jupyter:
 #   jupytext:
-#     formats: ipynb,jl:light
 #     text_representation:
 #       extension: .jl
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.14.4
+#       format_name: nomarker
+#       format_version: '1.0'
+#       jupytext_version: 1.14.7
 #   kernelspec:
 #     display_name: Julia 1.9.1
 #     language: julia
@@ -18,7 +17,6 @@
 #
 # Claire Brécheteau
 #
-
 # We consider $\mathcal{K}$, an unknown compact subset of the Euclidean space $(\mathbb{R}^d,\|\cdot\|)$. We dispose of a sample of $n$ points $\mathbb{X} = \{X_1, X_2,\ldots, X_n\}$ generated uniformly on $\mathcal{K}$ or generated in a neighborhood of $\mathcal{K}$. The sample of points may be corrupted by outliers. That is, by points lying far from $\mathcal{K}$.
 #
 # Given $X_1, X_2,\ldots, X_n$, we aim at recovering $\mathcal{K}$. More precisely, we construct approximations of $\mathcal{K}$ as unions of $k$ balls or $k$ ellipsoids, for $k$ possibly much smaller than the sample size $n$.
@@ -27,7 +25,7 @@
 #
 # <br>
 #
-# In this page, we present three methods to construct approximations of $d_{\mathcal{K}}$ from a possibly noisy sample $\mathbb{X}$. The first approximation is the well-known distance-to-measure (DTM) function of Chazal11[^1]. The two last methods are new. They are based on the following approximations which sublevel sets are unions of $k$ balls or ellispoids: the $k$-PDTM Brecheteau19a[^2] and the $k$-PLM Brecheteau19b[^3].
+# In this page, we present three methods to construct approximations of $d_{\mathcal{K}}$ from a possibly noisy sample $\mathbb{X}$. The first approximation is the well-known distance-to-measure (DTM) function of Chazal11[^1]<cite data-cite="15120274/8APG3W3N"></cite>. The two last methods are new. They are based on the following approximations which sublevel sets are unions of $k$ balls or ellispoids: the $k$-PDTM Brecheteau19a[^2]<cite data-cite="15120274/VCLI6PEL"></cite> and the $k$-PLM Brecheteau19b[^3]<cite data-cite="15120274/WFJDBSAG"></cite>.
 #
 # The codes and some toy examples are available in this page. In particular, they are implemented via the functions:
 #
@@ -41,19 +39,17 @@
 # For a sample **X** of size $n$, these functions compute the distance approximations at the points in **query_pts**. The parameter **q** is a regularity parameter in $\{0,1,\ldots,n\}$, **k** is the number of balls or ellispoids for the sublevel sets of the distance approximations. The procedures remove $n-$**sig** points of the sample, cf Section "Detecting outliers".
 #
 #
-
+#
 # ##  Example 
-
+#
 # We consider as a compact set $\mathcal{K}$, the infinity symbol:
 #
 
-# +
 using GeometricClusterAnalysis
 using NearestNeighbors
 using CairoMakie
 using Random
 using Statistics
-using StaticArrays
 
 nsignal = 500
 nnoise = 50
@@ -66,12 +62,15 @@ rng = MersenneTwister(1234)
 
 dataset = infinity_symbol(rng, nsignal, nnoise, σ, dimension, noise_min, noise_max)
 
-scatter(dataset.points[1,:], dataset.points[2,:])
-# -
+f = Figure(; resolution = (400, 400))
+ax = Axis(f[1, 1], aspect = 1)
+limits!(ax, -5, 5, -5, 5)
+scatter!(ax, dataset.points[1,:], dataset.points[2,:], 
+          color = dataset.colors, colormap = :blues, markersize=7)
+f
 
 # The target is the distance function $d_{\mathcal{K}}$. The graph of $-d_{\mathcal{K}}$ is the following:
 
-# +
 function dtm(kdtree, x, y)
 
     idxs, dists = nn(kdtree, [x, y])  # get the closest point
@@ -87,23 +86,20 @@ kdtree = KDTree(dataset.points[:,1:nsignal])
 zs = [-dtm(kdtree, x, y) for x in xs, y in ys]
 
 surface(xs, ys, zs, cb = false)
-# -
 
 # We have generated a noisy sample $\mathbb X$. Then, $d_{\mathbb X}$ is a terrible approximation of $d_{\mathcal{K}}$. Indeed, the graph of $-d_{\mathbb X}$ is the following:
 
-# +
 kdtree = KDTree(dataset.points)
 
 zs = [-dtm(kdtree, x, y) for x in xs, y in ys]
 
 surface(xs, ys, zs, cb = false)
-# -
 
 # ## The distance-to-measure (DTM)
 #
 # Nonetheless, there exist robust approximations of the distance-to-compact function, such as the distance-to-measure (DTM) function $d_{\mathbb X,q}$ (that depends on a regularity parameter $q$) [**Chazal11**]. 
 #
-# The distance-to-measure function (DTM) is a surrogate for the distance-to-compact, robust to noise. It was introduced in 2009 [**Chazal11**]. It depends on some regularity parameter $q\in\{0,1,\ldots,n\}$. The distance-to-measure function $d_{\mathbb{X},q}$ is defined by 
+# The distance-to-measure function (DTM) is a surrogate for the distance-to-compact, robust to noise. It was introduced in 2009 <cite data-cite="undefined">[**Chazal11**]</cite>. It depends on some regularity parameter $q\in\{0,1,\ldots,n\}$. The distance-to-measure function $d_{\mathbb{X},q}$ is defined by 
 #     <a id="equation_DTM">
 # $$
 # d_{\mathbb{X},q}^2:x\mapsto \|x-m(x,\mathbb{X},q)\|^2 + v(x,\mathbb{X},q),
@@ -117,7 +113,6 @@ surface(xs, ys, zs, cb = false)
 # The graph of $-d_{\mathbb X,q}$ for some $q$ is the following:
 #
 
-# +
 function dtm(kdtree, x, y, q)
 
     idxs, dists = knn(kdtree, [x, y], q)
@@ -131,38 +126,32 @@ q = 10
 zs = [-dtm(kdtree, x, y, q) for x in xs, y in ys]
 
 surface(xs, ys, zs, cb = false)
-# -
 
 # In this page, we define two functions, the $k$-PDTM $d_{\mathbb X,q,k}$ and the $k$-PLM $d'_{\mathbb X,q,k}$. The sublevel sets of the $k$-PDTM are unions of $k$ balls. The sublevel sets of the $k$-PLM are unions of $k$ ellipsoids.
 # The graphs of $-d_{\mathbb X,q,k}$ and $-d'_{\mathbb X,q,k}$ for some $q$ and $k$ are the following:
 
-# +
 function f_Σ!(Σ) end
 
 k, c = 20, 20
 iter_max, nstart = 100, 10   
 
-df_kpdtm = kpdtm(rng, dataset.points, k, c, nsignal, iter_max, nstart)
+df_kpdtm = kpdtm(rng, dataset.points, k, c, nsignal, iter_max, nstart);
 
-# -
 
 # and 
 
-# +
 function f_Σ!(Σ) end
 
 k, c = 20, 20
 iter_max, nstart = 100, 10   
 
-df_kplm = kplm(rng, dataset.points, k, c, nsignal, iter_max, nstart, f_Σ!)
+df_kplm = kplm(rng, dataset.points, k, c, nsignal, iter_max, nstart, f_Σ!);
 
-# -
 
 # ### Example - DTM computation for a noisy sample on a circle
 
 # The points are generated on the circle accordingly to the following function **SampleOnCircle**. This whole example was picked from the page **DTM-based filtrations: demo** of Raphaël Tinarrage.
 
-# +
 using Random
 
 """
@@ -190,10 +179,9 @@ function sample_on_circle(n_obs, n_out; is_plot = false)
 
     x = vcat(x_obs, x_out)
     y = vcat(y_obs, y_out)
-    data = hcat(x, y)
 
     if is_plot
-        f = Figure(resolution = (500, 500))
+        f = Figure(resolution = (400, 400))
         ax = Axis(f[1, 1], 
                   title = "$(n_obs)-sampling of the unit circle with $(n_out) outliers",
                   aspect = 1)
@@ -201,34 +189,32 @@ function sample_on_circle(n_obs, n_out; is_plot = false)
         scatter!( ax, x_out, y_out, color="orange", label = "outliers")
         display(f)      
     end
-    return data
+    return vcat(x',y')
 end
-# -
 
 # Sampling on the circle with outlier
 
 n_obs = 150                                     # number of points sampled on the circle
 n_out = 100                                     # number of outliers 
-x = sample_on_circle(n_obs, n_out; is_plot=true);  # sample points with outliers 
+data = sample_on_circle(n_obs, n_out; is_plot=true);  # sample points with outliers 
 
 # Compute the DTM on X
 
-# +
 q = 40
-kdtree = KDTree(x')
+kdtree = KDTree(data)
 
 # compute the values of the DTM of parameter q
 dtm_values = [dtm(kdtree, px, py, q) for (px,py) in eachrow(x)]
 
 # plot of  the opposite of the DTM
-f = Figure(resolution=(500,500))
+f = Figure(resolution=(500,400))
 ax = Axis(f[1, 1], 
                   title = "Values of -DTM on X with parameter q=$q",
                   aspect = 1)
 scatter!(ax, x[:,1], x[:,2], color=-dtm_values)
 Colorbar(f[1, 2], limits = extrema(-dtm_values), colormap = :viridis)
+colsize!(f.layout, 1, Aspect(1, 1.0)) # reduce size colorbar
 f
-# -
 
 # ## Approximating $\mathcal{K}$ with a union of $k$ balls - or -  the $k$-power-distance-to-measure ($k$-PDTM)
 
@@ -249,226 +235,16 @@ f
 #
 # Note that these centers $c^*_1,c^*_2,\ldots,c^*_k$ are not necessarily uniquely defined. The following algorithm provides local minimisers of the criterion $R$.
 
-# +
-"""
-    mean_var(data, x, q, kdtree)
+include("optima_kpdtm.jl")
 
-An auxiliary function.
-
-Input:
-- X: an nxd numpy array representing n points in R^d
-- x: an sxd numpy array representing s points, 
-    for each of these points we compute the mean and variance of the nearest neighbors in X
-- q: parameter of the DTM in {1,2,...,n} - number of nearest neighbors to consider
-- kdt: a KDtree obtained from X via the expression KDTree(X, leaf_size=30, metric='euclidean')
-
-Output:
-- Mean: an sxd numpy array containing the means of nearest neighbors
-- Var: an sx1 numpy array containing the variances of nearest neighbors
-
-Example:
-```julia
-data = hcat([[-1., -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]]...)
-x = hcat([[2.,3],[0,0]]...)
-kdtree = KDTree(data)
-μ, σ = mean_var(data, x, 2, kdtree) # ([[2.5, 1.5], [0.0, 0.0]], [0.5, 2.0])
-```
-"""
-function mean_var(data, x, q, kdtree)
-    
-    idxs, dists  = knn(kdtree, x, q)
-    
-    mu = [vec(mean(data[:,i], dims=2)) for i in idxs]
-    
-    sigma =  mean.([sum((data[:,idxs[i]] .- mu[i]).^2, dims=1) for i in eachindex(idxs)])
-
-    return mu, sigma
-    
-end
-data = hcat([[-1., -1], [-2, -1], [-3, -2], [2, 2], [3, 2], [4, 3]]...)
-x = hcat([[2.,3],[0,0]]...)
-kdtree = KDTree(data)
-q = 3
-μ, σ = mean_var(data, x, q, kdtree) # ([[2.5, 1.5], [0.0, 0.0]], [0.5, 2.0])
-# -
-
-"""
-    optima_for_kPDTM(data, q, k, sig, iter_max = 10, nstart = 1)
-
-- Compute local optimal centers for the k-PDTM-criterion ``R`` for the point cloud X
-- Requires `KDTree` to search nearest neighbors
-
-Input:
-- `data`: an nxd numpy array representing n points in ``R^d``
-- `query_pts`:  an sxd numpy array of query points
-- `q`: parameter of the DTM in {1,2,...,n}
-- `k`: number of centers
-- `sig`: number of sample points that the algorithm keeps (the other ones are considered as outliers -- cf section "Detecting outliers")
-- `iter_ma` : maximum number of iterations for the optimisation algorithm
-- `nstart` : number of starts for the optimisation algorithm
-
-Output: 
-- centers: a kxd numpy array contaning the optimal centers ``c^*_i`` computed by the algorithm
-- means: a kxd numpy array containing the local centers ``m(c^*_i,\\mathbb X,q)``
-- variances: a kx1 numpy array containing the local variances ``v(c^*_i,\\mathbb X,q)``
-- colors: a size n numpy array containing the colors of the sample points in X
-    points in the same weighted Voronoi cell (with centers in opt_means and weights in opt_variances)
-    have the same color
-- cost: the mean, for the "sig" points data[j,] considered as signal, of their smallest weighted distance to a center in "centers"
-    that is, ``min_i\\|data[j,]-means[i,]\\|^2+variances[i]``.
-    
-
-Example:
-```julia
-data = hcat([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]]...)
-sig = size(data, 2) # There is no trimming, all sample points are assigned to a cluster
-centers, means, variances, colors, cost = optima_for_kPDTM(X, 3, 2, sig)
-```
-"""
-function optima_for_kPDTM(data, q, k, sig, iter_max, nstart)
-    
-    d, n = size(data)
-    opt_cost = Inf
-    opt_centers = zeros(d, k)
-    opt_colors = zeros(Int, n)
-    opt_kept_centers = trues(k)
-    opt_mu = [zeros(d) for i in 1:k]
-    opt_sigma = zeros(k)
-    
-    (q<=0 || q>n) && @error "Error: q should be in {1,2,...,n}"
-    (k<=0 || k>n) && @error "Error: k should be in {1,2,...,n}"
-    kdtree = KDTree(data)
-        
-    for starts in 1:nstart
-        # Initialisation
-        colors = zeros(Int, n)
-        min_distance = zeros(n) # Weighted distance between a point and its nearest center
-        kept_centers = trues(k)
-        first_centers_ind = 1:k #rand(1:n, k) # Indices of the centers from which the algorithm starts
-        centers = data[:, first_centers_ind]
-        old_centers = similar(centers)
-        fill!(old_centers, Inf)
-        @show mu, sigma = mean_var(data, centers, q, kdtree)
-        nstep = 1
-        costt = Inf
-        old_mu = deepcopy(mu)
-        old_sigma = deepcopy(sigma)
-        while !(old_centers ≈ centers) && (nstep <= iter_max)
-            
-            nstep += 1
-            
-            # Step 1: Update colors and min_distance
-            for j in 1:n
-                cost = Inf
-                best_ind = 0
-                for i in 1:k
-                    if kept_centers[i] 
-                        @show newcost = sum((data[:,j] .- mu[i]).^2) .+ sigma[i]
-                        if newcost < cost 
-                            cost = newcost
-                            best_ind = i
-                        end
-                    end
-                end
-                colors[j] = best_ind
-                min_distance[j] = cost
-            end
-
-            # Step 2: Trimming step - Put color -1 to the (n-sig) points with largest cost
-            index = sortperm(-min_distance)
-            colors[index[1:(n-sig)]] .= -1
-            ds = min_distance[index[n-sig+1:end]]
-            costt = mean(ds)
-            
-            # Step 3: Update Centers and mv
-            old_centers .= centers
-            for i in eachindex(mu)
-                old_mu[i] .= mu[i]
-                old_sigma[i] = sigma[i]
-            end
-            
-            for i in 1:k
-                if kept_centers[i]
-                    pointcloud_size = sum(colors .== i)
-                    if pointcloud_size >= 1
-                        centers[:,i] .= vec(mean(data[:,colors .== i], dims=2))
-                    else
-                        kept_centers[i] = false
-                    end
-                end
-            end
-            mu, sigma = mean_var(data, centers, q, kdtree)
-        end
-            
-        if costt <= opt_cost 
-            opt_cost = costt
-            opt_centers .= old_centers
-            opt_mu .= deepcopy(old_mu)
-            opt_sigma .= deepcopy(old_sigma)
-            opt_colors .= colors
-            opt_kept_centers .= kept_centers
-        end
-    end
-    @show sum(opt_kept_centers)       
-    centers = opt_centers[:, opt_kept_centers]
-    means = opt_mu[opt_kept_centers]
-    variances = opt_sigma[opt_kept_centers]
-    colors = zeros(Int, n)
-    for i in eachindex(colors)
-        colors[i] = sum(opt_kept_centers[1:(opt_colors[i]+1)]) - 1
-    end
-    cost = opt_cost
-    return centers, means, variances, colors, cost
-end
-
-X = hcat([[-1., -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]]...)
-sig = size(data, 2) # There is no trimming, all sample points are assigned to a cluster
+X = hcat([[-1., -1], [-2, -1], [-3, -2], [2, 2], [3, 2], [4, 3]]...)
+sig = size(X, 2) # There is no trimming, all sample points are assigned to a cluster
 centers, means, variances, colors, cost = optima_for_kPDTM(X, 3, 2, sig, 1, 1)
 
-"""
-    kPDTM(data, query_pts, q, k, sig, iter_max = 10, nstart = 1)
-
-Compute the values of the k-PDTM of the empirical measure of a point cloud `data`
-Requires KDTree to search nearest neighbors
-
-Input:
-- `data`: a nxd numpy array representing n points in R^d
-- `query_pts`:  a sxd numpy array of query points
-- `q`: parameter of the DTM in {1,2,...,n}
-- `k`: number of centers
-- `sig`: number of points considered as signal in the sample (other signal points are trimmed)
-
-Output: 
-- `kPDTM_result`: a sx1 numpy array contaning the kPDTM of the query points
-
-Example:
-```julia
-data = hcat([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]]...)
-query_points = hcat([[0,0],[5,5]]...)
-kPDTM_values = kPDTM(data, query_points, 3, 2, size(data,2))
-```
-"""
-function kPDTM(data, query_pts, q, k, sig; iter_max = 10, nstart = 1)
-    
-    nqp = size(query_pts, 2)
-    result = zeros(nqp)
-    d, n = size(data) 
-    (q<=0 || q>n) && @error "Error: q should be in {1,2,...,n}"
-    (k<=0 || k>n) && @error "Error: k should be in {1,2,...,n}"
-    (d != size(query_pts,1)) && @error "Error: data and query_pts should contain points with the same number of coordinates."
-    centers, means, variances, colors, cost = optima_for_kPDTM(data, q, k, sig, iter_max, nstart)
-    for i = 1:nqp
-        result[i] = Inf
-        for j in eachindex(means)
-            aux = sqrt(sum((query_pts[:,i] .- means[j]).^2) + variances[j])
-            if aux < result[i]
-                result[i] = aux 
-            end
-        end
-    end
-                    
-    return result, centers, means, variances, colors, cost
-end
+q = 40
+k = 250
+sig = size(data, 2)
+centers, means, variances, colors, cost = optima_for_kPDTM(data, q, k, sig, 1, 1)
 
 # We compute the $k$-PDTM on the same sample of points.
 #
@@ -478,7 +254,6 @@ end
 
 # Compute the k-PDTM of parameter q on data
 
-data = collect(x')
 q = 40
 k = 250
 sig = size(data, 2)
@@ -515,220 +290,34 @@ fig
 #
 # The following algorithm provides local minimisers of the criterion $R'$.
 
-# +
-from scipy.spatial import distance # For the Mahalanobis distance
-
-def optima_for_kPLM(X,q,k,sig,iter_max = 10,nstart = 1):
-    '''
-    Compute local optimal centers and matrices for the k-PLM-criterion $R'$ for the point cloud X    
-    Input:
-    X: an nxd numpy array representing n points in R^d
-    query_pts:  an sxd numpy array of query points
-    q: parameter of the DTM in {1,2,...,n}
-    k: number of centers
-    sig: number of sample points that the algorithm keeps (the other ones are considered as outliers -- cf section "Detecting outliers")
-    iter_max : maximum number of iterations for the optimisation algorithm
-    nstart : number of starts for the optimisation algorithm
-    
-    Output: 
-    centers: a kxd numpy array contaning the optimal centers c^*_i computed by the algorithm
-    Sigma: a list of dxd numpy arrays containing the covariance matrices associated to the centers
-    means: a kxd numpy array containing the centers of ellipses that are the sublevels sets of the k-PLM
-    weights: a size k numpy array containing the weights associated to the means
-    colors: a size n numpy array containing the colors of the sample points in X
-        points in the same weighted Voronoi cell (with centers in means and weights in weights)
-        have the same color    
-    cost: the mean, for the "sig" points X[j,] considered as signal, of their smallest weighted distance to a center in "centers"
-        that is, min_i\|X[j,]-means[i,]\|_{Sigma[i]^(-1)}^2+weights[i].         
-    
-    Example:
-    X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
-    sig = X.shape[0] # There is no trimming, all sample points are assigned to a cluster
-    centers, Sigma, means, weights, colors, cost = optima_for_kPLM(X, 3, 2, sig)
-    '''
-    n = X.shape[0]
-    d = X.shape[1]
-    opt_cost = np.inf
-    opt_centers = np.zeros([k,d])
-    opt_Sigma = []
-    opt_means = np.zeros([k,d])
-    opt_weights = np.zeros(k)
-    opt_colors = np.zeros(n)
-    opt_kept_centers = np.zeros(k)
-    if(q<=0 or q>n):
-        raise AssertionError("Error: q should be in {1,2,...,n}")
-    elif(k<=0 or k>n):
-        raise AssertionError("Error: k should be in {1,2,...,n}")
-    else:
-        #kdt = KDTree(X, leaf_size=30, metric='euclidean')
-        for starts in range(nstart):
-            
-            # Initialisation
-            colors = np.zeros(n)
-            kept_centers = np.ones((k), dtype=bool)
-            first_centers_ind = random.sample(range(n), k) # Indices of the centers from which the algorithm starts
-            centers = X[first_centers_ind,:]
-            old_centers = np.ones([k,d])*np.inf
-            Sigma = [np.identity(d)]*k
-            old_Sigma = np.copy(Sigma)
-            old_mi = np.zeros([k,d])
-            old_weights = np.zeros(k)
-            
-            mi = np.zeros([k,d]) # means
-            vi = np.zeros(k) # variances for the mahalanobis norms
-            ci = np.zeros(k) # log(det(Sigma))
-            
-            Nstep = 1
-            continue_Sigma = True
-            
-            while((continue_Sigma or (np.sum(old_centers!=centers)>0)) and (Nstep <= iter_max)):
-                Nstep = Nstep + 1
-                
-                # Step 1: Update mi, vi and ci
-                for i in range(k):
-                    index = np.argsort([distance.mahalanobis(X[j,], centers[i,], np.linalg.inv(Sigma[i])) for j in range(X.shape[0])])
-                    index = index[range(q)]
-                    mi[i,] = np.mean(X[index,], axis = 0)
-                    vect_aux = [distance.mahalanobis(X[index[j],], mi[i,], np.linalg.inv(Sigma[i])) for j in range(q)]
-                    vi[i] = np.mean([val*val for val in vect_aux]) # The square of the Mahalanobis distance
-                    sign, ci[i] = np.linalg.slogdet(Sigma[i]) # log(det(Sigma[i]))
-                                     
-                # Step 2: Update colors and min_distance
-                min_distance = np.zeros(n) # Weighted distance between a point and its nearest center
-                for j in range(n):
-                    cost = np.inf
-                    best_ind = 0
-                    for i in range(k):
-                        if(kept_centers[i]):
-                            aux = distance.mahalanobis(X[j,],mi[i,],np.linalg.inv(Sigma[i]))
-                            newcost = aux*aux + vi[i] + ci[i]
-                            if (newcost < cost):
-                                cost = newcost
-                                best_ind = i
-                    colors[j] = best_ind
-                    min_distance[j] = cost
-                    
-                # Step 3: Trimming step - Put color -1 to the (n-sig) points with largest cost
-                index = np.argsort(-min_distance)
-                colors[index[range(n-sig)]] = -1
-                ds = min_distance[index[range(n-sig,n)]]
-                costt = np.mean(ds)
-                
-                # Step 4: Update Centers and mi and Sigma
-                old_centers = np.copy(centers)
-                old_mi = np.copy(mi)
-                old_weights = vi+ci
-                old_Sigma = np.copy(Sigma)
-                for i in range(k):
-                    pointcloud_size = np.sum(colors == i)
-                    if(pointcloud_size>1):
-                        centers[i,] = np.mean(X[colors==i,],axis = 0)  
-                        index = np.argsort([distance.mahalanobis(X[j,], centers[i,], np.linalg.inv(Sigma[i])) for j in range(X.shape[0])])
-                        index = index[range(q)]
-                        mi[i,] = np.mean(X[index,], axis = 0)
-                        aa = np.dot(np.array([mi[i,]-centers[i,]]).T,np.array([mi[i,]-centers[i,]]))
-                        bb = (q-1)/q*np.cov(np.array([X[index[j],] for j in range(q)]).T)
-                        cc = (pointcloud_size - 1)/(pointcloud_size)*np.cov(np.array(X[colors==i,]).T)
-                        Sigma[i] = aa+bb+cc
-                    elif(pointcloud_size==1):
-                        centers[i,] = np.mean(X[colors==i,],axis = 0)  
-                        index = np.argsort([distance.mahalanobis(X[j,], centers[i,], np.linalg.inv(Sigma[i])) for j in range(X.shape[0])])
-                        index = index[range(q)]
-                        mi[i,] = np.mean(X[index,], axis = 0)
-                        aa = np.dot(np.array([mi[i,]-centers[i,]]).T,np.array([mi[i,]-centers[i,]]))
-                        bb = (q-1)/q*np.cov(np.array([X[index[j],] for j in range(q)]).T)
-                        Sigma[i] = aa + bb
-                    else:
-                        kept_centers[i] = False
-                Stop_Sigma = True # True while old_Sigma = Sigma
-                for i in range(k):
-                    if(kept_centers[i]):
-                        Stop_Sigma = (Stop_Sigma and (np.sum([old_Sigma[i]!=Sigma[i]])==0))
-                continue_Sigma = not Stop_Sigma
-                
-            if(costt <= opt_cost):
-                opt_cost = costt
-                opt_centers = np.copy(old_centers)
-                opt_means = np.copy(old_mi)
-                opt_weigths = np.copy(old_weights)
-                opt_Sigma = np.copy(old_Sigma)
-                opt_colors = np.copy(colors)
-                opt_kept_centers = np.copy(kept_centers)
-                
-        centers = opt_centers[opt_kept_centers,]
-        Sigma = [opt_Sigma[i] for i in range(k) if opt_kept_centers[i]]#### ATTENTION !!!!
-        means = opt_means[opt_kept_centers,]
-        weights = opt_weigths[opt_kept_centers]
-        colors = np.zeros(n)
-        for i in range(n):
-            colors[i] = np.sum(opt_kept_centers[range(int(opt_colors[i]+1))])-1
-        cost = opt_cost
-        
-    return(centers, Sigma, means, weights, colors, cost)
+include("optima_kplm.jl")
+X = hcat([[-1, -1], [-2, -1], [-3, -2], [2, 2], [3, 2], [4, 3]]...)
+sig = size(X,2) # There is no trimming, all sample points are assigned to a cluster
+centers, Σ, μ, ω, colors, cost = optima_for_kPLM(X, 3, 2, sig, iter_max = 1, nstart = 1)
 
 
-def kPLM(X,query_pts,q,k,sig,iter_max = 10,nstart = 1):
-    '''
-    Compute the values of the k-PDTM of the empirical measure of a point cloud X
-    Require sklearn.neighbors.KDTree to search nearest neighbors
-    
-    Input:
-    X: a nxd numpy array representing n points in R^d
-    query_pts:  a sxd numpy array of query points
-    q: parameter of the DTM in {1,2,...,n}
-    k: number of centers
-    sig: number of points considered as signal in the sample (other signal points are trimmed)
-    
-    Output: 
-    kPDTM_result: a sx1 numpy array contaning the kPDTM of the 
-    query points
-    
-    Example:
-    X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
-    Q = np.array([[0,0],[5,5]])
-    kPLM_values = kPLM(X, Q, 3, 2,X.shape[0])
-    '''
-    n = X.shape[0]     
-    if(q<=0 or q>n):
-        raise AssertionError("Error: q should be in {1,2,...,n}")
-    elif(k<=0 or k>n):
-        raise AssertionError("Error: k should be in {1,2,...,n}")
-    elif(X.shape[1]!=query_pts.shape[1]):
-        raise AssertionError("Error: X and query_pts should contain points with the same number of coordinates.")
-    else:
-        centers, Sigma, means, weights, colors, cost = optima_for_kPLM(X,q,k,sig,iter_max = iter_max,nstart = nstart)
-        kPLM_result = np.zeros(query_pts.shape[0])
-        for i in range(query_pts.shape[0]):
-            kPLM_result[i] = np.inf
-            for j in range(means.shape[0]):
-                aux0 = distance.mahalanobis(query_pts[i,],means[j,],np.linalg.inv(Sigma[j]))
-                aux = aux0*aux0 + weights[j] # We don't take the squareroot, since aux could be negative
-                if(aux<kPLM_result[i]):
-                    kPLM_result[i] = aux 
-                    
-    return(kPLM_result, centers, Sigma, means, weights, colors, cost)
-# -
+centers, Σ, μ, ω, colors, cost
 
 # We compute the $k$-PLM on the same sample of points.
 #
 # The sub-level sets of the $k$-PLM are unions of $k$ ellispoids which centers are represented by triangles.
 
-' Compute the k-PLM on X ' 
-# compute the values of the DTM of parameter q
 q = 40
 k = 250
-sig = X.shape[0]
+sig = size(data, 2)
 iter_max = 10
 nstart = 1
-kPLM_values, centers, Sigma, means, weights, colors, cost = kPLM(X,X,q,k,sig,iter_max,nstart)  
+kPLM_values, centers, Sigma, means, weights, colors, cost = kPLM(data, data, q, k, sig; iter_max = iter_max, nstart = nstart)  
 # plot of  the opposite of the DTM
-fig, ax = plt.subplots()
-plot = ax.scatter(X[:,0], X[:,1], c=-kPLM_values)
-fig.colorbar(plot)
-for i in range(means.shape[0]):
-    ax.scatter(means[i,0],means[i,1],c = "black",marker = "^")
-ax.axis('equal')
-ax.set_title('Values of -kPLM on X with parameter q='+str(q)+' and k='+str(k)+'.');
+fig = Figure(; resolution = (500, 400))
+ax = Axis(fig[1,1], aspect = 1, 
+     title = "Values of kPLM on data with parameter q=$(q) and k=$(k).")
+scatter!(ax, data[1,:], data[2,:], color = -kPLM_values)
+Colorbar(fig[1, 2], limits = extrema(-kPLM_values), colormap = :viridis)
+scatter!(ax, getindex.(means,1), getindex.(means, 2), color = "black", marker = :utriangle)
+colsize!(fig.layout, 1, Aspect(1, 1.0)) # reduce size colorbar
+
+fig
 
 # ## Detecting outliers - Trimmed versions of the $k$-PDTM and the $k$-PLM
 
@@ -786,7 +375,6 @@ ax.set_title('Values of -kPLM on X with parameter q='+str(q)+' and k='+str(k)+'.
 
 # ### Functions to plot ellipsoids and disks
 
-# +
 import math
 import matplotlib
 
@@ -797,11 +385,9 @@ def Trace_ellipses(Sigma,center,alpha):
 
 def Trace_balls(center,alpha):
     return(matplotlib.patches.Circle(center, np.sqrt(alpha)))
-# -
 
 # ### Sublevel sets of the $k$-PDTM
 
-# +
 ' Compute the sublevel sets of the k-PDTM on X ' 
 
 q = 5
@@ -827,11 +413,9 @@ for i in range(means.shape[0]):
 
 ax.axis('equal')
 ax.set_title('Sublevel sets of the kPDTM on X with parameters q='+str(q)+' and k='+str(k)+'.');
-# -
 
 # ### Sublevel sets of the $k$-PLM
 
-# +
 ' Compute the sublevel sets of the k-PLM on X ' 
 
 q = 10
@@ -854,10 +438,9 @@ for ell in Ellipses:
 
 for i in range(means.shape[0]):
     ax.scatter(means[i,0],means[i,1],c = "black",marker = "^")
-    
+
 ax.axis('equal')
 ax.set_title('Sublevel sets of the kPLM on X with parameters q='+str(q)+' and k='+str(k)+'.');
-# -
 
 # ## References :
 #

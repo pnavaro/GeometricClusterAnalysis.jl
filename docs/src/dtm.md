@@ -43,9 +43,10 @@ sample, cf Section "Detecting outliers".
 We consider as a compact set $\mathcal{K}$, the infinity symbol:
 
 ```@example dtm
-using GeometricClusterAnalysis
-using NearestNeighbors
 using CairoMakie
+using GeometricClusterAnalysis
+using LinearAlgebra
+using NearestNeighbors
 using Random
 using Statistics
 
@@ -60,7 +61,7 @@ rng = MersenneTwister(1234)
 
 dataset = infinity_symbol(rng, nsignal, nnoise, σ, dimension, noise_min, noise_max)
 
-f = Figure(; resolution = (400, 400))
+f = Figure(; resolution = (600, 400))
 ax = Axis(f[1, 1], aspect = 1)
 limits!(ax, -5, 5, -5, 5)
 scatter!(ax, dataset.points[1,:], dataset.points[2,:], 
@@ -121,7 +122,7 @@ function $d_{\mathbb{X},q}$ is defined by
 
 ```math
 \begin{equation}
-\label{equation_dtm}
+\label{eqdtm1}
 d_{\mathbb{X},q}^2:x\mapsto \|x-m(x,\mathbb{X},q)\|^2 + v(x,\mathbb{X},q),
 \end{equation}
 ```
@@ -161,7 +162,7 @@ X,q,k}$ and $-d'_{\mathbb X,q,k}$ for some $q$ and $k$ are the
 following:
 
 ```@example dtm
-function kPDTM_values(rng, points, x, y, q, k, nsignal, iter_max, nstart)
+function kPDTM(rng, points, x, y, q, k, nsignal, iter_max, nstart)
 
     nx, ny = length(x), length(y)
     result = fill(Inf, (nx, ny))
@@ -175,15 +176,15 @@ function kPDTM_values(rng, points, x, y, q, k, nsignal, iter_max, nstart)
         end
     end
 
-    return result
+    return result, df_kpdtm
 end
 
 q, k = 20, 20
 iter_max, nstart = 100, 10 
 xs = LinRange(-10, 10, 200)
 ys = LinRange(-10, 10, 200)
-zs = - kPDTM_values(rng, dataset.points, xs, ys, q, k, nsignal, iter_max, nstart)
-fig = surface(xs, ys, zs, axis=(type=Axis3,), cb = false)
+zs, df = kPDTM(rng, dataset.points, xs, ys, q, k, nsignal, iter_max, nstart)
+fig = surface(xs, ys, -zs, axis=(type=Axis3,), cb = false)
 save("assets/dtm5.png", fig); nothing #hide
 ```
 
@@ -191,10 +192,10 @@ save("assets/dtm5.png", fig); nothing #hide
 
 and 
 
-```julia
+```@example dtm
 function f_Σ!(Σ) end
 
-function kPLM_values(rng, points, x, y, q, k, nsignal, iter_max, nstart)
+function kPLM(rng, points, x, y, q, k, nsignal, iter_max, nstart)
 
     nx, ny = length(x), length(y)
     result = fill(Inf, (nx, ny))
@@ -202,18 +203,18 @@ function kPLM_values(rng, points, x, y, q, k, nsignal, iter_max, nstart)
 
     for i = eachindex(x), j = eachindex(y)
         for (μ, Σ, ω) in zip(df_kplm.μ, df_kplm.Σ, df_kplm.ω)
-            aux = GeometricClusterAnalysis.sqmahalanobis([x[i], y[j]], μ, inv(Hermitian(Σ))) #+ ω
+            aux = GeometricClusterAnalysis.sqmahalanobis([x[i], y[j]], μ, inv(Σ)) #+ ω
             result[i,j] = min(result[i,j], aux)
         end
     end
 
-    return result
+    return result, df_kplm
 
 end
 
 nsignal = 500
 nnoise = 50
-σ = 0.05
+σ = 0.1
 dimension = 2
 noise_min = -5
 noise_max = 5
@@ -226,19 +227,20 @@ q, k = 20, 8
 iter_max, nstart = 100, 10 
 xs = LinRange(-10, 10, 200)
 ys = LinRange(-10, 10, 200)
-zs = kPLM_values(rng, dataset.points, xs, ys, q, k, nsignal, iter_max, nstart)
-surface( xs, ys, - zs, axis=(type=Axis3,))
+zs, df = kPLM(rng, dataset.points, xs, ys, q, k, nsignal, iter_max, nstart)
+f = surface( xs, ys, -zs, axis=(type=Axis3,))
+save("assets/dtm6.png", f); nothing #hide
 ```
+![](assets/dtm6.png)
 
 ## DTM computation for a noisy sample on a circle
 
 The points are generated on the circle accordingly to the following
-function **SampleOnCircle**. This whole example was picked from the
-page **DTM-based filtrations: demo** of Raphaël Tinarrage.
+function. This whole example was picked from the page **DTM-based filtrations: demo** of Raphaël Tinarrage.
 
 ```@example dtm
 """
-    sample_on_circle(n_obs, n_out; is_plot = false)
+    sample_on_circle(n_obs, n_out)
 
 Sample `n_obs` points (observations) points from the uniform distribution on the unit circle in ``R^2``, 
     and `n_out` points (outliers) from the uniform distribution on the unit square  
@@ -246,12 +248,11 @@ Sample `n_obs` points (observations) points from the uniform distribution on the
 Input: 
 - `n_obs` : number of sample points on the circle
 - `n_noise` : number of sample points on the square
-- `is_plot = true or false` : draw a plot of the sampled points            
 
 Output : 
 - `data` : a (`n_obs` + `n_out`) x 2 matrix, the sampled points concatenated 
 """
-function sample_on_circle(n_obs, n_out; is_plot = false)
+function sample_on_circle(n_obs, n_out)
     
     rand_uniform = rand(n_obs) .* 2 .- 1    
     x_obs = cos.(2pi .* rand_uniform)
@@ -273,7 +274,7 @@ Sampling on the circle with outlier
 n_obs = 150                            # number of points sampled on the circle
 n_out = 100                            # number of outliers 
 data = sample_on_circle(n_obs, n_out)  # sample points with outliers 
-f = Figure(resolution = (400, 400))
+f = Figure(resolution = (600, 400))
 ax = Axis(f[1, 1], 
           title = "$(n_obs)-sampling of the unit circle with $(n_out) outliers",
           aspect = 1)
@@ -288,11 +289,9 @@ Compute the DTM on X
 ```@example dtm
 q = 40
 kdtree = KDTree(data)
-```
 
-compute the values of the DTM of parameter q
+# compute the values of the DTM of parameter q
 
-```@example dtm
 function dtm(kdtree, x, y, q)
     idxs, dists = knn(kdtree, [x, y], q)
     dtm_result = sqrt(sum(dists .* dists)/q)
@@ -303,12 +302,11 @@ dtm_values = [dtm(kdtree, px, py, q) for (px,py) in eachcol(data)]
 
 # plot of  the opposite of the DTM
 
-f = Figure(resolution=(500,400))
+f = Figure(resolution=(600,400))
 ax = Axis(f[1, 1], 
                   title = "Values of -DTM on X with parameter q=$q",
                   aspect = 1)
 scatter!(ax, data[1,:], data[2,:], color=-dtm_values)
-Colorbar(f[1, 2], limits = extrema(-dtm_values), colormap = :heat)
 colsize!(f.layout, 1, Aspect(1, 1.0)) # reduce size colorbar
 save("assets/circle2.png", f); nothing #hide
 ```
@@ -321,12 +319,13 @@ The $k$-PDTM is an approximation of the DTM, which sublevel sets
 are unions of $k$ balls. It was introduced and studied in
 [Brecheteau20](@cite).
 
-According to the previous [expression of the DTM](#equation_DTM), the DTM rewrites as
+According to the previous expression of the DTM \eqref{eqdtm1}, the DTM rewrites as
 ```math
+\begin{equation} \label{eqdtm2}
 d_{\mathbb{X},q}^2:x\mapsto \inf_{c\in\mathbb{R}^d}\|x-m(c,\mathbb X,q)\|^2+v(c,\mathbb X,q).
+\end{equation}
 ```
-</a>
-The $k$-PDTM $d_{\mathbb{X},q,k}$ is an approximation of the DTM that consists in replacing the infimum over $\mathbb{R}^d$ in [this new formula ](#deuxieme_expression_DTM) with an infimum over a set of $k$ centers $c^*_1,c^*_2,\ldots,c^*_k$: 
+The $k$-PDTM $d_{\mathbb{X},q,k}$ is an approximation of the DTM that consists in replacing the infimum over $\mathbb{R}^d$ in this new formula \eqref{eqdtm2} with an infimum over a set of $k$ centers $c^*_1,c^*_2,\ldots,c^*_k$: 
 
 ```math
 d_{\mathbb{X},q,k}^2:x\mapsto \min_{i\in\{1,2,\ldots,k\}}\|x-m(c^*_i,\mathbb X,q)\|^2+v(c^*_i,\mathbb X,q).
@@ -340,38 +339,47 @@ is minimal.
 
 Note that these centers $c^*_1,c^*_2,\ldots,c^*_k$ are not necessarily uniquely defined. The following algorithm provides local minimisers of the criterion $R$.
 
-We compute the $k$-PDTM on the same sample of points.
+We compute the $k$-PDTM on the same sample of points. Note that
+when we take $k=250$, that is, when $k$ is equal to the sample size,
+the DTM and the $k$-PDTM coincide on the points of the sample. The
+sub-level sets of the $k$-PDTM are unions of $k$ balls which centers
+are represented by triangles.
 
-Note that when we take $k=250$, that is, when $k$ is equal to the
-sample size, the DTM and the $k$-PDTM coincide on the points of the
-sample.
+```@example dtm
+function kPDTM(rng, points, query_points, q, k, nsignal, iter_max, nstart)
 
-The sub-level sets of the $k$-PDTM are unions of $k$ balls which
-centers are represented by triangles.
+    result = fill(Inf, size(query_points,2))
+
+    df_kpdtm = kpdtm(rng, points, q, k, nsignal, iter_max, nstart)
+
+    for i = eachindex(result)
+        for (μ, ω) in zip(df_kpdtm.μ, df_kpdtm.ω)
+            aux = sqrt(sum((query_points[:,i] .- μ).^2) + ω)
+            result[i] = min(result[i], aux)
+        end
+    end
+
+    return result, df_kpdtm
+end
 
 
-Compute the k-PDTM of parameter q on data
-
-```julia
 q = 40
 k = 250
 sig = size(data, 2)
 iter_max = 100
 nstart = 10
-kPDTM_values, centers, means, variances, colors, cost = kPDTM(data, data, q, k, sig, iter_max = iter_max, nstart = nstart)  
-```
+values, df = kPDTM(rng, data, data, q, k, sig, iter_max, nstart)  
 
-```julia
-fig = Figure(; resolution=(500,500))
-ax = Axis(fig[1, 1],
+fig = Figure(; resolution=(600,400))
+ax = Axis(fig[1, 1], aspect = 1,
     title = "Values of -kPDTM on X with parameter q=$(q) and k=$(k).",
 )
-scatter!(ax, data[1,:], data[2, :], color=-kPDTM_values)
-for μ in means
-    scatter!(ax, μ[1], μ[2], color = "black", marker=:utriangle)
-end
-fig
+scatter!(ax, data[1,:], data[2, :], color=-values)
+scatter!(ax, getindex.(df.μ,1), getindex.(df.μ,2), color = "black", marker=:utriangle)
+save("assets/circle3.png", fig); nothing #hide
 ```
+
+![](assets/circle3.png)
 
 ## Approximating $\mathcal{K}$ with a union of $k$ ellipsoids - or - the $k$-power-likelihood-to-measure ($k$-PLM)
 
@@ -399,23 +407,41 @@ We compute the $k$-PLM on the same sample of points.
 
 The sub-level sets of the $k$-PLM are unions of $k$ ellispoids which centers are represented by triangles.
 
-```julia
+```@example dtm
+function f_Σ!(Σ) end
+
+function kPLM(rng, points, query_points, q, k, nsignal, iter_max, nstart)
+
+    result = fill(Inf, size(query_points, 2))
+    df_kplm = kplm(rng, points, q, k, nsignal, iter_max, nstart, f_Σ!)
+
+    for i = eachindex(result)
+        for (μ, Σ, ω) in zip(df_kplm.μ, df_kplm.Σ, df_kplm.ω)
+            aux = GeometricClusterAnalysis.sqmahalanobis(query_points[:, i], μ, inv(Σ)) #+ ω
+            result[i] = min(result[i], aux)
+        end
+    end
+
+    return result, df_kplm
+
+end
 q = 40
 k = 250
 sig = size(data, 2)
 iter_max = 10
 nstart = 1
-kPLM_values, centers, Sigma, means, weights, colors, cost = kPLM(data, data, q, k, sig; iter_max = iter_max, nstart = nstart)  
+values, df = kPLM(rng, data, data, q, k, sig, iter_max, nstart)  
 # plot of  the opposite of the DTM
-fig = Figure(; resolution = (500, 400))
+fig = Figure(; resolution = (600, 400))
 ax = Axis(fig[1,1], aspect = 1, 
      title = "Values of kPLM on data with parameter q=$(q) and k=$(k).")
-scatter!(ax, data[1,:], data[2,:], color = -kPLM_values)
-Colorbar(fig[1, 2], limits = extrema(-kPLM_values), colormap = :viridis)
-scatter!(ax, getindex.(means,1), getindex.(means, 2), color = "black", marker = :utriangle)
+scatter!(ax, data[1,:], data[2,:], color = -values)
+scatter!(ax, getindex.(df.μ,1), getindex.(df.μ, 2), color = "black", marker = :utriangle)
 colsize!(fig.layout, 1, Aspect(1, 1.0)) # reduce size colorbar
-fig
+save("assets/circle4.png", fig); nothing #hide
 ```
+
+![](assets/circle4.png)
 
 ## Detecting outliers - Trimmed versions of the $k$-PDTM and the $k$-PLM
 
@@ -440,91 +466,91 @@ The $o = n-sig$ outliers are represented in red in the following figures.
 
 Compute the trimmed k-PDTM values of parameter q
 
-```julia
+```@example dtm
 q = 5
 k = 100
 sig = 150 # Amount of signal points - We will remove o = 250 - 150 points from the sample
 iter_max = 100
 nstart = 10
-kPDTM_values, centers, means, variances, colors, cost = kPDTM(data,data,q,k,sig,
-iter_max = iter_max, nstart = nstart)  
+values, df = kPDTM(rng, data, data, q, k, sig, iter_max, nstart)  
 # plot of  the opposite of the k-PDTM
-fig = Figure(; resolution=(500,500))
-ax = Axis(fig[1, 1],
+fig = Figure(; resolution=(600,400))
+ax = Axis(fig[1, 1], aspect = 1,
     title = "Values of -kPDTM on X with parameter q=$(q) and k=$(k).",
 )
-scatter!(ax, data[1,:], data[2, :], color=-kPDTM_values)
-scatter!(ax, getindex.(means,1), getindex.(means, 2), color = "black", marker=:utriangle)
-fig
+scatter!(ax, data[1,:], data[2, :], color=-values)
+scatter!(ax, getindex.(df.μ	,1), getindex.(df.μ, 2), color = "black", marker=:utriangle)
+save("assets/circle5.png", fig); nothing #hide
 ```
+
+![](assets/circle5.png)
 
 # Compute the trimmed k-PLM values of parameter q
 
-```julia
+```@example dtm
 q = 10
 k = 100
 sig = 150
 iter_max = 10
 nstart = 1
-kPLM_values, centers, Sigma, means, weights, colors, cost = kPLM(data,data,q,k,sig;
-iter_max = iter_max, nstart = nstart)  
+values, df = kPLM(rng, data, data, q, k, sig, iter_max, nstart)  
 # plot of  the opposite of the k-PLM
-fig = Figure(; resolution = (500, 400))
+fig = Figure(; resolution = (600, 400))
 ax = Axis(fig[1,1], aspect = 1, 
      title = "Values of kPLM on data with parameter q=$(q) and k=$(k).")
-scatter!(ax, data[1,:], data[2,:], color = -kPLM_values)
-Colorbar(fig[1, 2], limits = extrema(-kPLM_values), colormap = :rainbow)
-scatter!(ax, getindex.(means,1), getindex.(means, 2), color = "black", marker = :utriangle)
+scatter!(ax, data[1,:], data[2,:], color = -values)
+scatter!(ax, getindex.(df.μ,1), getindex.(df.μ, 2), color = "black", marker = :utriangle)
 colsize!(fig.layout, 1, Aspect(1, 1.0)) # reduce size colorbar
-fig
+save("assets/circle6.png", fig); nothing #hide
 ```
+
+![](assets/circle6.png)
 
 ## The sublevel sets
 
 ### Sublevel sets of the $k$-PDTM
 
-```julia
+```@example dtm
 q = 5
 k = 100
 sig = 150
 iter_max = 10
 nstart = 1
-kPDTM_values, centers, means, variances, colors, cost = kPDTM(data,data,q,k,sig,
-iter_max = iter_max, nstart = nstart)  
+values, df = kPDTM(rng, data, data, q, k, sig, iter_max, nstart)  
 
-fig = Figure()
+fig = Figure(; resolution = (600, 400))
 ax = Axis(fig[1,1], aspect = 1,
 title = "Sublevel sets of the kPDTM on X with parameters q=$q and k=$k .")
-scatter!(ax, data[1,:], data[2,:], color = -kPDTM_values)
-Colorbar(fig[1,2])
-alpha = 0.2 # Level for the sub-level set of the k-PLM
-for (μ,ω) in zip(means, variances)
+scatter!(ax, data[1,:], data[2,:], color = -values)
+alpha = 0.5 # Level for the sub-level set of the k-PLM
+for (μ,ω) in zip(df.μ, df.ω)
     poly!(ax, Circle(Point2(μ), max(0,alpha*alpha - ω)), 
-    color= "green",  transparency = true)
+    color= RGBAf(0.5, 0.5, 1, 0.5),  transparency = true, shading = true)
 end
-fig
+save("assets/circle_balls.png", fig); nothing #hide
 ```
+
+![](assets/circle_balls.png)
 
 ### Sublevel sets of the $k$-PLM
 
 Compute the sublevel sets of the k-PLM on X  
 
-```julia
+```@example dtm
 q = 10
 k = 100
 sig = 150
 iter_max = 10
 nstart = 1
-kPLM_values, centers, Sigma, means, weights, colors, cost = kPLM(data,data,q,k,sig,
-iter_max = iter_max, nstart = nstart) ;
+values, df = kPLM(rng, data, data, q, k, sig, iter_max, nstart)
 
 α = 10 # Level for the sub-level set of the k-PLM
-f = Figure()
-ax = Axis(f[1,1], aspect = 1, 
+fig = Figure(; resolution = (600, 400))
+ax = Axis(fig[1,1], aspect = 1, 
 title = "Sublevel sets of the kPLM on X with parameters q=$q and k=$k .")
 function covellipse(μ, Σ, α)
     λ, U = eigen(Σ)
-    S = 0.1 .* α * U * diagm(.√λ)
+    S = 0.2 * α * U * diagm(.√λ)
     θ = range(0, 2π; length = 100)
     A = S * [cos.(θ)'; sin.(θ)']
     x = μ[1] .+ A[1, :]
@@ -533,10 +559,11 @@ function covellipse(μ, Σ, α)
     Makie.Polygon([Point2f(px, py) for (px,py) in zip(x, y)])
 
 end
-scatter!(ax, data[1,:], data[2,:], color=-kPLM_values)
-Colorbar(fig[1,2], colormap=:rainbow)
-for (μ, Σ, ω) in zip(means, Sigma, weights)
-    poly!(ax, covellipse(μ, Σ, max(0, α - ω)), color = "blue" )
+scatter!(ax, data[1,:], data[2,:], color=-values)
+for (μ, Σ, ω) in zip(df.μ, df.Σ, df.ω) 
+    poly!(ax, covellipse(μ, Σ, max(0, α - ω)), color = RGBAf(0.5, 0.5, 1, 0.5) )
 end
-f
+save("assets/circle_ellipses.png", fig); nothing #hide
 ```
+
+![](assets/circle_ellipses.png)

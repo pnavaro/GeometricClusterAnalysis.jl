@@ -8,7 +8,7 @@
 #       format_version: '1.0'
 #       jupytext_version: 1.14.7
 #   kernelspec:
-#     display_name: Julia 1.9.1
+#     display_name: Julia 1.9.2
 #     language: julia
 #     name: julia-1.9
 # ---
@@ -130,22 +130,76 @@ surface(xs, ys, zs, cb = false)
 # In this page, we define two functions, the $k$-PDTM $d_{\mathbb X,q,k}$ and the $k$-PLM $d'_{\mathbb X,q,k}$. The sublevel sets of the $k$-PDTM are unions of $k$ balls. The sublevel sets of the $k$-PLM are unions of $k$ ellipsoids.
 # The graphs of $-d_{\mathbb X,q,k}$ and $-d'_{\mathbb X,q,k}$ for some $q$ and $k$ are the following:
 
-function f_Σ!(Σ) end
+function kPDTM_values(rng, points, x, y, q, k, nsignal, iter_max, nstart)
 
-k, c = 20, 20
-iter_max, nstart = 100, 10   
+    nx, ny = length(x), length(y)
+    result = fill(Inf, (nx, ny))
 
-df_kpdtm = kpdtm(rng, dataset.points, k, c, nsignal, iter_max, nstart);
+    df_kpdtm = kpdtm(rng, points, q, k, nsignal, iter_max, nstart)
 
+    for i = eachindex(x), j = eachindex(y)
+        for (μ, ω) in zip(df_kpdtm.μ, df_kpdtm.ω)
+            aux = sqrt(sum(((x[i],y[j]) .- μ).^2) + ω)
+            result[i,j] = min(result[i,j], aux)
+        end
+    end
+
+    return result
+
+end
+
+
+
+q, k = 20, 20
+iter_max, nstart = 100, 10 
+xs = LinRange(-10, 10, 200)
+ys = LinRange(-10, 10, 200)
+zs = - kPDTM_values(rng, dataset.points, xs, ys, q, k, nsignal, iter_max, nstart)
+surface(xs, ys, zs, axis=(type=Axis3,), cb = false)
 
 # and 
 
+using GeometricClusterAnalysis
+using CairoMakie
+using Random
+
 function f_Σ!(Σ) end
 
-k, c = 20, 20
-iter_max, nstart = 100, 10   
+function kPLM_values(rng, points, x, y, q, k, nsignal, iter_max, nstart)
 
-df_kplm = kplm(rng, dataset.points, k, c, nsignal, iter_max, nstart, f_Σ!);
+    nx, ny = length(x), length(y)
+    result = fill(Inf, (nx, ny))
+    df_kplm = kplm(rng, points, q, k, nsignal, iter_max, nstart, f_Σ!)
+
+    for i = eachindex(x), j = eachindex(y)
+        for (μ, Σ, ω) in zip(df_kplm.μ, df_kplm.Σ, df_kplm.ω)
+            aux = GeometricClusterAnalysis.sqmahalanobis([x[i], y[j]], μ, inv(Hermitian(Σ))) #+ ω
+            result[i,j] = min(result[i,j], aux)
+        end
+    end
+
+    return result
+
+end
+
+nsignal = 500
+nnoise = 50
+σ = 0.05
+dimension = 2
+noise_min = -5
+noise_max = 5
+
+rng = MersenneTwister(1234)
+
+dataset = infinity_symbol(rng, nsignal, nnoise, σ, dimension, noise_min, noise_max)
+
+q, k = 20, 8
+iter_max, nstart = 100, 10 
+xs = LinRange(-10, 10, 200)
+ys = LinRange(-10, 10, 200)
+zs = kPLM_values(rng, dataset.points, xs, ys, q, k, nsignal, iter_max, nstart)
+fig = surface( xs, ys, - zs, axis=(type=Axis3,))
+save("kplm.png", fig)
 
 
 # ### Example - DTM computation for a noisy sample on a circle
@@ -406,7 +460,7 @@ function covellipse(μ, Σ, α)
     y = μ[2] .+ A[2, :]
 
     Makie.Polygon([Point2f(px, py) for (px,py) in zip(x, y)])
-    
+
 end
 scatter!(ax, data[1,:], data[2,:], color=-kPLM_values)
 Colorbar(fig[1,2], colormap=:rainbow)

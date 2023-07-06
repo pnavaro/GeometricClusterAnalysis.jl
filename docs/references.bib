@@ -29,7 +29,7 @@ year = {1997},
 journal = {Annals of Statistics}
 }
 
-@article{lloyd,
+@article{Lloyd,
 author = {Lloyd, S.P.},
 year = {1982},
 title = {Least squares quantization in pcm.},
@@ -79,4 +79,57 @@ title = {Slope Heuristics: Overview and Implementation},
 volume = {22},
 journal = {Stat Comput},
 doi = {10.1007/s11222-011-9236-1}
+}
+
+
+@article{Brecheteau20,
+	title = {A \$k\$-points-based distance for robust geometric inference},
+	volume = {26},
+	issn = {1350-7265},
+	url = {https://projecteuclid.org/journals/bernoulli/volume-26/issue-4/A-k-points-based-distance-for-robust-geometric-inference/10.3150/20-BEJ1214.full},
+	doi = {10.3150/20-BEJ1214},
+	abstract = {Analyzing the sub-level sets of the distance to a compact submanifold of \${\textbackslash}mathbb\{R\}{\textasciicircum}\{d\}\$ is a common method in topological data analysis, to understand its topology. Therefore, topological inference procedures usually rely on a distance estimate based on \$n\$ sample points (Discrete Comput. Geom. 33 (2005) 249–274). In the case where sample points are corrupted by noise, the distance-to-measure function ({DTM}, Found. Comput. Math. 11 (2011) 733–751) is a surrogate for the distance-to-compact-set function. In practice, approximating the homology of its sub-level sets requires to compute the homology of unions of \$n\$ balls (Discrete Comput. Geom. 49 (2013) 22–45; In Proceedings of the Twenty-Sixth Annual {ACM}-{SIAM} Symposium on Discrete Algorithms (2015) 168–180 {SIAM}), that might become intractable whenever \$n\$ is large. To simultaneously face the two problems of a large number of points and noise, we introduce the \$k\$-power-distance-to-measure function (\$k\$-{PDTM}). This new surrogate for the distance-to-compact is a \$k\$-points-based approximation of the {DTM}. These \$k\$ points are minimizers of a robustified version of the classical \$k\$-means criterion (In Proc. Fifth Berkeley Sympos. Math. Statist. and Probability (Berkeley, Calif., 1965/66) (1967) 281–297 Univ. California Press). The sublevel sets of the \$k\$-{PDTM} consist in unions of \$k\$ balls, and this distance is also proved robust to noise. We assess the quality of this approximation for \$k\$ possibly drastically smaller than \$n\$, and provide an algorithm to compute this \$k\$-{PDTM} from a sample. Numerical experiments illustrate the good behavior of this \$k\$-points approximation in a noisy topological inference framework.},
+	pages = {3017--3050},
+	number = {4},
+	journal = {Bernoulli},
+	author = {Brécheteau, Claire and Levrard, Clément},
+	urldate = {2023-07-05},
+	date = {2020-11},
+    year = {2020},
+	keywords = {Minimax rates, quantization, robust distance estimation, topological inference},
+}
+
+@article{Chazal,
+	title = {Geometric Inference for Probability Measures},
+	volume = {11},
+	issn = {1615-3383},
+	url = {https://doi.org/10.1007/s10208-011-9098-0},
+	doi = {10.1007/s10208-011-9098-0},
+	abstract = {Data often comes in the form of a point cloud sampled from an unknown compact subset of Euclidean space. The general goal of geometric inference is then to recover geometric and topological features (e.g., Betti numbers, normals) of this subset from the approximating point cloud data. It appears that the study of distance functions allows one to address many of these questions successfully. However, one of the main limitations of this framework is that it does not cope well with outliers or with background noise. In this paper, we show how to extend the framework of distance functions to overcome this problem. Replacing compact subsets by measures, we introduce a notion of distance function to a probability distribution in ℝd. These functions share many properties with classical distance functions, which make them suitable for inference purposes. In particular, by considering appropriate level sets of these distance functions, we show that it is possible to reconstruct offsets of sampled shapes with topological guarantees even in the presence of outliers. Moreover, in settings where empirical measures are considered, these functions can be easily evaluated, making them of particular practical interest.},
+	pages = {733--751},
+	number = {6},
+    year = {2011},
+	journal = {Foundations of Computational Mathematics},
+	shortjournal = {Found Comput Math},
+	author = {Chazal, Frédéric and Cohen-Steiner, David and Mérigot, Quentin},
+	urldate = {2023-07-05},
+	date = {2011-12-01},
+	langid = {english},
+	keywords = {28A33, 62-07, 62G05, Computational topology, Geometric inference, Nearest neighbor, Optimal transportation, Surface reconstruction},
+}
+
+@online{Brecheteau18,
+	title = {Robust shape inference from a sparse approximation of the Gaussian trimmed loglikelihood},
+    booktitle = {},
+	url = {https://www.semanticscholar.org/paper/Robust-shape-inference-from-a-sparse-approximation-Br%C3%A9cheteau/a26da44144a782e21e492d2c24fcedb0abb00db7},
+    year = {2018},
+	abstract = {Given a noisy sample of points lying around some shape M, with possibly outliers or clutter noise, we focus on the question of recovering M, or at least geometric and topological information about M. Often, such inference is based on the sublevel sets of distance-like functions such as the function distance to M, the distance-to-measure ({DTM}) or the k-witnessed distance. In this paper, we firstly widespread the concept of trimmed log-likelihood to probability distributions. This trimmed log-likelihood can be considered as a generalisation of the {DTM}. 
+ 
+A sparse approximation of the {DTM}, the m-power distance-to-measure (m-{PDTM}), has been introduced and studied by Brecheteau and Levrard in 2017. Its sublevel sets are unions of m balls, with m possibly much smaller than the sample size. 
+By miming the construction of the m-{PDTM} from the {DTM}, we propose an approximation of the trimmed log-likelihood associated to the family of Gaussian distributions on R{\textasciicircum}d. This approximation is sparse is the sense that its sublevel sets are unions of m ellipsoids. 
+ 
+We provide a Lloyd-type algorithm to compute the centers and covariance matrices associated to the ellipsoids. We improve our algorithm by allowing an additional noise parameter to wipe out some points, just as the trimmed m-means algorithm of Cuesta-Albertos et al. Our algorithm comes together with a heuristic to select this parameter. Some illustrations on different examples enhance that our algorithm is efficient in wiping out clutter noise, recovering the shape and recovering the homology of M; this requiring a storage of only m points and covariance matrices.},
+	author = {Brécheteau, C.},
+	urldate = {2023-07-05},
+	date = {2018-12-06},
 }

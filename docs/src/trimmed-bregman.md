@@ -150,7 +150,7 @@ The dictionnary ``\mathbf{c} = (c_1, c_2,\ldots c_k)`` is the one minimising the
 ```math
 R_n:((c_1, c_2,\ldots c_k),\mathbb{X})\mapsto\frac1n\sum_{i = 1}^n\gamma_\phi(X_i,\mathbf{c}) = \frac1n\sum_{i = 1}^n\min_{l\in[\![1,k]\!]}\mathrm{d}_\phi(X_i,c_l).
 ```
-When ``\phi = \|\cdot\|^2``, ``R_n`` is the risk associated to the ``k``-means [lloyd](@cite) clustering.
+When ``\phi = \|\cdot\|^2``, ``R_n`` is the risk associated to the ``k``-means [Lloyd](@cite) clustering.
 
 ## Trimming
 
@@ -174,7 +174,7 @@ We denote by ``\hat{\mathbf{c}}_{\alpha}`` a minimiser of ``R_{n,\alpha}(\cdot,\
 
 ### The clustering algorithm without trimming
 
-The algorithm of [lloyd](@cite) consists in searching for a local minimiser
+The algorithm of [Lloyd](@cite) consists in searching for a local minimiser
 ``\hat{\mathbf{c}}`` of the risk``R_n(\cdot,\mathbb{X})`` for the ``k``-means criterion (that is, when ``\phi =
 \|\cdot\|^2``). It adapts to any Bregman divergence.
 The algorithm is as follows.

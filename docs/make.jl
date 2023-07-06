@@ -1,7 +1,6 @@
 using Documenter
 using DocumenterCitations
 using GeometricClusterAnalysis
-using Plots
 using Literate
 
 ENV["GKSwstype"] = "100"
@@ -38,18 +37,17 @@ makedocs(
     doctest = false,
     pages = [
         "Documentation" => "index.md",
-        "Datasets" => "fake_data.md",
-        "Fleas dataset" => "fleas.md",
-        "Three Curves" => "three_curves.md",
-        "Two Spirals" => "two_spirals.md",
-        "Fourteen lines" => "fourteen_lines.md",
-        "Trimmed Bregman Clustering" =>
-            ["trimmed-bregman.md", "poisson1.md", "poisson2.md", "obama.md"],
-        "ToMaTo" => "tomato.md",
-        "DTM" => "dtm.md",
-        "Circle" => "circle.md",
-        "Types" => "types.md",
-        "Functions" => "functions.md",
+        "Robust approximations of compact sets" => "dtm.md",
+        #"Datasets" => "fake_data.md",
+        #"Fleas dataset" => "fleas.md",
+        #"Three Curves" => "three_curves.md",
+        #"Two Spirals" => "two_spirals.md",
+        #"Fourteen lines" => "fourteen_lines.md",
+        #"Trimmed Bregman Clustering" =>
+        #    ["trimmed-bregman.md", "poisson1.md", "poisson2.md", "obama.md"],
+        #"ToMaTo" => "tomato.md",
+        #"Types" => "types.md",
+        #"Functions" => "functions.md",
     ],
 )
 

@@ -46,6 +46,8 @@ makedocs(
         "Trimmed Bregman Clustering" =>
             ["trimmed-bregman.md", "poisson1.md", "poisson2.md", "obama.md"],
         "ToMaTo" => "tomato.md",
+        "DTM" => "dtm.md",
+        "Circle" => "circle.md",
         "Types" => "types.md",
         "Functions" => "functions.md",
     ],

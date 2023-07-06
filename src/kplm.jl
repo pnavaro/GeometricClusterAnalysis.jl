@@ -256,7 +256,7 @@ function kplm(
 
                 if kept_centers[i]
 
-                    stop_Σ = stop_Σ && all(Σ[i] .== Σ_old[i])
+                    stop_Σ = stop_Σ && all(Σ[i] ≈ Σ_old[i])
 
                 end
 

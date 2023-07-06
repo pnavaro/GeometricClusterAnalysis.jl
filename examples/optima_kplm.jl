@@ -228,8 +228,7 @@ function kPLM(data, query_pts, q, k, sig; iter_max = 10, nstart = 1)
     for i in eachindex(result)
         result[i] = Inf
         for j in eachindex(μ)
-            aux0 = sqrt(sqmahalanobis(query_pts[:,i], μ[j], inv(Σ[j])))
-            aux = aux0*aux0 + ω[j] # We don't take the squareroot, since aux could be negative
+            aux = sqmahalanobis(query_pts[:,i], μ[j], inv(Σ[j])) + ω[j]
             if aux < result[i]
                 result[i] = aux 
             end

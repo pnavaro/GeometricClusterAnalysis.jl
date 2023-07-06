@@ -7,9 +7,6 @@ import GeometricClusterAnalysis: mahalanobis
 
 using GeometricClusterAnalysis
 
-
-include("test_hyperellipsoid.jl")
-
 nrow(M::AbstractArray) = size(M)[1]
 ncol(M::AbstractArray) = size(M)[2]
 rbind(a, b) = vcat(a, b)

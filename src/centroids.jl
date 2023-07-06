@@ -1,7 +1,6 @@
 import StatsBase: sample
 import Base:size, length
 
-abstract type AbstractCentroids end
 
 function kmeans_pp(data::AbstractMatrix, nc::Int) 
 
@@ -29,6 +28,10 @@ function kmeans_pp(data::AbstractMatrix, nc::Int)
     return centroids
 
 end
+
+#=
+#
+abstract type AbstractCentroids end
 
 struct EllipsoidalCentroids <: AbstractCentroids
 
@@ -61,3 +64,5 @@ size(A::AbstractCentroids) = size(A.μ)
 size(A::AbstractCentroids, i::Int) = size(A.μ, i)
 
 getindex(A::AbstractCentroids, I::Vararg{Int, N}) where {N} = A.μ[I...]
+
+=#

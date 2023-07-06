@@ -480,6 +480,8 @@ ax = Axis(fig[1, 1], aspect = 1,
 )
 scatter!(ax, data[1,:], data[2, :], color=-values)
 scatter!(ax, getindex.(df.μ	,1), getindex.(df.μ, 2), color = "black", marker=:utriangle)
+outliers = df.colors .== 0
+scatter!(ax, data[1,outliers], data[2,outliers], color = "red")
 save("assets/circle5.png", fig); nothing #hide
 ```
 
@@ -500,6 +502,8 @@ ax = Axis(fig[1,1], aspect = 1,
      title = "Values of kPLM on data with parameter q=$(q) and k=$(k).")
 scatter!(ax, data[1,:], data[2,:], color = -values)
 scatter!(ax, getindex.(df.μ,1), getindex.(df.μ, 2), color = "black", marker = :utriangle)
+outliers = df.colors .== 0
+scatter!(ax, data[1,outliers], data[2,outliers], color = "red")
 colsize!(fig.layout, 1, Aspect(1, 1.0)) # reduce size colorbar
 save("assets/circle6.png", fig); nothing #hide
 ```

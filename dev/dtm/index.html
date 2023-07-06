@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Robust approximations of compact sets · GeometricClusterAnalysis.jl</title><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.png" alt="GeometricClusterAnalysis.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">GeometricClusterAnalysis.jl</a></span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Documentation</a></li><li><a class="tocitem" href="../fake_data/">Datasets</a></li><li><a class="tocitem" href="../fleas/">Fleas dataset</a></li><li><a class="tocitem" href="../three_curves/">Three Curves</a></li><li><a class="tocitem" href="../two_spirals/">Two Spirals</a></li><li><a class="tocitem" href="../fourteen_lines/">Fourteen lines</a></li><li><span class="tocitem">Trimmed Bregman Clustering</span><ul><li><a class="tocitem" href="../trimmed-bregman/">Bregman divergences</a></li><li><a class="tocitem" href="../poisson1/">One-dimensional data from the Poisson distribution</a></li><li><a class="tocitem" href="../poisson2/">Two-dimensional data from the Poisson distribution</a></li><li><a class="tocitem" href="../obama/">Application to authors texts clustering</a></li></ul></li><li class="is-active"><a class="tocitem" href>Robust approximations of compact sets</a><ul class="internal"><li><a class="tocitem" href="#Example"><span>Example</span></a></li><li><a class="tocitem" href="#The-distance-to-measure-(DTM)"><span>The distance-to-measure (DTM)</span></a></li><li><a class="tocitem" href="#DTM-computation-for-a-noisy-sample-on-a-circle"><span>DTM computation for a noisy sample on a circle</span></a></li><li><a class="tocitem" href="#Approximating-\\mathcal{K}-with-a-union-of-k-balls-or-the-k-power-distance-to-measure-(k-PDTM)"><span>Approximating <span>$\mathcal{K}$</span> with a union of <span>$k$</span> balls - or -  the <span>$k$</span>-power-distance-to-measure (<span>$k$</span>-PDTM)</span></a></li><li><a class="tocitem" href="#Approximating-\\mathcal{K}-with-a-union-of-k-ellipsoids-or-the-k-power-likelihood-to-measure-(k-PLM)"><span>Approximating <span>$\mathcal{K}$</span> with a union of <span>$k$</span> ellipsoids - or - the <span>$k$</span>-power-likelihood-to-measure (<span>$k$</span>-PLM)</span></a></li><li><a class="tocitem" href="#Detecting-outliers-Trimmed-versions-of-the-k-PDTM-and-the-k-PLM"><span>Detecting outliers - Trimmed versions of the <span>$k$</span>-PDTM and the <span>$k$</span>-PLM</span></a></li><li class="toplevel"><a class="tocitem" href="#Compute-the-trimmed-k-PLM-values-of-parameter-q"><span>Compute the trimmed k-PLM values of parameter q</span></a></li><li><a class="tocitem" href="#The-sublevel-sets"><span>The sublevel sets</span></a></li></ul></li><li><a class="tocitem" href="../tomato/">ToMaTo</a></li><li><a class="tocitem" href="../types/">Types</a></li><li><a class="tocitem" href="../functions/">Functions</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Robust approximations of compact sets</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Robust approximations of compact sets</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/pnavaro/GeometricClusterAnalysis.jl/blob/master/docs/src/dtm.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Robust-approximations-of-compact-sets"><a class="docs-heading-anchor" href="#Robust-approximations-of-compact-sets">Robust approximations of compact sets</a><a id="Robust-approximations-of-compact-sets-1"></a><a class="docs-heading-anchor-permalink" href="#Robust-approximations-of-compact-sets" title="Permalink"></a></h1><p>We consider <span>$\mathcal{K}$</span>, an unknown compact subset of the Euclidean space <span>$(\mathbb{R}^d,\|\cdot\|)$</span>. We dispose of a sample of <span>$n$</span> points <span>$\mathbb{X} = \{X_1, X_2,\ldots, X_n\}$</span> generated uniformly on <span>$\mathcal{K}$</span> or generated in a neighborhood of <span>$\mathcal{K}$</span>. The sample of points may be corrupted by outliers. That is, by points lying far from <span>$\mathcal{K}$</span>.</p><p>Given <span>$X_1, X_2,\ldots, X_n$</span>, we aim at recovering <span>$\mathcal{K}$</span>. More precisely, we construct approximations of <span>$\mathcal{K}$</span> as unions of <span>$k$</span> balls or <span>$k$</span> ellipsoids, for <span>$k$</span> possibly much smaller than the sample size <span>$n$</span>.</p><p>Note that <span>$\mathcal{K}$</span> coincides with <span>$d_{\mathcal{K}}^{-1}((-\infty,0])$</span>, the sublevel set of the distance-to-compact function <span>$d_{\mathcal{K}}$</span>. Then, the approximations we propose for <span>$\mathcal{K}$</span> are sublevel sets of approximations of the distance function <span>$d_{\mathcal{K}}$</span>, based on <span>$\mathbb{X}$</span>. Since the sample may be corrupted by outliers and the points may not lie exactly on the compact set, approximating <span>$d_{\mathcal{K}}$</span> by <span>$d_{\mathbb{X}}$</span> may be terrible. Therefore, we construct approximations of <span>$d_{\mathcal{K}}$</span> that are robust to noise.</p><p>In this page, we present three methods to construct approximations of <span>$d_{\mathcal{K}}$</span> from a possibly noisy sample <span>$\mathbb{X}$</span>. The first approximation is the well-known distance-to-measure (DTM) function of <a href="../references/#Chazal">Chazal</a>. The two last methods are new. They are based on the following approximations which sublevel sets are unions of <span>$k$</span> balls or ellispoids: the <span>$k$</span>-PDTM <a href="../references/#Brecheteau18">C. Brécheteau (2018)</a> and the <span>$k$</span>-PLM <a href="../references/#Brecheteau20">Claire Brécheteau, Clément Levrard (2020)</a>.</p><p>For a sample dataset of size <span>$n$</span>, these functions compute the distance approximations at the points in <code>query_pts</code>. The parameter <code>q</code> is a regularity parameter in <span>$\{0,1,\ldots,n\}$</span>, <code>k</code> is the number of balls or ellispoids for the sublevel sets of the distance approximations. The procedures remove <code>nsignal</code> points of the sample, cf Section &quot;Detecting outliers&quot;.</p><h2 id="Example"><a class="docs-heading-anchor" href="#Example">Example</a><a id="Example-1"></a><a class="docs-heading-anchor-permalink" href="#Example" title="Permalink"></a></h2><p>We consider as a compact set <span>$\mathcal{K}$</span>, the infinity symbol:</p><pre><code class="language-julia hljs">using CairoMakie
+using GeometricClusterAnalysis
+using LinearAlgebra
+using NearestNeighbors
+using Random
+using Statistics
+
+nsignal = 500
+nnoise = 50
+σ = 0.05
+dimension = 2
+noise_min = -5
+noise_max = 5
+
+rng = MersenneTwister(1234)
+
+dataset = infinity_symbol(rng, nsignal, nnoise, σ, dimension, noise_min, noise_max)
+
+f = Figure(; resolution = (600, 400))
+ax = Axis(f[1, 1], aspect = 1)
+limits!(ax, -5, 5, -5, 5)
+scatter!(ax, dataset.points[1,:], dataset.points[2,:],
+          color = dataset.colors, colormap = :blues, markersize=7)</code></pre><p><img src="../assets/dtm1.png" alt/></p><p>The target is the distance function <span>$d_{\mathcal{K}}$</span>. The graph of <span>$-d_{\mathcal{K}}$</span> is the following:</p><pre><code class="language-julia hljs">function dtm(kdtree, x, y)
+
+    idxs, dists = nn(kdtree, [x, y])  # get the closest point
+    dtm_result = sqrt(sum(dists * dists))
+
+    return dtm_result
+end
+
+xs = LinRange(-6, 6, 100)
+ys = LinRange(-6, 6, 100)
+kdtree = KDTree(dataset.points[:,1:nsignal])
+
+zs = [-dtm(kdtree, x, y) for x in xs, y in ys]
+
+f = surface(xs, ys, zs, cb = false)</code></pre><p><img src="../assets/dtm2.png" alt/></p><p>We have generated a noisy sample <span>$\mathbb X$</span>. Then, <span>$d_{\mathbb X}$</span> is a terrible approximation of <span>$d_{\mathcal{K}}$</span>. Indeed, the graph of <span>$-d_{\mathbb X}$</span> is the following:</p><pre><code class="language-julia hljs">kdtree = KDTree(dataset.points)
+
+zs = [-dtm(kdtree, x, y) for x in xs, y in ys]
+
+f = surface(xs, ys, zs, cb = false)</code></pre><p><img src="../assets/dtm3.png" alt/></p><h2 id="The-distance-to-measure-(DTM)"><a class="docs-heading-anchor" href="#The-distance-to-measure-(DTM)">The distance-to-measure (DTM)</a><a id="The-distance-to-measure-(DTM)-1"></a><a class="docs-heading-anchor-permalink" href="#The-distance-to-measure-(DTM)" title="Permalink"></a></h2><p>Nonetheless, there exist robust approximations of the distance-to-compact function, such as the distance-to-measure (DTM) function <span>$d_{\mathbb X,q}$</span> (that depends on a regularity parameter <span>$q$</span>) <a href="../references/#Chazal">Frédéric Chazal, David Cohen-Steiner, Quentin Mérigot (2011)</a>.</p><p>The distance-to-measure function (DTM) is a surrogate for the distance-to-compact, robust to noise. It was introduced in 2009 <a href="../references/#Chazal">Frédéric Chazal, David Cohen-Steiner, Quentin Mérigot (2011)</a>. It depends on some regularity parameter <span>$q\in\{0,1,\ldots,n\}$</span>. The distance-to-measure function <span>$d_{\mathbb{X},q}$</span> is defined by</p><p class="math-container">\[\begin{equation}
+\label{eqdtm1}
+d_{\mathbb{X},q}^2:x\mapsto \|x-m(x,\mathbb{X},q)\|^2 + v(x,\mathbb{X},q),
+\end{equation}\]</p><p>where <span>$m(x,\mathbb{X},q) = \frac{1}{q}\sum_{i=1}^qX^{(i)}$</span> is the barycenter of the <span>$q$</span> nearest neighbours of <span>$x$</span> in <span>$\mathbb{X}$</span>, <span>$X^{(1)}, X^{(2)},\ldots, X^{(q)}$</span>, and <span>$v(x,\mathbb{X},q)$</span> is their variance <span>$\frac{1}{q}\sum_{i=1}^q\|m(x,\mathbb{X},q)-X^{(i)}\|^2$</span>.</p><p>Equivalently, the DTM coincides with the mean distance between <span>$x$</span> and its <span>$q$</span> nearest neighbours: <span>$d_{\mathbb{X},q}^2(x) = \frac{1}{q}\sum_{i=1}^q\|x-X^{(i)}\|^2.$</span></p><p>The graph of <span>$-d_{\mathbb X,q}$</span> for some <span>$q$</span> is the following:</p><pre><code class="language-julia hljs">function dtm(kdtree, x, y, q)
+    idxs, dists = knn(kdtree, [x, y], q)
+    dtm_result = sqrt(sum(dists .* dists)/q)
+    return dtm_result
+end
+
+q = 10
+
+zs = [-dtm(kdtree, x, y, q) for x in xs, y in ys]
+
+fig = surface(xs, ys, zs, cb = false)</code></pre><p><img src="../assets/dtm4.png" alt/></p><p>In this page, we define two functions, the <span>$k$</span>-PDTM <span>$d_{\mathbb X,q,k}$</span> and the <span>$k$</span>-PLM <span>$d&#39;_{\mathbb X,q,k}$</span>. The sublevel sets of the <span>$k$</span>-PDTM are unions of <span>$k$</span> balls. The sublevel sets of the <span>$k$</span>-PLM are unions of <span>$k$</span> ellipsoids.  The graphs of <span>$-d_{\mathbb X,q,k}$</span> and <span>$-d&#39;_{\mathbb X,q,k}$</span> for some <span>$q$</span> and <span>$k$</span> are the following:</p><pre><code class="language-julia hljs">function kPDTM(rng, points, x, y, q, k, nsignal, iter_max, nstart)
+
+    nx, ny = length(x), length(y)
+    result = fill(Inf, (nx, ny))
+
+    df_kpdtm = kpdtm(rng, points, q, k, nsignal, iter_max, nstart)
+
+    for i = eachindex(x), j = eachindex(y)
+        for (μ, ω) in zip(df_kpdtm.μ, df_kpdtm.ω)
+            aux = sqrt(sum(((x[i],y[j]) .- μ).^2) + ω)
+            result[i,j] = min(result[i,j], aux)
+        end
+    end
+
+    return result, df_kpdtm
+end
+
+q, k = 20, 20
+iter_max, nstart = 100, 10
+xs = LinRange(-10, 10, 200)
+ys = LinRange(-10, 10, 200)
+zs, df = kPDTM(rng, dataset.points, xs, ys, q, k, nsignal, iter_max, nstart)
+fig = surface(xs, ys, -zs, axis=(type=Axis3,), cb = false)</code></pre><p><img src="../assets/dtm5.png" alt/></p><p>and </p><pre><code class="language-julia hljs">function f_Σ!(Σ) end
+
+function kPLM(rng, points, x, y, q, k, nsignal, iter_max, nstart)
+
+    nx, ny = length(x), length(y)
+    result = fill(Inf, (nx, ny))
+    df_kplm = kplm(rng, points, q, k, nsignal, iter_max, nstart, f_Σ!)
+
+    for i = eachindex(x), j = eachindex(y)
+        for (μ, Σ, ω) in zip(df_kplm.μ, df_kplm.Σ, df_kplm.ω)
+            aux = GeometricClusterAnalysis.sqmahalanobis([x[i], y[j]], μ, inv(Σ)) #+ ω
+            result[i,j] = min(result[i,j], aux)
+        end
+    end
+
+    return result, df_kplm
+
+end
+
+nsignal = 500
+nnoise = 50
+σ = 0.1
+dimension = 2
+noise_min = -5
+noise_max = 5
+
+rng = MersenneTwister(1234)
+
+dataset = infinity_symbol(rng, nsignal, nnoise, σ, dimension, noise_min, noise_max)
+
+q, k = 20, 8
+iter_max, nstart = 100, 10
+xs = LinRange(-10, 10, 200)
+ys = LinRange(-10, 10, 200)
+zs, df = kPLM(rng, dataset.points, xs, ys, q, k, nsignal, iter_max, nstart)
+f = surface( xs, ys, -zs, axis=(type=Axis3,))</code></pre><p><img src="../assets/dtm6.png" alt/></p><h2 id="DTM-computation-for-a-noisy-sample-on-a-circle"><a class="docs-heading-anchor" href="#DTM-computation-for-a-noisy-sample-on-a-circle">DTM computation for a noisy sample on a circle</a><a id="DTM-computation-for-a-noisy-sample-on-a-circle-1"></a><a class="docs-heading-anchor-permalink" href="#DTM-computation-for-a-noisy-sample-on-a-circle" title="Permalink"></a></h2><p>The points are generated on the circle accordingly to the following function. This whole example was picked from the page <strong>DTM-based filtrations: demo</strong> of Raphaël Tinarrage.</p><pre><code class="language-julia hljs">&quot;&quot;&quot;
+    sample_on_circle(n_obs, n_out)
+
+Sample `n_obs` points (observations) points from the uniform distribution on the unit circle in ``R^2``,
+    and `n_out` points (outliers) from the uniform distribution on the unit square
+
+Input:
+- `n_obs` : number of sample points on the circle
+- `n_noise` : number of sample points on the square
+
+Output :
+- `data` : a (`n_obs` + `n_out`) x 2 matrix, the sampled points concatenated
+&quot;&quot;&quot;
+function sample_on_circle(n_obs, n_out)
+
+    rand_uniform = rand(n_obs) .* 2 .- 1
+    x_obs = cos.(2pi .* rand_uniform)
+    y_obs = sin.(2pi .* rand_uniform)
+
+    x_out = rand(n_out) .* 2 .- 1
+    y_out = rand(n_out) .* 2 .- 1
+
+    x = vcat(x_obs, x_out)
+    y = vcat(y_obs, y_out)
+
+    return vcat(x&#39;,y&#39;)
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Main.sample_on_circle</code></pre><p>Sampling on the circle with outlier</p><pre><code class="language-julia hljs">n_obs = 150                            # number of points sampled on the circle
+n_out = 100                            # number of outliers
+data = sample_on_circle(n_obs, n_out)  # sample points with outliers
+f = Figure(resolution = (600, 400))
+ax = Axis(f[1, 1],
+          title = &quot;$(n_obs)-sampling of the unit circle with $(n_out) outliers&quot;,
+          aspect = 1)
+scatter!( ax, data[1,1:n_obs], data[2,1:n_obs], color=&quot;cyan&quot;, label = &quot;data&quot;)
+scatter!( ax, data[1,(n_obs+1):end], data[2,(n_obs+1):end], color=&quot;orange&quot;, label = &quot;outliers&quot;)</code></pre><p><img src="../assets/circle1.png" alt/></p><p>Compute the DTM on X</p><pre><code class="language-julia hljs">q = 40
+kdtree = KDTree(data)
+
+# compute the values of the DTM of parameter q
+
+function dtm(kdtree, x, y, q)
+    idxs, dists = knn(kdtree, [x, y], q)
+    dtm_result = sqrt(sum(dists .* dists)/q)
+    return dtm_result
+end
+
+dtm_values = [dtm(kdtree, px, py, q) for (px,py) in eachcol(data)]
+
+# plot of  the opposite of the DTM
+
+f = Figure(resolution=(600,400))
+ax = Axis(f[1, 1],
+                  title = &quot;Values of -DTM on X with parameter q=$q&quot;,
+                  aspect = 1)
+scatter!(ax, data[1,:], data[2,:], color=-dtm_values)
+colsize!(f.layout, 1, Aspect(1, 1.0)) # reduce size colorbar</code></pre><p><img src="../assets/circle2.png" alt/></p><h2 id="Approximating-\\mathcal{K}-with-a-union-of-k-balls-or-the-k-power-distance-to-measure-(k-PDTM)"><a class="docs-heading-anchor" href="#Approximating-\\mathcal{K}-with-a-union-of-k-balls-or-the-k-power-distance-to-measure-(k-PDTM)">Approximating <span>$\mathcal{K}$</span> with a union of <span>$k$</span> balls - or -  the <span>$k$</span>-power-distance-to-measure (<span>$k$</span>-PDTM)</a><a id="Approximating-\\mathcal{K}-with-a-union-of-k-balls-or-the-k-power-distance-to-measure-(k-PDTM)-1"></a><a class="docs-heading-anchor-permalink" href="#Approximating-\\mathcal{K}-with-a-union-of-k-balls-or-the-k-power-distance-to-measure-(k-PDTM)" title="Permalink"></a></h2><p>The <span>$k$</span>-PDTM is an approximation of the DTM, which sublevel sets are unions of <span>$k$</span> balls. It was introduced and studied in <a href="../references/#Brecheteau20">Claire Brécheteau, Clément Levrard (2020)</a>.</p><p>According to the previous expression of the DTM \eqref{eqdtm1}, the DTM rewrites as</p><p class="math-container">\[\begin{equation} \label{eqdtm2}
+d_{\mathbb{X},q}^2:x\mapsto \inf_{c\in\mathbb{R}^d}\|x-m(c,\mathbb X,q)\|^2+v(c,\mathbb X,q).
+\end{equation}\]</p><p>The <span>$k$</span>-PDTM <span>$d_{\mathbb{X},q,k}$</span> is an approximation of the DTM that consists in replacing the infimum over <span>$\mathbb{R}^d$</span> in this new formula \eqref{eqdtm2} with an infimum over a set of <span>$k$</span> centers <span>$c^*_1,c^*_2,\ldots,c^*_k$</span>: </p><p class="math-container">\[d_{\mathbb{X},q,k}^2:x\mapsto \min_{i\in\{1,2,\ldots,k\}}\|x-m(c^*_i,\mathbb X,q)\|^2+v(c^*_i,\mathbb X,q).\]</p><p>These centers are chosen such that the criterion </p><p class="math-container">\[R: (c_1,c_2,\ldots,c_k) \mapsto \sum_{X\in\mathbb X}\min_{i\in\{1,2,\ldots,k\}}\|X-m(c_i,\mathbb X,q)\|^2+v(c_i,\mathbb X,q)\]</p><p>is minimal.</p><p>Note that these centers <span>$c^*_1,c^*_2,\ldots,c^*_k$</span> are not necessarily uniquely defined. The following algorithm provides local minimisers of the criterion <span>$R$</span>.</p><p>We compute the <span>$k$</span>-PDTM on the same sample of points. Note that when we take <span>$k=250$</span>, that is, when <span>$k$</span> is equal to the sample size, the DTM and the <span>$k$</span>-PDTM coincide on the points of the sample. The sub-level sets of the <span>$k$</span>-PDTM are unions of <span>$k$</span> balls which centers are represented by triangles.</p><pre><code class="language-julia hljs">function kPDTM(rng, points, query_points, q, k, nsignal, iter_max, nstart)
+
+    result = fill(Inf, size(query_points,2))
+
+    df_kpdtm = kpdtm(rng, points, q, k, nsignal, iter_max, nstart)
+
+    for i = eachindex(result)
+        for (μ, ω) in zip(df_kpdtm.μ, df_kpdtm.ω)
+            aux = sqrt(sum((query_points[:,i] .- μ).^2) + ω)
+            result[i] = min(result[i], aux)
+        end
+    end
+
+    return result, df_kpdtm
+end
+
+
+q = 40
+k = 250
+sig = size(data, 2)
+iter_max = 100
+nstart = 10
+values, df = kPDTM(rng, data, data, q, k, sig, iter_max, nstart)
+
+fig = Figure(; resolution=(600,400))
+ax = Axis(fig[1, 1], aspect = 1,
+    title = &quot;Values of -kPDTM on X with parameter q=$(q) and k=$(k).&quot;,
+)
+scatter!(ax, data[1,:], data[2, :], color=-values)
+scatter!(ax, getindex.(df.μ,1), getindex.(df.μ,2), color = &quot;black&quot;, marker=:utriangle)</code></pre><p><img src="../assets/circle3.png" alt/></p><h2 id="Approximating-\\mathcal{K}-with-a-union-of-k-ellipsoids-or-the-k-power-likelihood-to-measure-(k-PLM)"><a class="docs-heading-anchor" href="#Approximating-\\mathcal{K}-with-a-union-of-k-ellipsoids-or-the-k-power-likelihood-to-measure-(k-PLM)">Approximating <span>$\mathcal{K}$</span> with a union of <span>$k$</span> ellipsoids - or - the <span>$k$</span>-power-likelihood-to-measure (<span>$k$</span>-PLM)</a><a id="Approximating-\\mathcal{K}-with-a-union-of-k-ellipsoids-or-the-k-power-likelihood-to-measure-(k-PLM)-1"></a><a class="docs-heading-anchor-permalink" href="#Approximating-\\mathcal{K}-with-a-union-of-k-ellipsoids-or-the-k-power-likelihood-to-measure-(k-PLM)" title="Permalink"></a></h2><p>Sublevel sets of the <span>$k$</span>-PDTM are unions of <span>$k$</span> balls. The <span>$k$</span>-PLM is a generalisation of the <span>$k$</span>-PDTM. Its sublevel sets are unions of <span>$k$</span> ellipsoids. It was introduced and studied in <a href="../references/#Brecheteau20">Claire Brécheteau, Clément Levrard (2020)</a>.</p><p>The <span>$k$</span>-PLM <span>$d&#39;_{\mathbb{X},q,k}$</span> is defined from a set of <span>$k$</span> centers <span>$c^*_1,c^*_2,\ldots,c^*_k$</span> and a set of <span>$k$</span> covariance matrices <span>$\Sigma^*_1,\Sigma^*_2,\ldots,\Sigma^*_k$</span> by</p><p class="math-container">\[{d&#39;}_{\mathbb{X},q,k}^2:x\mapsto \min_{i\in\{1,2,\ldots,k\}}\|x-m(c^*_i,\mathbb X,q,\Sigma^*_i)\|_{\Sigma^*_i}^2+v(c^*_i,\mathbb X,q,\Sigma^*_i)+\log(\det(\Sigma^*_i)),\]</p><p>where <span>$\|\cdot\|_{\Sigma}$</span> denotes the <span>$\Sigma$</span>-Mahalanobis norm, that is defined for <span>$x\in\mathbb{R}^d$</span> by <span>$\|x\|^2_{\Sigma}=x^T\Sigma^{-1}x$</span>, <span>$m(x,\mathbb X,q,\Sigma)=\frac1q\sum_{i=1}^qX^{(i)}$</span>, where <span>$X^{(1)},X^{(2)},\ldots,X^{(q)}$</span> are the <span>$q$</span> nearest neigbours of <span>$x$</span> in <span>$\mathbb X$</span> for the <span>$\|\cdot\|_{\Sigma}$</span>-norm. Moreover, the local variance at <span>$x$</span> for the <span>$\|\cdot\|_{\Sigma}$</span>-norm is defined by <span>$v(x,\mathbb X,q,\Sigma)=\frac1q\sum_{i=1}^q\|X^{(i)}-m(x,\mathbb X,q,\Sigma)\|^2_{\Sigma}$</span>.</p><p>These centers and covariances matrices are chosen such that the criterion</p><p class="math-container">\[R&#39;:(c_1,c_2,\ldots,c_k,\Sigma_1,\Sigma_2,\ldots,\Sigma_k)\mapsto\sum_{X\in\mathbb{X}}\min_{i\in\{1,2,\ldots,k\}}\|X-m(c_i,\mathbb X,q,\Sigma_i)\|_{\Sigma_i}^2+v(c_i,\mathbb X,q,\Sigma_i)+\log(\det(\Sigma_i))\]</p><p>is minimal.</p><p>The following algorithm provides local minimisers of the criterion <span>$R&#39;$</span>.</p><p>We compute the <span>$k$</span>-PLM on the same sample of points.</p><p>The sub-level sets of the <span>$k$</span>-PLM are unions of <span>$k$</span> ellispoids which centers are represented by triangles.</p><pre><code class="language-julia hljs">function f_Σ!(Σ) end
+
+function kPLM(rng, points, query_points, q, k, nsignal, iter_max, nstart)
+
+    result = fill(Inf, size(query_points, 2))
+    df_kplm = kplm(rng, points, q, k, nsignal, iter_max, nstart, f_Σ!)
+
+    for i = eachindex(result)
+        for (μ, Σ, ω) in zip(df_kplm.μ, df_kplm.Σ, df_kplm.ω)
+            aux = GeometricClusterAnalysis.sqmahalanobis(query_points[:, i], μ, inv(Σ)) #+ ω
+            result[i] = min(result[i], aux)
+        end
+    end
+
+    return result, df_kplm
+
+end
+q = 40
+k = 250
+sig = size(data, 2)
+iter_max = 10
+nstart = 1
+values, df = kPLM(rng, data, data, q, k, sig, iter_max, nstart)
+# plot of  the opposite of the DTM
+fig = Figure(; resolution = (600, 400))
+ax = Axis(fig[1,1], aspect = 1,
+     title = &quot;Values of kPLM on data with parameter q=$(q) and k=$(k).&quot;)
+scatter!(ax, data[1,:], data[2,:], color = -values)
+scatter!(ax, getindex.(df.μ,1), getindex.(df.μ, 2), color = &quot;black&quot;, marker = :utriangle)
+colsize!(fig.layout, 1, Aspect(1, 1.0)) # reduce size colorbar</code></pre><p><img src="../assets/circle4.png" alt/></p><h2 id="Detecting-outliers-Trimmed-versions-of-the-k-PDTM-and-the-k-PLM"><a class="docs-heading-anchor" href="#Detecting-outliers-Trimmed-versions-of-the-k-PDTM-and-the-k-PLM">Detecting outliers - Trimmed versions of the <span>$k$</span>-PDTM and the <span>$k$</span>-PLM</a><a id="Detecting-outliers-Trimmed-versions-of-the-k-PDTM-and-the-k-PLM-1"></a><a class="docs-heading-anchor-permalink" href="#Detecting-outliers-Trimmed-versions-of-the-k-PDTM-and-the-k-PLM" title="Permalink"></a></h2><p>The criterions <span>$R$</span> and <span>$R&#39;$</span> are of the form <span>$\sum_{X\in\mathbb{X}}\min_{i\in\{1,2,\ldots,k\}}\gamma(X,\theta_i)$</span> for some cost function <span>$\gamma$</span> and some parameters <span>$\theta_i$</span> (<span>$c_i$</span> or <span>$(c_i,\Sigma_i)$</span>). Morally, points <span>$X$</span> for which <span>$\min_{i\in\{1,2,\ldots,k\}}\gamma(X,\theta_i)$</span> is small are close to the optimal centers, and then should be close to the compact set <span>$\mathcal{K}$</span>. Then, points <span>$X$</span> such that <span>$\min_{i\in\{1,2,\ldots,k\}}\gamma(X,\theta_i)$</span> is large should be considered as outliers, and should be removed from the sample of points <span>$\mathbb X$</span>.</p><p>Selecting <span>$o\leq n$</span> outliers together with computing optimal centers is possible. Such a procedure is called <em>trimming</em>. It consists is finding <span>$(\theta^*_1,\theta^*_2,\ldots,\theta^*_k)$</span> that minimise the criterion</p><p class="math-container">\[(\theta_1,\theta_2,\ldots,\theta_k)\mapsto\inf_{\mathbb{X}&#39;\subset\mathbb{X}\mid\left|\mathbb{X}&#39;\right|=o}\sum_{X\in\mathbb{X}&#39;}\min_{i\in\{1,2,\ldots,k\}}\gamma(X,\theta_i).\]</p><p>The elements of the optimal set <span>$\mathbb X&#39;$</span> should be considered as signal points, the remaining ones as outliers. The trimmed versions of the <span>$k$</span>-PDTM and the <span>$k$</span>-PLM follow.</p><p>The <span>$o = n-sig$</span> outliers are represented in red in the following figures.</p><p>Compute the trimmed k-PDTM values of parameter q</p><pre><code class="language-julia hljs">q = 5
+k = 100
+sig = 150 # Amount of signal points - We will remove o = 250 - 150 points from the sample
+iter_max = 100
+nstart = 10
+values, df = kPDTM(rng, data, data, q, k, sig, iter_max, nstart)
+# plot of  the opposite of the k-PDTM
+fig = Figure(; resolution=(600,400))
+ax = Axis(fig[1, 1], aspect = 1,
+    title = &quot;Values of -kPDTM on X with parameter q=$(q) and k=$(k).&quot;,
+)
+scatter!(ax, data[1,:], data[2, :], color=-values)
+scatter!(ax, getindex.(df.μ	,1), getindex.(df.μ, 2), color = &quot;black&quot;, marker=:utriangle)</code></pre><p><img src="../assets/circle5.png" alt/></p><h1 id="Compute-the-trimmed-k-PLM-values-of-parameter-q"><a class="docs-heading-anchor" href="#Compute-the-trimmed-k-PLM-values-of-parameter-q">Compute the trimmed k-PLM values of parameter q</a><a id="Compute-the-trimmed-k-PLM-values-of-parameter-q-1"></a><a class="docs-heading-anchor-permalink" href="#Compute-the-trimmed-k-PLM-values-of-parameter-q" title="Permalink"></a></h1><pre><code class="language-julia hljs">q = 10
+k = 100
+sig = 150
+iter_max = 10
+nstart = 1
+values, df = kPLM(rng, data, data, q, k, sig, iter_max, nstart)
+# plot of  the opposite of the k-PLM
+fig = Figure(; resolution = (600, 400))
+ax = Axis(fig[1,1], aspect = 1,
+     title = &quot;Values of kPLM on data with parameter q=$(q) and k=$(k).&quot;)
+scatter!(ax, data[1,:], data[2,:], color = -values)
+scatter!(ax, getindex.(df.μ,1), getindex.(df.μ, 2), color = &quot;black&quot;, marker = :utriangle)
+colsize!(fig.layout, 1, Aspect(1, 1.0)) # reduce size colorbar</code></pre><p><img src="../assets/circle6.png" alt/></p><h2 id="The-sublevel-sets"><a class="docs-heading-anchor" href="#The-sublevel-sets">The sublevel sets</a><a id="The-sublevel-sets-1"></a><a class="docs-heading-anchor-permalink" href="#The-sublevel-sets" title="Permalink"></a></h2><h3 id="Sublevel-sets-of-the-k-PDTM"><a class="docs-heading-anchor" href="#Sublevel-sets-of-the-k-PDTM">Sublevel sets of the <span>$k$</span>-PDTM</a><a id="Sublevel-sets-of-the-k-PDTM-1"></a><a class="docs-heading-anchor-permalink" href="#Sublevel-sets-of-the-k-PDTM" title="Permalink"></a></h3><pre><code class="language-julia hljs">q = 5
+k = 100
+sig = 150
+iter_max = 10
+nstart = 1
+values, df = kPDTM(rng, data, data, q, k, sig, iter_max, nstart)
+
+fig = Figure(; resolution = (600, 400))
+ax = Axis(fig[1,1], aspect = 1,
+title = &quot;Sublevel sets of the kPDTM on X with parameters q=$q and k=$k .&quot;)
+scatter!(ax, data[1,:], data[2,:], color = -values)
+alpha = 0.5 # Level for the sub-level set of the k-PLM
+for (μ,ω) in zip(df.μ, df.ω)
+    poly!(ax, Circle(Point2(μ), max(0,alpha*alpha - ω)),
+    color= RGBAf(0.5, 0.5, 1, 0.5),  transparency = true, shading = true)
+end</code></pre><p><img src="../assets/circle_balls.png" alt/></p><h3 id="Sublevel-sets-of-the-k-PLM"><a class="docs-heading-anchor" href="#Sublevel-sets-of-the-k-PLM">Sublevel sets of the <span>$k$</span>-PLM</a><a id="Sublevel-sets-of-the-k-PLM-1"></a><a class="docs-heading-anchor-permalink" href="#Sublevel-sets-of-the-k-PLM" title="Permalink"></a></h3><p>Compute the sublevel sets of the k-PLM on X  </p><pre><code class="language-julia hljs">q = 10
+k = 100
+sig = 150
+iter_max = 10
+nstart = 1
+values, df = kPLM(rng, data, data, q, k, sig, iter_max, nstart)
+
+α = 10 # Level for the sub-level set of the k-PLM
+fig = Figure(; resolution = (600, 400))
+ax = Axis(fig[1,1], aspect = 1,
+title = &quot;Sublevel sets of the kPLM on X with parameters q=$q and k=$k .&quot;)
+function covellipse(μ, Σ, α)
+    λ, U = eigen(Σ)
+    S = 0.2 * α * U * diagm(.√λ)
+    θ = range(0, 2π; length = 100)
+    A = S * [cos.(θ)&#39;; sin.(θ)&#39;]
+    x = μ[1] .+ A[1, :]
+    y = μ[2] .+ A[2, :]
+
+    Makie.Polygon([Point2f(px, py) for (px,py) in zip(x, y)])
+
+end
+scatter!(ax, data[1,:], data[2,:], color=-values)
+for (μ, Σ, ω) in zip(df.μ, df.Σ, df.ω)
+    poly!(ax, covellipse(μ, Σ, max(0, α - ω)), color = RGBAf(0.5, 0.5, 1, 0.5) )
+end</code></pre><p><img src="../assets/circle_ellipses.png" alt/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../obama/">« Application to authors texts clustering</a><a class="docs-footer-nextpage" href="../tomato/">ToMaTo »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Thursday 6 July 2023 18:02">Thursday 6 July 2023</span>. Using Julia version 1.9.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

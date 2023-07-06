@@ -7,8 +7,6 @@ import GeometricClusterAnalysis: mahalanobis
 
 using GeometricClusterAnalysis
 
-# Traductions de quelques fonctions R en Julia pour plus de lisibilité
-
 nrow(M::AbstractArray) = size(M)[1]
 ncol(M::AbstractArray) = size(M)[2]
 rbind(a, b) = vcat(a, b)

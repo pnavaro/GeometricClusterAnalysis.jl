@@ -6,7 +6,6 @@ using Random
 nrow(M::Matrix) = size(M, 1)
 ncol(M::Matrix) = size(M, 2)
 
-#include("centroids.jl")
 include("data.jl")
 include("three_curves.jl")
 include("nested_spirals.jl")
@@ -23,5 +22,6 @@ include("poisson.jl")
 include("dtm.jl")
 include("tomato.jl")
 include("methods.jl")
+include("centroids.jl")
 
 end

@@ -1,9 +1,10 @@
+# -*- coding: utf-8 -*-
 using Plots
 using Random
 using LinearAlgebra
 using RCall # For R package capusche
 import Statistics: cov, mean, min
-import Base.Threads: @threads, @sync, @spawn, nthreads, threadid
+using .Threads
 
 """
     KpResult
@@ -54,8 +55,7 @@ using RecipesBase
 
 abstract type AbstractData end
 
-export Data
-
+# +
 struct Data{T} <: AbstractData
 
     np::Int
@@ -65,6 +65,7 @@ struct Data{T} <: AbstractData
 
 end
 
+# +
 @recipe function f(data::Data)
 
     x := data.points[1, :]
@@ -79,6 +80,7 @@ end
     ()
 
 end
+# -
 
 """
     MultKpResult
@@ -139,7 +141,7 @@ end
 
 function initiate_centers(rng,points,n_centers)
     n_points = size(points)[2]
-    first_centers = first(randperm(rng, n_points), n_centers)
+    first_centers = rand(rng, 1:n_points, n_centers)
     return centers = [points[:, i] for i in first_centers]
 end
 
@@ -203,6 +205,7 @@ function compute_kplm_value(grid, kplm_result::KpResult{T}) where {T<:AbstractFl
     return dists
 end
 
+# +
 function scatter_values(grid,values,xlims = [0,0], ylims=[0,0],coordinates=[1,2], title="")
 
     scatter(
@@ -224,8 +227,9 @@ function scatter_values(grid,values,xlims = [0,0], ylims=[0,0],coordinates=[1,2]
         #    xlims!(min(grid[coordinates[1]...]),max(grid[coordinates[2]...]))
         #end
         title!(title)
-    
+
 end
+# -
 
 function compute_Voronoi_kplm_value(grid, kplm_result::KpResult{T}, to_scatter=false, coordinates=[1,2], title="", ylims=[0,0]) where {T<:AbstractFloat}
     n_grid = size(grid)[2]
@@ -580,6 +584,7 @@ function kplm(rng, points, n_signal_points, n_nearest_neighbours, first_centers,
     #λ_kplm = λ
         
     return KpResult(n_nearest_neighbours, centers_, μ, ω, invΣ, T_, λ*1.0, d, labels, dists_min, mean_kplm)
+end                                                                                                                                 
 
 function scatter_slope_n_centers_fixed(model::MultKpResult{T}, ylims=[0,0]) where {T<:AbstractFloat} 
     scatter(model.D[1,:],model.min_contrast[1,:],label=string("n_centers = ",model.matrix_c[1,1]))
@@ -897,7 +902,7 @@ rng = MersenneTwister(1234) ;
 spirals = noisy_nested_spirals(rng, n_signal_points, n_outliers, σ, dimension);
 
 p = scatter(spirals.points[1,:], spirals.points[2,:]; markershape = :diamond, 
-                markercolor = spirals.labels, label = "")
+                markercolor = spirals.labels, label = "", aspect_ratio = 1)
 
 n_nearest_neighbours = 20        # number of nearest neighbors
 n_centers = 25        # number of ellipsoids
@@ -921,7 +926,7 @@ first_centers = initiate_centers(rng,spirals.points,n_centers);
 spirals_kplm = kplm(rng,spirals.points,n_signal_points,n_nearest_neighbours,first_centers,iter_max,d,λ);
 
 p = scatter(spirals.points[1,:], spirals.points[2,:]; markershape = :diamond, 
-                markercolor = spirals_kplm.labels, label = "")
+                markercolor = spirals_kplm.labels, label = "", aspect_ratio = 1)
 
 p = scatter(spirals.points[1,:], spirals.points[3,:]; markershape = :diamond, 
                 markercolor = spirals_kplm.labels, label = "")
@@ -930,13 +935,15 @@ spirals_grid = nested_spirals_grid(200, dimension);
 
 scatter(spirals.points[1,:], spirals.points[2,:]; markershape = :diamond, 
                 markercolor = spirals.labels, label = "sample points")
-scatter!(spirals_grid[1,:],spirals_grid[2,:]; markershape = :cross, markercolor = :black, label = "grid")#,aspect_ratio = :equal)
+scatter!(spirals_grid[1,:],spirals_grid[2,:]; 
+markershape = :cross, markercolor = :black, label = "grid", aspect_ratio = 1)
 
 dists_to_spirals = compute_sq_euclidean_dists_to_sample(spirals_grid, spirals.points); # 10s execution for 100_000 points on the grid
 
 kplm_value = compute_kplm_value(spirals.points, spirals_kplm);
 
-scatter_values(spirals.points,abs.(sqrt.(dists_to_spirals).-sqrt.(kplm_value)),[-60,60],[-60,60],[1,2],string("Difference between sqrt(kplm)\n and the true distance to spirals"))
+scatter_values(spirals.points,abs.(sqrt.(dists_to_spirals).-sqrt.(kplm_value)),
+[-60,60],[-60,60],[1,2],string("Difference between sqrt(kplm)\n and the true distance to spirals"))
 
 scatter_values(spirals.points,sqrt.(kplm_value),[-60,60],[-60,60],[1,2],"sqrt(kplm) on sample points")
 
@@ -1086,3 +1093,5 @@ plot2_mc(mc)
 plot3_mc(mc)
 
 plot4_mc(mc)
+
+

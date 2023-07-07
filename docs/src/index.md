@@ -4,7 +4,8 @@ Documentation for GeometricClusterAnalysis.jl
 
 ```@contents
 Pages = ["functions.md", "trimmed-bregman.md", "fake_data.md",
-         "three_curves.md", "types.md"]
+         "three_curves.md", "two_spirals.md", "fourteen_lines.md", 
+         "dtm.md", "types.md"]
 ```
 
 

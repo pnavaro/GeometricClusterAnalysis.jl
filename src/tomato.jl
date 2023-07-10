@@ -157,9 +157,7 @@ $(SIGNATURES)
 """
 function distance_matrix_tomato(graph, birth)
 
-    if size(graph, 1) != length(birth)
-        @error "graph should be of size lxl with l the length of birth"
-    end
+    @assert size(graph, 1) == length(birth)  "graph should be of size lxl with l the length of birth"
 
     distance_matrix = fill(Inf, size(graph))
     for i in eachindex(birth), j = 1:i

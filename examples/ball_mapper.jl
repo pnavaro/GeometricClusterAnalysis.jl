@@ -99,6 +99,9 @@ struct BallMapper
             end
         end
         
+        # remove outliers
+        
+        
         loc_x = zeros(nv)
         loc_y = zeros(nv)
         for i in keys(points_covered_by_landmarks)
@@ -121,12 +124,12 @@ end
 bm = BallMapper(data.points,1.0) # the
 
 nv = length(bm.centers)
-gplot(bm.graph, bm.loc_x, bm.loc_y, nodelabel=1:nv)
 
+gplot(bm.graph, bm.loc_x, bm.loc_y, nodelabel=1:nv)
 
 scatter(data.points[1,:], data.points[2, :], marker_z = bm.colors, palette = :rainbow )
 scatter!(bm.loc_x, bm.loc_y, aspect_ratio = 1, marker = :star, markersize = 10, markercolor = :black)
 
-extrema(bm.colors)
+
 
 

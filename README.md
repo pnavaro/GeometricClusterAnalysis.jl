@@ -49,3 +49,4 @@ Julia packages providing clustering methods:
  - [QuickShiftClustering.jl](https://github.com/rened/QuickShiftClustering.jl)
  - [RobustTDA.jl](https://github.com/sidv23/RobustTDA.jl)
  - [SpectralClustering.jl](https://github.com/lucianolorenti/SpectralClustering.jl)
+ - [TDA.j](https://github.com/wildart/TDA.jl)

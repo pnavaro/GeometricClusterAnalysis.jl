@@ -1,44 +1,7 @@
+# -*- coding: utf-8 -*-
 using LinearAlgebra
-using Plots
 using Random
 using Statistics
-
-struct Data{T}
-
-    np::Int
-    nv::Int
-    points::Array{T,2}
-    labels::Vector{Int}
-
-end
-
-function noisy_nested_spirals(rng, n_signal_points, n_outliers, σ, dimension)
-
-    nmid = n_signal_points ÷ 2
-
-    t1 = 6 .* rand(rng, nmid) .+ 2
-    t2 = 6 .* rand(rng, n_signal_points - nmid) .+ 2
-
-    x = zeros(n_signal_points)
-    y = zeros(n_signal_points)
-
-    λ = 5
-
-    x[1:nmid] = λ .* t1 .* cos.(t1)
-    y[1:nmid] = λ .* t1 .* sin.(t1)
-
-    x[(nmid+1):n_signal_points] = λ .* t2 .* cos.(t2 .- 0.8 * π)
-    y[(nmid+1):n_signal_points] = λ .* t2 .* sin.(t2 .- 0.8 * π)
-
-    p0 = hcat(x, y, zeros(Int8, n_signal_points, dimension - 2))
-    signal = p0 .+ σ .* randn(rng, n_signal_points, dimension)
-    noise = 120 .* rand(rng, n_outliers, dimension) .- 60
-
-    points = collect(transpose(vcat(signal, noise)))
-    labels = vcat(ones(nmid), 2 * ones(n_signal_points - nmid), zeros(n_outliers))
-
-    return Data{Float64}(n_signal_points + n_outliers, dimension, points, labels)
-end
 
 """
     KpResult
@@ -96,14 +59,14 @@ When λ>=1, λ is fixed to this value.
 Returns mean_kplm which is the mean value of the kplm function over all sample points (analoguous to the mean sum of squares for k-means, so, no squareroot).
 """
 function kplm(
-    rng,
-    points,
-    n_signal_points,
-    n_nearest_neighbours,
-    first_centers,
-    iter_max = 10,
-    d = 0,
-    λ = 0,
+    rng :: AbstractRNG,
+    points :: Matrix{Float64},
+    n_signal_points :: Int,
+    n_nearest_neighbours :: Int,
+    first_centers :: Vector{Vector{Float64}},
+    iter_max:: Int,
+    d :: Real,
+    λ :: Real,
 )
 
     # Initialisation
@@ -365,97 +328,3 @@ function kplm(
         mean_kplm,
     )
 end
-
-n_signal_points = 2000 # number of points in the sample not considered as outliers
-n_outliers = 0 # number of outliers
-n_points = n_signal_points + n_outliers
-dimension = 5      # dimension of the data
-σ = 0.5;  # standard deviation for the additive noise
-
-rng = MersenneTwister(1234);
-
-spirals = noisy_nested_spirals(rng, n_signal_points, n_outliers, σ, dimension);
-
-p = plot(layout = (2, 2))
-
-scatter!(
-    p[1, 1],
-    spirals.points[1, :],
-    spirals.points[2, :];
-    markershape = :diamond,
-    markercolor = spirals.labels,
-    label = "",
-    aspect_ratio = 1,
-)
-
-
-n_nearest_neighbours = 20        # number of nearest neighbors
-n_centers = 25        # number of ellipsoids
-iter_max = 100 # maximum number of iterations of the algorithm kPLM
-λ = 0; # to update λ in the algorithm
-d = 1; # intrinsic dimension of ellipsoids
-
-first_centers = initiate_centers(rng, spirals.points, n_centers);
-@time spirals_kplm = kplm(
-    rng,
-    spirals.points,
-    n_signal_points,
-    n_nearest_neighbours,
-    first_centers,
-    iter_max,
-    d,
-    λ,
-);
-
-println("Mean kplm of signal points : ", spirals_kplm.mean_squared_distance_function)
-println("\nThe eigenvalue λ is : ", spirals_kplm.λ)
-println("\nIn particular, the penality term, dlog(λ) is : ", d * log(spirals_kplm.λ))
-
-n_nearest_neighbours = 20  # number of nearest neighbors
-n_centers = 25             # number of ellipsoids
-iter_max = 100             # maximum number of iterations of the algorithm kPLM
-λ = 0                      # to update λ in the algorithm
-d = 1
-first_centers = initiate_centers(rng, spirals.points, n_centers);
-
-@time spirals_kplm = kplm(
-    rng,
-    spirals.points,
-    n_signal_points,
-    n_nearest_neighbours,
-    first_centers,
-    iter_max,
-    d,
-    λ,
-)
-
-scatter!(
-    p[1, 2],
-    spirals.points[1, :],
-    spirals.points[2, :];
-    markershape = :diamond,
-    markercolor = spirals_kplm.labels,
-    label = "",
-    aspect_ratio = 1,
-)
-
-scatter!(
-    p[2, 1],
-    spirals.points[1, :],
-    spirals.points[3, :];
-    markershape = :diamond,
-    markercolor = spirals_kplm.labels,
-    label = "",
-)
-
-scatter!(
-    p[2, 2],
-    spirals.points[1, :],
-    spirals.points[2, :];
-    markershape = :diamond,
-    markercolor = spirals.labels,
-    label = "sample points",
-    aspect_ratio = 1,
-)
-
-display(p)

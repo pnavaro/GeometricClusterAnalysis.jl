@@ -7,7 +7,7 @@ ENV["GKSwstype"] = "100"
 
 using DocumenterCitations
 
-bib = CitationBibliography(joinpath(@__DIR__, "references.bib"), sorting = :nyt)
+bib = CitationBibliography(joinpath(@__DIR__, "references.bib"))
 
 doc_outputdir  = joinpath(@__DIR__, "src")
 nb_outputdir   = joinpath(doc_outputdir, "notebooks")

@@ -45,7 +45,6 @@ makedocs(
         "Trimmed Bregman Clustering" =>
             ["trimmed-bregman.md", "poisson1.md", "poisson2.md", "obama.md"],
         "Robust approximations of compact sets" => "dtm.md",
-        "ToMaTo" => "tomato.md",
         "Types" => "types.md",
         "Functions" => "functions.md",
     ],

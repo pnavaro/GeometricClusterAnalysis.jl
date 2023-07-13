@@ -12,8 +12,9 @@ deps <- c(
 "randomForest", 
 "tourr", 
 "tclust", 
-"TDA", 
+"TDA"
 )
+
 packages <- installed.packages()
 
 for(pkg in deps) {

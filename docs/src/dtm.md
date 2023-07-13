@@ -487,7 +487,7 @@ save("assets/circle5.png", fig); nothing #hide
 
 ![](assets/circle5.png)
 
-# Compute the trimmed k-PLM values of parameter q
+## Compute the trimmed k-PLM values of parameter q
 
 ```@example dtm
 q = 10

@@ -1,6 +1,4 @@
-import DataStructures: IntDisjointSets, find_root, in_same_set
-
-export tomato_density, tomato_clustering
+export tomato_clustering
 
 
 """
@@ -28,86 +26,6 @@ struct Tomato
     merge_threshold::Int
 
 end
-
-
-"""
-$(SIGNATURES)
-"""
-function tomato_density(kdtree, X::AbstractMatrix, k)
-    k = k + 1
-    dim, n = size(X)
-    idxs, dists = knn(kdtree, X, k)
-    f = []
-    if dim == 2
-        for i = 1:n
-            push!(f, k * (k + 1) / (2n * π * sum(dists[i] .^ 2)))
-        end
-    elseif dim == 3
-        for i = 1:n
-            push!(f, k * (k + 1) / (2n * (4π / 3) * sum(dists[i] .^ 3)))
-        end
-    elseif dim == 1
-        for i = 1:n
-            push!(f, k * (k + 1) / (2n * sum(dists[i])))
-        end
-    end
-    return f
-end
-
-"""
-$(SIGNATURES)
-
-function originally written by [twMisc](https://github.com/twMisc/Clustering-ToMaTo)
-
-Algorithm is described [here](https://geometrica.saclay.inria.fr/data/Steve.Oudot/clustering/jacm_oudot.pdf)
-"""
-function tomato_clustering(G::Array{Array{Int64,1},1}, f::Array, τ::Number)
-    n = length(f)
-    g = zeros(n)
-    v = [i for i = 1:n]
-    pair = [f v G]
-    pairs = sortslices(pair, dims = 1, rev = true, by = x -> x[1])
-    vertices_corr_inv = Dict(zip(pairs[:, 2], 1:n))
-    ver_invf(x) = vertices_corr_inv[x]
-    C = []
-    for subset in pairs[:, 3]
-        push!(C, ver_invf.(subset))
-    end
-    pairs[:, 3] = C
-    u = IntDisjointSets(n)
-    for i = 1:n
-        nGi = [j for j in pairs[i, 3] if j < i]
-        if length(nGi) > 0 # vertex is not a peak of f within G
-            ff(i) = pairs[i, 1]
-            g[i] = nGi[argmax(ff.(nGi))]
-            ei = find_root(u, Int.(g[i]))
-            union!(u, ei, i)
-            for j in nGi
-                e = find_root(u, j)
-                if e != ei && minimum([pairs[e, 1]; pairs[ei, 1]]) < pairs[i, 1] + τ
-                    if pairs[e, 1] < pairs[ei, 1]
-                        union!(u, ei, e)
-                    else
-                        union!(u, e, ei)
-                    end
-                    e2 = find_root(u, e)
-                    ei = e2
-                end
-            end
-        end
-    end
-    S = Set([find_root(u, i) for i = 1:n if pairs[find_root(u, i), 1] >= τ])
-    S2 = [s for s in S]
-    Xs = []
-    for j = 1:length(S2)
-        Xs = push!(
-            Xs,
-            (pairs[S2[j], 2], [pairs[i, 2] for i = 1:n if in_same_set(u, S2[j], i)]),
-        )
-    end
-    return Xs
-end
-
 
 """
 $(SIGNATURES)
@@ -157,9 +75,7 @@ $(SIGNATURES)
 """
 function distance_matrix_tomato(graph, birth)
 
-    if size(graph, 1) != length(birth)
-        @error "graph should be of size lxl with l the length of birth"
-    end
+    @assert size(graph, 1) == length(birth)  "graph should be of size lxl with l the length of birth"
 
     distance_matrix = fill(Inf, size(graph))
     for i in eachindex(birth), j = 1:i

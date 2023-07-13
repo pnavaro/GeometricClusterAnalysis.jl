@@ -1,6 +1,5 @@
 using LinearAlgebra
 import Statistics: cov
-import Base.Threads: @threads, @sync, @spawn, nthreads, threadid
 
 export kplm
 
@@ -115,14 +114,8 @@ function kplm(
 
     # Some arrays for nearest neighbors computation
 
-    ntid = nthreads()
-    if ncenters > ntid
-        chunks = Iterators.partition(1:ncenters, ncenters ÷ ntid)
-    else
-        chunks = Iterators.partition(1:ncenters, ncenters)
-    end
-    dists = [zeros(Float64, npoints) for _ = 1:ntid]
-    idxs = [zeros(Int, k) for _ = 1:ntid]
+    dists = zeros(Float64, npoints)
+    idxs = zeros(Int, k) 
 
     costs = zeros(1, npoints)
     dist_min = zeros(npoints)
@@ -161,25 +154,20 @@ function kplm(
 
             # Step 1 : Update means and weights
 
-            @sync for chunk in chunks
-                @spawn begin
-                    tid = threadid()
-                    for i in chunk
+            for i in eachindex(centers)
 
-                        compute_dists!(dists[tid], centers[i], points, Σ[i])
+                compute_dists!(dists, centers[i], points, Σ[i])
 
-                        idxs[tid] .= partialsortperm(dists[tid], 1:k)
+                idxs .= partialsortperm(dists, 1:k)
 
-                        μ[i] .= vec(mean(view(points, :, idxs[tid]), dims = 2))
+                μ[i] .= vec(mean(view(points, :, idxs), dims = 2))
 
-                        ω[i] =
-                            mean(
-                                sqmahalanobis(points[:, j], μ[i], inv(Σ[i])) for
-                                j in idxs[tid]
-                            ) + log(det(Σ[i]))
+                ω[i] =
+                    mean(
+                        sqmahalanobis(points[:, j], μ[i], inv(Σ[i])) for
+                        j in idxs
+                    ) + log(det(Σ[i]))
 
-                    end
-                end
             end
 
             # Step 2 : Update color
@@ -210,42 +198,35 @@ function kplm(
 
             # Step 4 : Update centers
 
-            @sync for chunk in chunks
-                @spawn begin
+            for i in eachindex(centers)
 
-                    tid = threadid()
-                    for i in chunk
+                cloud = findall(colors .== i)
+                cloud_size = length(cloud)
 
-                        cloud = findall(colors .== i)
-                        cloud_size = length(cloud)
+                if cloud_size > 0
 
-                        if cloud_size > 0
+                    centers[i] .= vec(mean(view(points, :, cloud), dims = 2))
 
-                            centers[i] .= vec(mean(view(points, :, cloud), dims = 2))
+                    compute_dists!(dists, centers[i], points, Σ[i])
 
-                            compute_dists!(dists[tid], centers[i], points, Σ[i])
+                    idxs .= partialsortperm(dists, 1:k)
 
-                            idxs[tid] .= partialsortperm(dists[tid], 1:k)
+                    μ[i] .= vec(mean(points[:, idxs], dims = 2))
 
-                            μ[i] .= vec(mean(points[:, idxs[tid]], dims = 2))
-
-                            Σ[i] .= (μ[i] .- centers[i]) * (μ[i] .- centers[i])'
-                            Σ[i] .+= (k - 1) / k .* cov(points[:, idxs[tid]]')
-                            if cloud_size > 1
-                                Σ[i] .+=
-                                    (cloud_size - 1) / cloud_size .* cov(points[:, cloud]')
-                            end
-
-                            f_Σ!(Σ[i])
-
-                        else
-
-                            kept_centers[i] = false
-
-                        end
+                    Σ[i] .= (μ[i] .- centers[i]) * (μ[i] .- centers[i])'
+                    Σ[i] .+= (k - 1) / k .* cov(points[:, idxs]')
+                    if cloud_size > 1
+                        Σ[i] .+=
+                            (cloud_size - 1) / cloud_size .* cov(points[:, cloud]')
                     end
-                end
 
+                    f_Σ!(Σ[i])
+
+                else
+
+                    kept_centers[i] = false
+
+                end
             end
 
             # Step 5 : Condition for loop

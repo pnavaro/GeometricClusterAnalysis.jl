@@ -27,7 +27,7 @@ noise_min = -7
 noise_max = 7
 σ = 0.01
 data = infinity_symbol(rng, signal, noise, σ, dimension, noise_min, noise_max)
-scatter(data.points[1,:], data.points[2,:], ms = 2)
+scatter(data.points[1,:], data.points[2,:], ms = 2, aspect = 1)
 
 # +
 function dtm(kdtree, x, y, k)
@@ -63,25 +63,48 @@ k = 10
 zs = [-dtm(kdtree, x, y, k) for x in xs, y in ys]
 
 fig = surface(xs, ys, zs, axis=(type=Axis3,))
+# -
+
+include("kplm_with_eigenvalues.jl")
 
 # +
+k, c = 20, 20
+first_centers = [data.points[:,i] for i in rand(rng, 1:signal, c)]
+iter_max = 100
+d = 0
+λ = 5
+df = kplm(rng, data.points, signal, k, first_centers, iter_max, d, λ)
+
+nx, ny = length(xs), length(ys)
+zs = fill(Inf, (nx, ny))
+
+for i = eachindex(xs), j = eachindex(ys)
+    for (μ, Σ, ω) in zip(df.μ, df.invΣ, df.ω)
+        aux = GeometricClusterAnalysis.sqmahalanobis([xs[i], ys[j]], μ, Σ) + ω
+        zs[i,j] = min(zs[i,j], aux)
+    end
+end
+
+fig = surface(xs, ys, -zs, axis=(type=Axis3,))
+
+# +
+import Plots
+
 function f_Σ!(Σ) end
 
 k, c = 20, 20
 iter_max, nstart = 100, 10   
 
-df = kplm(rng, data.points, k, c, signal, iter_max, nstart, f_Σ!)
+df = GeometricClusterAnalysis.kplm(rng, data.points, k, c, signal, iter_max, nstart, f_Σ!)
 
-# +
-import Plots
 mh = build_distance_matrix(df)
 
 hc = hierarchical_clustering_lem(mh)
 
-lims = (min(minimum(hc.birth), minimum(hc.death)),
-        max(maximum(hc.birth), maximum(hc.death[hc1.death .!= Inf]))+1)
+lims = (min(minimum(hc.birth) - 1, minimum(hc.death) + 1),
+        max(maximum(hc.birth) - 1, maximum(hc.death[hc.death .!= Inf]))+2)
 
-Plots.plot(hc1, xlims = lims, ylims = lims)
+Plots.plot(hc, xlims = lims, ylims = lims)
 # -
 
 remain_indices = hc.startup_indices

@@ -22,6 +22,6 @@ include("poisson.jl")
 include("dtm.jl")
 include("tomato.jl")
 include("methods.jl")
-include("centroids.jl")
+#include("centroids.jl")
 
 end

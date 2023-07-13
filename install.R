@@ -1,6 +1,19 @@
-deps <- c("aricode", "dbscan", "devtools", "here", "magrittr",
-          "FNN", "tourr", "TDA", "tclust", "kernlab",
-          "doParallel", "randomForest", "ade4")
+deps <- c(
+"ade4"
+"aricode", 
+"capushe", 
+"dbscan", 
+"devtools", 
+"doParallel", 
+"FNN", 
+"here", 
+"kernlab",
+"magrittr",
+"randomForest", 
+"tourr", 
+"tclust", 
+"TDA", 
+)
 packages <- installed.packages()
 
 for(pkg in deps) {

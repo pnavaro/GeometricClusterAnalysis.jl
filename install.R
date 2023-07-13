@@ -1,5 +1,5 @@
 deps <- c(
-"ade4"
+"ade4",
 "aricode", 
 "capushe", 
 "dbscan", 

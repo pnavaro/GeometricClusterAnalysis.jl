@@ -9,7 +9,7 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.14.4
 #   kernelspec:
-#     display_name: Julia 1.9.0
+#     display_name: Julia 1.9.2
 #     language: julia
 #     name: julia-1.9
 # ---
@@ -157,7 +157,7 @@ using GeometricClusterAnalysis
 
 nb_clusters, k, c, radius, iter_max = 3, 10, 100, 1.9, 100
 nsignal = size(points, 1)
-col_tomato, _ = tomato_clustering(nb_clusters, points, k, c, nsignal, radius, iter_max, nstart)
+col_tomato, _ = tomato_clustering(nb_clusters, collect(points'), k, c, nsignal, radius, iter_max, nstart)
 println("NMI = $(mutualinfo(true_colors, col_tomato))")
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
@@ -190,15 +190,18 @@ col_dbscan = dbscan::dbscan(P, 1.5,minPts = 10)$cluster
 print(aricode::NMI(col_dbscan,true_color))
 """
 
-clusters = dbscan(x, 1.5, min_neighbors = 5, min_cluster_size = 10)
+# +
+result = dbscan(points', 1.5, min_neighbors = 5, min_cluster_size = 10)
+
 p = plot(aspect_ratio=true)
-for cluster in clusters
-    scatter!(p, x[1, cluster.core_indices], x[2, cluster.core_indices] )
+for cluster in result.clusters
+    scatter!(p, points[cluster.core_indices, 1], points[cluster.core_indices, 2] )
 end
 p
 
 # +
 import ClusterAnalysis
+
 
 m = ClusterAnalysis.dbscan(points, 1.5, 10)
 p = plot(aspect_ratio = true)
@@ -238,6 +241,7 @@ plot(p1, p2, layout = l)
 # -
 
 R"""
+source(here::here("R", "kplm.R"))
 f_Sigma <- function(Sigma){return(Sigma)}
 col_PLM_nonhier = kplm(P,10,3,nrow(P),100,10,f_Sigma)$color
 print(aricode::NMI(col_PLM_nonhier,true_color))
@@ -394,5 +398,3 @@ l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, Int.(rcopy(R"col_PLM")))
 plot(p1, p2, layout = l)
-
-

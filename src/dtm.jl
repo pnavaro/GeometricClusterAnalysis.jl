@@ -7,7 +7,7 @@ Distance to measure function for each points
 """
 function dtm(x::Matrix{Float64}, m0; r = 2)
 
-    n = size(x, 2)
+    d, n = size(x)
     weight_bound = Float64(m0 * n)
     kdtree = KDTree(x)
     k = ceil(Int, weight_bound)

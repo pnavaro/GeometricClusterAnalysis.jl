@@ -6,6 +6,7 @@ deps <- c(
 "devtools", 
 "doParallel", 
 "FNN", 
+"ggforce",
 "here", 
 "kernlab",
 "magrittr",

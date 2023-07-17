@@ -153,9 +153,12 @@ plot(p1, p2, layout = l, aspect_ratio = :equal)
 
 ## ToMaTo
 
+!!! warning "This algorithm is not correctly implemented yet"
+    This part is still in active developpement and does not work well. 
+    Do not draw any conclusions about the performance of this algorithm from the results obtained below.
+
 Algorithm ToMATo from paper "Persistence-based clustering in Riemannian Manifolds"
 Frederic Chazal, Steve Oudot, Primoz Skraba, Leonidas J. Guibas
-
 
 ```@example fleas
 nb_clusters, k, c, radius, iter_max = 3, 10, 100, 1.9, 100

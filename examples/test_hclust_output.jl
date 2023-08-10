@@ -7,26 +7,18 @@
 #       extension: .jl
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.14.1
+#       jupytext_version: 1.14.7
 #   kernelspec:
-#     display_name: Julia 1.8.5
+#     display_name: Julia 1.9
 #     language: julia
-#     name: julia-1.8
+#     name: julia-1.9
 # ---
 
 # # Example of two spirals
 
 using GeometricClusterAnalysis
+using Plots
 using Random
-
-# +
-model = ClusteringModel(data)
-
-result1 = fit(model, method = kPLM(k, c, α, iter_max, nstart, f_Σ!))
-result2 = fit(model, method = kPDTM(k, c, α, iter_max, nstart, f_Σ!))
-
-build_distance_matrix()
-# -
 
 # ### Parameters
 
@@ -66,6 +58,10 @@ hc = hierarchical_clustering_lem(
     store_colors = true,
     store_timesteps = true,
 )
+
+plot(hc)
+
+plot(diagram(hc), infinity=20)
 
 length(hc.saved_colors)
 

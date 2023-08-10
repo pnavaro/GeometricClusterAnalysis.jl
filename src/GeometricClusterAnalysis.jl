@@ -1,13 +1,19 @@
 module GeometricClusterAnalysis
 
 using DocStringExtensions
-using PersistenceDiagrams
+
 using Random
+export MersenneTwister
+
+using PersistenceDiagrams
+export birth, death, persistence, midlife, barcode
+
 
 nrow(M::Matrix) = size(M, 1)
 ncol(M::Matrix) = size(M, 2)
 
 include("data.jl")
+include("clusters.jl")
 include("three_curves.jl")
 include("nested_spirals.jl")
 include("fourteen_segments.jl")

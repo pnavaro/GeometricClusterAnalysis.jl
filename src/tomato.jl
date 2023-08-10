@@ -1,5 +1,4 @@
-export tomato_clustering
-
+export graph_nn
 
 """
 $(SIGNATURES)
@@ -26,6 +25,7 @@ function graph_nn(points, k)
 end
 
 
+export graph_radius
 
 """
 $(SIGNATURES)
@@ -58,6 +58,8 @@ function distance_matrix_tomato(graph, birth)
 
     return distance_matrix
 end
+
+export tomato
 
 function tomato(points, m0, graph; infinity = Inf, threshold = Inf)
 
@@ -94,7 +96,6 @@ function tomato_clustering(nb_clusters, points, k, c, signal, radius, iter_max, 
     sort_bd = sort(hc.death .- hc.birth)
     infinity = mean([sort_bd[end-nb_clusters], sort_bd[end-nb_clusters+1]])
     colors, saved_colors, hc = tomato(points, m0, graph, infinity = infinity, threshold = threshold)
-    lifetime = reverse(sort_bd)
-    colors, lifetime
+    colors, diagram(hc)
 
 end

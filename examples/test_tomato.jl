@@ -25,9 +25,9 @@ barcode(pdiag)
 nb_clusters = 2
 sort_bd = sort(pdiag, by=persistence, rev=true)
 
-infinity = 0.05
+threshold, infinity = 0.01, 0.05
 
-colors, saved_colors, hc = GeometricClusterAnalysis.tomato(points, m0, graph, infinity = infinity, threshold = threshold)
+colors, saved_colors, hc = tomato(points, m0, graph)
 plot(diagram(hc))
 
 scatter( points[1,:], points[2,:], c = colors, aspect_ratio = 1)
@@ -59,7 +59,7 @@ radius = 0.2
 iter_max = 10
 nstart = 100
 nclusters = 2
-labels, diag = tomato_clustering(nclusters, points, k, c, signal, radius, iter_max, nstart)
+labels, diag = tomato_clustering(nclusters, points, k, signal, radius, iter_max, nstart)
 
 
 plot(diag)

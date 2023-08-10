@@ -85,7 +85,7 @@ end
 
 export tomato_clustering
 
-function tomato_clustering(nb_clusters, points, k, c, signal, radius, iter_max, nstart)
+function tomato_clustering(nb_clusters, points, k, signal, radius, iter_max, nstart)
 
     d, n = size(points)
     graph = graph_radius(points, radius)

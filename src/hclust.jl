@@ -315,3 +315,10 @@ function compute_threshold_infinity(
     threshold, infinity
 
 end
+
+
+export diagram
+
+diagram(hc::HClust) = PersistenceDiagram([ p for p  in zip(hc.birth, hc.death)])
+
+                                 

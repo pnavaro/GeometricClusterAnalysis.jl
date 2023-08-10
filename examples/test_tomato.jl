@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 using GeometricClusterAnalysis
+using PersistenceDiagrams
 using Plots
 
 # +
@@ -10,9 +11,10 @@ points = hcat(unit_circle, 0.5 .* unit_circle , 0.75 .* unit_circle)
 scatter( points[1,:], points[2,:], aspect_ratio = 1)
 # -
 
+radius = 0.2
+k = 10
 graph = GeometricClusterAnalysis.graph_radius(points, radius)
 d, n = size(points)
-m0 = k / n
 m0 = k / n
 sort_dtm = sort(dtm(points, m0))
 threshold = sort_dtm[end]    
@@ -23,14 +25,21 @@ colors, saved_colors, hc = GeometricClusterAnalysis.tomato(points, m0, graph; in
 plot(hc)
 # -
 
-nb_clusters = 3
-sort_bd = sort(hc.death[hc.death .!= Inf] .- hc.birth[hc.death .!= Inf])
+pdiag = diagram(hc)
+plot(pdiag)
 
-infinity = mean([sort_bd[end-nb_clusters], sort_bd[end-nb_clusters+1]])
+barcode(pdiag)
+
+nb_clusters = 3
+sort_bd = sort(pdiag, by=persistence)
+
+infinity = 0.1
 
 colors, saved_colors, hc = GeometricClusterAnalysis.tomato(points, m0, graph, infinity = infinity, threshold = threshold)
-plot(hc)
+plot(diagram(hc))
 
 scatter( points[1,:], points[2,:], c = colors, aspect_ratio = 1)
+
+
 
 

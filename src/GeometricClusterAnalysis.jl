@@ -1,6 +1,7 @@
 module GeometricClusterAnalysis
 
 using DocStringExtensions
+using PersistenceDiagrams
 using Random
 
 nrow(M::Matrix) = size(M, 1)

@@ -3,24 +3,7 @@ using RecipesBase
 
 @recipe function f(hc::HClust)
 
-    aspect_ratio := :equal
-
-    lim_min, lim_max = get(plotattributes, :xlims, extrema(hc.birth))
-
-    @series begin
-
-        seriestype := :scatter
-        hc.birth, min.(hc.death, lim_max)
-
-    end
-
-    primary := false
-    legend --> :none
-    title := "persistence diagram"
-    xlabel := "birth"
-    ylabel := "death"
-
-    (lim_min-1):(lim_max+1), (lim_min-1):(lim_max+1)
+    diagram(hc)
 
 end
 

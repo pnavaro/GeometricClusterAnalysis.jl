@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+# +
 """
     mean_var(data, x, q, kdtree)
 
@@ -34,7 +36,7 @@ function mean_var(data, x, q, kdtree)
 
 end
 
-
+# +
 """
     optima_for_kPDTM(data, q, k, sig, iter_max = 10, nstart = 1)
 
@@ -168,6 +170,7 @@ function optima_for_kPDTM(data, q, k, sig, iter_max, nstart)
 
 end
 
+# +
 """
     kPDTM(data, query_pts, q, k, sig, iter_max = 10, nstart = 1)
 
@@ -216,3 +219,6 @@ function kPDTM(data, query_pts, q, k, sig; iter_max = 10, nstart = 1)
     return result, centers, means, variances, colors, cost
 
 end
+# -
+
+

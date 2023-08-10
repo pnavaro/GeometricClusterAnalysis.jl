@@ -1,6 +1,6 @@
+# -*- coding: utf-8 -*-
 using GeometricClusterAnalysis
 using Plots
-using Random
 
 nsignal = 2000 # number of signal points
 nnoise = 300   # number of outliers
@@ -28,12 +28,9 @@ hc = hierarchical_clustering_lem(
 )
 
 
-# Tracer le diagramme de persistance (pour sélectionner infinity et threshold, puis relancer) :
-lims = (
-    min(min(hc.birth...), min(hc.death...)),
-    max(max(hc.birth...), max(hc.death[hc.death.!=Inf]...)),
-)
-plot(hc, xlims = lims, ylims = lims)
+Tracer le diagramme de persistance
+
+plot(hc)
 
 hc = hierarchical_clustering_lem(
     mh,
@@ -53,14 +50,14 @@ length_ri = length(remain_indices)
 color_points, dists = subcolorize(data.points, nsignal, df, remain_indices)
 
 
-## COLORIZE - steps parametrized by merging times
+# # COLORIZE - steps parametrized by merging times
 
 
 # Associate colours to points (as represented in the plot)
-returned_colors = [return_color(color_points, c, remain_indices) for c in colors]
+returned_colors = [return_color(color_points, c, remain_indices) for c in saved_colors]
 
 # scatter(data.points[1,:],data.points[2,:],color = Colors[1])
-# scatter!([μ[8][1]], [μ[8][2]], color = "green", label = "", markersize = 10)
+#  scatter!([μ[8][1]], [μ[8][2]], color = "green", label = "", markersize = 10)
 
 for i in eachindex(returned_colors), j = 1:data.np
     # If the cost of the point is smaller to the time : label 0 (not in the ellipsoid)
@@ -69,7 +66,7 @@ end
 
 # Pas sûr qu'il faille garder ça...
 μ = [df.μ[i] for i in remain_indices]
-ω = [df.weights[i] for i in remain_indices]
+ω = [df.ω[i] for i in remain_indices]
 Σ = [df.Σ[i] for i in remain_indices]
 
 ncolors = length(returned_colors)
@@ -91,9 +88,10 @@ end
 gif(anim, "anim_kpdtm.gif", fps = 10)
 
 
-## COLORIZE - steps parametrized by regularly increasing time parameter time
+# # COLORIZE - steps parametrized by regularly increasing time parameter time
 # Attention - vérifier que le dernier élément de `timesteps` vaut forcément Inf.
 
+# +
 let idx = 0
 
     time = (1:20) ./ 40 # A regler en fonction du vecteur `timesteps` 
@@ -146,3 +144,6 @@ let idx = 0
     gif(anim, "anim_kpdtm2.gif", fps = 2)
 
 end
+# -
+
+

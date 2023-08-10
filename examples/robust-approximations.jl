@@ -8,7 +8,7 @@
 #       format_version: '1.0'
 #       jupytext_version: 1.14.7
 #   kernelspec:
-#     display_name: Julia 1.9.2
+#     display_name: Julia 1.9
 #     language: julia
 #     name: julia-1.9
 # ---
@@ -48,7 +48,6 @@
 using GeometricClusterAnalysis
 using NearestNeighbors
 using CairoMakie
-using Random
 using Statistics
 
 nsignal = 500
@@ -148,8 +147,6 @@ function kPDTM_values(rng, points, x, y, q, k, nsignal, iter_max, nstart)
 
 end
 
-
-
 q, k = 20, 20
 iter_max, nstart = 100, 10 
 xs = LinRange(-10, 10, 200)
@@ -193,6 +190,7 @@ rng = MersenneTwister(1234)
 
 dataset = infinity_symbol(rng, nsignal, nnoise, σ, dimension, noise_min, noise_max)
 
+using LinearAlgebra
 q, k = 20, 8
 iter_max, nstart = 100, 10 
 xs = LinRange(-10, 10, 200)
@@ -258,14 +256,14 @@ q = 40
 kdtree = KDTree(data)
 
 # compute the values of the DTM of parameter q
-dtm_values = [dtm(kdtree, px, py, q) for (px,py) in eachrow(x)]
+dtm_values = [dtm(kdtree, px, py, q) for (px,py) in eachcol(data)]
 
 # plot of  the opposite of the DTM
 f = Figure(resolution=(500,400))
 ax = Axis(f[1, 1], 
                   title = "Values of -DTM on X with parameter q=$q",
                   aspect = 1)
-scatter!(ax, x[:,1], x[:,2], color=-dtm_values)
+scatter!(ax, data[1,:], data[2,:], color=-dtm_values)
 Colorbar(f[1, 2], limits = extrema(-dtm_values), colormap = :viridis)
 colsize!(f.layout, 1, Aspect(1, 1.0)) # reduce size colorbar
 f
@@ -309,13 +307,13 @@ k = 250
 sig = size(data, 2)
 iter_max = 100
 nstart = 10
-kPDTM_values, centers, means, variances, colors, cost = kPDTM(data, data, q, k, sig, iter_max = iter_max, nstart = nstart)  
+values, centers, means, variances, colors, cost = kPDTM(data, data, q, k, sig, iter_max = iter_max, nstart = nstart)  
 
 fig = Figure(; resolution=(500,500))
 ax = Axis(fig[1, 1],
     title = "Values of -kPDTM on X with parameter q=$(q) and k=$(k).",
 )
-scatter!(ax, data[1,:], data[2, :], color=-kPDTM_values)
+scatter!(ax, data[1,:], data[2, :], color=-values)
 for μ in means
     scatter!(ax, μ[1], μ[2], color = "black", marker=:utriangle)
 end
@@ -379,14 +377,14 @@ k = 100
 sig = 150 # Amount of signal points - We will remove o = 250 - 150 points from the sample
 iter_max = 100
 nstart = 10
-kPDTM_values, centers, means, variances, colors, cost = kPDTM(data,data,q,k,sig,
+values, centers, means, variances, colors, cost = kPDTM(data,data,q,k,sig,
 iter_max = iter_max, nstart = nstart)  
 # plot of  the opposite of the k-PDTM
 fig = Figure(; resolution=(500,500))
 ax = Axis(fig[1, 1],
     title = "Values of -kPDTM on X with parameter q=$(q) and k=$(k).",
 )
-scatter!(ax, data[1,:], data[2, :], color=-kPDTM_values)
+scatter!(ax, data[1,:], data[2, :], color=-values)
 scatter!(ax, getindex.(means,1), getindex.(means, 2), color = "black", marker=:utriangle)
 fig
 
@@ -397,14 +395,14 @@ k = 100
 sig = 150
 iter_max = 10
 nstart = 1
-kPLM_values, centers, Sigma, means, weights, colors, cost = kPLM(data,data,q,k,sig;
+values, centers, Sigma, means, weights, colors, cost = kPLM(data,data,q,k,sig;
 iter_max = iter_max, nstart = nstart)  
 # plot of  the opposite of the k-PLM
 fig = Figure(; resolution = (500, 400))
 ax = Axis(fig[1,1], aspect = 1, 
      title = "Values of kPLM on data with parameter q=$(q) and k=$(k).")
-scatter!(ax, data[1,:], data[2,:], color = -kPLM_values)
-Colorbar(fig[1, 2], limits = extrema(-kPLM_values), colormap = :rainbow)
+scatter!(ax, data[1,:], data[2,:], color = -values)
+Colorbar(fig[1, 2], limits = extrema(-values), colormap = :rainbow)
 scatter!(ax, getindex.(means,1), getindex.(means, 2), color = "black", marker = :utriangle)
 colsize!(fig.layout, 1, Aspect(1, 1.0)) # reduce size colorbar
 
@@ -419,13 +417,13 @@ k = 100
 sig = 150
 iter_max = 10
 nstart = 1
-kPDTM_values, centers, means, variances, colors, cost = kPDTM(data,data,q,k,sig,
+values, centers, means, variances, colors, cost = kPDTM(data,data,q,k,sig,
 iter_max = iter_max, nstart = nstart)  
 
 fig = Figure()
 ax = Axis(fig[1,1], aspect = 1,
 title = "Sublevel sets of the kPDTM on X with parameters q=$q and k=$k .")
-scatter!(ax, data[1,:], data[2,:], color = -kPDTM_values)
+scatter!(ax, data[1,:], data[2,:], color = -values)
 Colorbar(fig[1,2])
 alpha = 0.2 # Level for the sub-level set of the k-PLM
 for (μ,ω) in zip(means, variances)
@@ -444,7 +442,7 @@ k = 100
 sig = 150
 iter_max = 10
 nstart = 1
-kPLM_values, centers, Sigma, means, weights, colors, cost = kPLM(data,data,q,k,sig,
+values, centers, Sigma, means, weights, colors, cost = kPLM(data,data,q,k,sig,
 iter_max = iter_max, nstart = nstart) ;
 
 α = 10 # Level for the sub-level set of the k-PLM
@@ -462,7 +460,7 @@ function covellipse(μ, Σ, α)
     Makie.Polygon([Point2f(px, py) for (px,py) in zip(x, y)])
 
 end
-scatter!(ax, data[1,:], data[2,:], color=-kPLM_values)
+scatter!(ax, data[1,:], data[2,:], color=-values)
 Colorbar(fig[1,2], colormap=:rainbow)
 for (μ, Σ, ω) in zip(means, Sigma, weights)
     poly!(ax, covellipse(μ, Σ, max(0, α - ω)), color = "blue" )

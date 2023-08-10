@@ -1,6 +1,6 @@
+# -*- coding: utf-8 -*-
 using GeometricClusterAnalysis
 using Plots
-using Random
 
 nsignal = 2000 # number of signal points
 nnoise = 300   # number of outliers
@@ -35,17 +35,17 @@ timesteps = hc.timesteps
 remain_indices = hc.startup_indices
 length_ri = length(remain_indices)
 
-#matrices = [df.Σ[i] for i in remain_indices]
-#remain_centers = [df.centers[i] for i in remain_indices]
+# matrices = [df.Σ[i] for i in remain_indices]
+# remain_centers = [df.centers[i] for i in remain_indices]
 
 # Vérifier que subcolorize tient compte des matrices...
 color_points, dists = subcolorize(data.points, nsignal, df, remain_indices)
 
-#c = length(ω)
-#remain_indices_2 = vcat(remain_indices, zeros(Int, c + 1 - length(remain_indices)))
-#color_points .+= (color_points.==0) .* (c + 1)
-#color_points .= [remain_indices_2[c] for c in color_points]
-#color_points .+= (color_points.==0) .* (c + 1)
+# c = length(ω)
+# remain_indices_2 = vcat(remain_indices, zeros(Int, c + 1 - length(remain_indices)))
+# color_points .+= (color_points.==0) .* (c + 1)
+# color_points .= [remain_indices_2[c] for c in color_points]
+# color_points .+= (color_points.==0) .* (c + 1)
 
 colors = [return_color(color_points, col, remain_indices) for col in saved_colors]
 
@@ -54,7 +54,7 @@ for i in eachindex(saved_colors), j = 1:data.np
 end
 
 μ = [df.μ[i] for i in remain_indices if i > 0]
-ω = [df.weights[i] for i in remain_indices if i > 0]
+ω = [df.ω[i] for i in remain_indices if i > 0]
 Σ = [df.Σ[i] for i in remain_indices if i > 0]
 
 ncolors = length(colors)
@@ -65,3 +65,5 @@ anim = @animate for i in [1:ncolors-1; Iterators.repeated(ncolors - 1, 30)...]
 end
 
 gif(anim, "anim1.gif", fps = 10)
+
+

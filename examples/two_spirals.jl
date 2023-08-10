@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # # Hierarchical clustering based on a union of ellipsoids 
 #
 #md # [![](https://mybinder.org/badge_logo.svg)](@__BINDER_ROOT_URL__/notebooks/two_spirals.ipynb)
@@ -7,7 +8,6 @@
 
 using GeometricClusterAnalysis
 using Plots
-using Random
 using Statistics
 
 # ## Data generation
@@ -28,7 +28,7 @@ println("The dataset contains $npoints points, of dimension $dim.")
 
 # ### Data display
 
-plot(data)
+plot(data, aspect_ratio = 1)
 
 # ## Computation of the union of ellipsoids with the kPLM function
 
@@ -79,12 +79,7 @@ hc1 = hierarchical_clustering_lem(
     store_timesteps = false,
 )
 
-lims = (min(minimum(hc1.birth), minimum(hc1.death)),
-        max(maximum(hc1.birth), maximum(hc1.death[hc1.death.!=Inf])) + 1)
-plot(hc1, xlims = lims, ylims = lims)
-
-# Note that the "+1" in the second argument of lims and lims2 hereafter is to separate
-# the components whose death time is $\infty$ to other components.
+plot(hc1)
 
 # We consider that ellipsoids born after time "threshold = 4" were not relevant.
 
@@ -100,10 +95,7 @@ hc2 = hierarchical_clustering_lem(
     store_timesteps = false,
 )
 
-lims2 = (min(minimum(hc2.birth), minimum(hc2.death)),
-         max(maximum(hc2.birth), maximum(hc2.death[hc2.death.!=Inf])) + 1)
-
-plot(hc2, xlims = lims2, ylims = lims2)
+plot(hc2)
 
 # We select "infinity = 15". Since there are clearly two connected components that have a lifetime much larger than others. This lifetime is larger than 15, whereas the lifetime of others is smaller than 15.
 
@@ -117,8 +109,7 @@ hc3 = hierarchical_clustering_lem(
     store_timesteps = true,
 )
 
-# Using the sames xlims and ylims than the previous persistence diagram.
-plot(hc3, xlims = lims2, ylims = lims2) 
+plot(hc3)
 
 # ### Getting the number of components, colors of ellipsoids and times of evolution of the clustering
 
@@ -175,3 +166,7 @@ anim = @animate for i in [1:nframes; Iterators.repeated(nframes, 30)...]
 end
 
 gif(anim, "anim_kplm.gif", fps = 5)
+
+
+
+

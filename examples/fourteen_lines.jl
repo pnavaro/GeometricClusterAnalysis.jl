@@ -3,7 +3,6 @@
 #md # [![](https://mybinder.org/badge_logo.svg)](@__BINDER_ROOT_URL__/notebooks/fourteen_lines.ipynb)
 #md # [![](https://img.shields.io/badge/show-nbviewer-579ACA.svg)](@__NBVIEWER_ROOT_URL__/notebooks/fourteen_lines.ipynb)
 
-import Clustering
 using GeometricClusterAnalysis
 using LinearAlgebra
 using Plots
@@ -42,8 +41,7 @@ p1 = pointset(dataset.points, dataset.colors)
 p2 = pointset(dataset.points, col_kplm)
 plot(p1, p2, layout = l, legend = false)
 
-import Clustering
-Clustering.mutualinfo(dataset.colors, col_kplm)
+mutualinfo(dataset.colors, col_kplm)
 
 # ## k-PDTM
 
@@ -53,7 +51,7 @@ p1 = plot(dataset, aspect_ratio = true, framestyle = :none, markersize = 2)
 p2 = pointset(dataset.points, col_kpdtm, legend = false)
 plot(p1, p2, layout = l)
 
-Clustering.mutualinfo(dataset.colors, col_kpdtm)
+mutualinfo(dataset.colors, col_kpdtm)
 
 # ## q-witnessed distance
 
@@ -64,7 +62,7 @@ p1 = plot(dataset, aspect_ratio = true, framestyle = :none, markersize = 2)
 p2 = pointset(points, witnessed_colors, legend = :outertopright)
 plot(p1, p2, layout = l)
 
-Clustering.mutualinfo(dataset.colors, witnessed_colors)
+mutualinfo(dataset.colors, witnessed_colors)
 
 # ## Power function
 
@@ -75,7 +73,7 @@ p1 = plot(dataset, aspect_ratio = true, framestyle = :none, markersize = 2)
 p2 = pointset(points, buchet_colors)
 plot(p1, p2, layout = l, legend = :none)
 
-Clustering.mutualinfo(dataset.colors, buchet_colors)
+mutualinfo(dataset.colors, buchet_colors)
 
 # ## DTM filtration
 
@@ -85,18 +83,15 @@ p1 = plot(dataset, aspect_ratio = true, framestyle = :none, markersize = 2)
 p2 = pointset(points, dtm_colors)
 plot(p1, p2, layout = l, legend = :none)
 
-Clustering.mutualinfo(dataset.colors, dtm_colors)
+mutualinfo(dataset.colors, dtm_colors)
 
 
 # ## ToMaTo
 
 radius = 0.12
 tomato_colors = clustering_tomato(points, nb_clusters, k, c, nsignal, radius, iter_max, nstart)
-println(Clustering.mutualinfo(dataset.colors, tomato_colors))
+println(mutualinfo(dataset.colors, tomato_colors))
 l = @layout [a b]
 p1 = plot(dataset, aspect_ratio = true, framestyle = :none, markersize = 2)
 p2 = pointset(points, tomato_colors)
 plot(p1, p2, layout = l, legend = :none)
-
-
-

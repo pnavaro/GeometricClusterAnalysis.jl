@@ -5,6 +5,9 @@ using DocStringExtensions
 using Random
 export MersenneTwister
 
+import Clustering: mutualinfo
+export mutualinfo
+
 using PersistenceDiagrams
 export birth, death, persistence, midlife, barcode
 

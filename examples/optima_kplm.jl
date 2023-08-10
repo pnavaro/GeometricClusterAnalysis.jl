@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 using LinearAlgebra
 import GeometricClusterAnalysis: sqmahalanobis
 
+# +
 """
     optima_for_kPLM(data, q, k, sig, iter_max = 10, nstart = 1)
 
@@ -190,6 +192,7 @@ function optima_for_kPLM(data, q, k, sig; iter_max = 10, nstart = 1)
 
 end
 
+# +
 """
     kPLM(data, query_pts, q, k, sig, iter_max = 10, nstart = 1)
 
@@ -238,3 +241,6 @@ function kPLM(data, query_pts, q, k, sig; iter_max = 10, nstart = 1)
     return result, centers, Σ, μ, ω, colors, cost
 
 end
+# -
+
+

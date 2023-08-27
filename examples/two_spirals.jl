@@ -1,7 +1,4 @@
 # # Hierarchical clustering based on a union of ellipsoids 
-#
-#md # [![](https://mybinder.org/badge_logo.svg)](@__BINDER_ROOT_URL__/notebooks/two_spirals.ipynb)
-#md # [![](https://img.shields.io/badge/show-nbviewer-579ACA.svg)](@__NBVIEWER_ROOT_URL__/notebooks/two_spirals.ipynb)
 
 # ## Example of two spirals
 

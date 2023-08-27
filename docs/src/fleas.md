@@ -163,7 +163,7 @@ Frederic Chazal, Steve Oudot, Primoz Skraba, Leonidas J. Guibas
 ```@example fleas
 nclusters, k, c, radius, iter_max, nstart = 3, 10, 10, 2., 100, 10
 signal = size(points, 1)
-col_tomato = clustering_tomato(points, nclusters, k, c, signal, radius, iter_max, nstart)
+col_tomato = clustering_tomato(features, nclusters, k, c, signal, radius, iter_max, nstart)
 println("NMI = $(mutualinfo(true_colors, col_tomato))")
 ```
 

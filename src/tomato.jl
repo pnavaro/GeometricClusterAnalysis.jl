@@ -93,9 +93,10 @@ function tomato_clustering(nb_clusters, points, k, signal, radius, iter_max, nst
     sort_dtm = sort(dtm(points, m0))
     threshold = sort_dtm[signal]
     colors, saved_colors, hc = tomato(points, m0, graph; infinity = Inf, threshold = threshold)
+    persistence_diagram = diagram(hc)
     sort_bd = sort(hc.death .- hc.birth)
     infinity = mean([sort_bd[end-nb_clusters], sort_bd[end-nb_clusters+1]])
     colors, saved_colors, hc = tomato(points, m0, graph, infinity = infinity, threshold = threshold)
-    colors, diagram(hc)
+    colors, persistence_diagram
 
 end

@@ -7,9 +7,9 @@
 #       extension: .jl
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.14.4
+#       jupytext_version: 1.14.7
 #   kernelspec:
-#     display_name: Julia 1.9.2
+#     display_name: Julia 1.9
 #     language: julia
 #     name: julia-1.9
 # ---
@@ -155,9 +155,10 @@ plot(p1, p2, layout = l, aspect_ratio = :equal)
 using GeometricClusterAnalysis
 
 
-nb_clusters, k, c, radius, iter_max = 3, 10, 100, 1.9, 100
-nsignal = size(points, 1)
-col_tomato, _ = tomato_clustering(nb_clusters, collect(points'), k, c, nsignal, radius, iter_max, nstart)
+nclusters, k, radius, iter_max, nstart = 3, 10, 2., 100, 10
+signal = size(points, 1)
+col_tomato, diag = tomato_clustering(nclusters, features, k, signal, radius, iter_max, nstart)
+
 println("NMI = $(mutualinfo(true_colors, col_tomato))")
 l = @layout [a b]
 p1 = plot_pointset(points, true_colors)

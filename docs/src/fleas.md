@@ -161,9 +161,9 @@ Algorithm ToMATo from paper "Persistence-based clustering in Riemannian Manifold
 Frederic Chazal, Steve Oudot, Primoz Skraba, Leonidas J. Guibas
 
 ```@example fleas
-nb_clusters, k, c, radius, iter_max = 3, 10, 100, 1.9, 100
-nsignal = size(points, 1)
-col_tomato, _ = tomato_clustering(nb_clusters, points, k, c, nsignal, radius, iter_max, nstart)
+nclusters, k, radius, iter_max, nstart = 3, 10, 2., 100, 10
+signal = size(points, 1)
+col_tomato, diag = tomato_clustering(nclusters, features, k, signal, radius, iter_max, nstart)
 println("NMI = $(mutualinfo(true_colors, col_tomato))")
 ```
 
@@ -209,7 +209,6 @@ plot(p1, p2, layout = l)
 
 ## Witnessed
 
-
 ```@example fleas
 μ, ω, colors = k_witnessed_distance(x, k, c, nsignal)
 
@@ -230,7 +229,6 @@ p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, witnessed_colors)
 plot(p1, p2, layout = l)
 ```
-
 
 ## k-PDTM
 
@@ -254,7 +252,6 @@ plot(p1, p2, layout = l)
 ```
 
 ## Power function Buchet et al.
-
 
 ```@example fleas
 using GeometricClusterAnalysis
@@ -282,7 +279,6 @@ plot(p1, p2, layout = l)
 ```
 
 ## DTM filtration
-
 
 ```@example fleas
 m0 = k / size(x, 2)
@@ -313,7 +309,6 @@ plot(p1, p2, layout = l)
 spectral_colors = rcopy(R"kernlab::specc(P, centers = 3)")
 println("NMI = $(mutualinfo(true_colors, spectral_colors))")
 ```
-
 
 ```@example fleas
 l = @layout [a b]

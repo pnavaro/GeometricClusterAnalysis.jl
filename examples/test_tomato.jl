@@ -59,10 +59,7 @@ radius = 0.2
 iter_max = 10
 nstart = 100
 nclusters = 2
-labels, diag = tomato_clustering(nclusters, points, k, signal, radius, iter_max, nstart)
-
-
-plot(diag)
+labels = clustering_tomato(points, nclusters, k, c, signal, radius, iter_max, nstart)
 
 scatter( points[1,:], points[2,:], c = labels, aspect_ratio = 1)
 

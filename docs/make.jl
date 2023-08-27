@@ -1,24 +1,12 @@
 using Documenter
 using DocumenterCitations
 using GeometricClusterAnalysis
-using Literate
+using DocumenterCitations
 
 ENV["GKSwstype"] = "100"
 
-using DocumenterCitations
 
 bib = CitationBibliography(joinpath(@__DIR__, "references.bib"); style=:authoryear)
-
-doc_outputdir  = joinpath(@__DIR__, "src")
-nb_outputdir   = joinpath(doc_outputdir, "notebooks")
-
-fourteen_lines = joinpath(@__DIR__, "..", "examples", "fourteen_lines.jl") 
-Literate.markdown(fourteen_lines, doc_outputdir, execute = false, credit = false)
-Literate.notebook(fourteen_lines, nb_outputdir, execute = false)
-
-two_spirals = joinpath(@__DIR__, "..", "examples", "two_spirals.jl") 
-Literate.markdown(two_spirals, doc_outputdir, execute = false, credit = false)
-Literate.notebook(two_spirals, nb_outputdir, execute = false)
 
 makedocs(
     bib,

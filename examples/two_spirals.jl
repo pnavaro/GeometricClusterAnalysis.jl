@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # # Hierarchical clustering based on a union of ellipsoids 
 #
 #md # [![](https://mybinder.org/badge_logo.svg)](@__BINDER_ROOT_URL__/notebooks/two_spirals.ipynb)

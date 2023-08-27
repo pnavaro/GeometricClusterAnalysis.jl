@@ -161,9 +161,9 @@ Algorithm ToMATo from paper "Persistence-based clustering in Riemannian Manifold
 Frederic Chazal, Steve Oudot, Primoz Skraba, Leonidas J. Guibas
 
 ```@example fleas
-nclusters, k, radius, iter_max, nstart = 3, 10, 2., 100, 10
+nclusters, k, c, radius, iter_max, nstart = 3, 10, 10, 2., 100, 10
 signal = size(points, 1)
-col_tomato, diag = tomato_clustering(nclusters, features, k, signal, radius, iter_max, nstart)
+col_tomato = clustering_tomato(points, nclusters, k, c, signal, radius, iter_max, nstart)
 println("NMI = $(mutualinfo(true_colors, col_tomato))")
 ```
 

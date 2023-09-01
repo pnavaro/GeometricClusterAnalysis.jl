@@ -2,6 +2,10 @@
 
 Documentation for GeometricClusterAnalysis.jl
 
+This set of functions is not a Julia package. Here you'll find a series of 
+examples and methods that can be used to approximate compact subsets 
+in noisy datasets. It could be use for clustering too.
+
 ```@contents
 Pages = ["functions.md", "trimmed-bregman.md", "fake_data.md",
          "three_curves.md", "two_spirals.md", "fourteen_lines.md", 

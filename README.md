@@ -47,7 +47,7 @@ Topological Data Analysis
  - [RobustTDA.jl](https://github.com/sidv23/RobustTDA.jl)
  - [Ripserer.jl](https://github.com/mtsch/Ripserer.jl/tree/master)
  - [PersistenceDiagrams.jl](https://github.com/mtsch/PersistenceDiagrams.jl)
- - [TDA.j](https://github.com/wildart/TDA.jl)
+ - [TDA.jl](https://github.com/wildart/TDA.jl)
 
 Julia packages providing clustering methods:
  - [Clustering.jl](https://github.com/JuliaStats/Clustering.jl)

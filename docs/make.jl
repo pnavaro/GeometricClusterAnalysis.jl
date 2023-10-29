@@ -9,7 +9,6 @@ ENV["GKSwstype"] = "100"
 bib = CitationBibliography(joinpath(@__DIR__, "references.bib"); style=:authoryear)
 
 makedocs(
-    bib,
     sitename = "GeometricClusterAnalysis.jl",
     authors = "Claire Brécheteau and Pierre Navaro",
     modules = [GeometricClusterAnalysis],
@@ -36,6 +35,7 @@ makedocs(
         "Types" => "types.md",
         "Functions" => "functions.md",
     ],
+    plugins = [bib],
 )
 
 deploydocs(

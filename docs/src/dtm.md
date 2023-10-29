@@ -25,7 +25,7 @@ to noise.
 In this page, we present three methods to construct approximations
 of $d_{\mathcal{K}}$ from a possibly noisy sample $\mathbb{X}$. The
 first approximation is the well-known distance-to-measure (DTM)
-function of [Chazal](@ref).
+function of [Chazal](@cite).
 The two last methods are new. They are based on the following
 approximations which sublevel sets are unions of $k$ balls or
 ellispoids: the $k$-PDTM [Brecheteau18](@cite) and the $k$-PLM

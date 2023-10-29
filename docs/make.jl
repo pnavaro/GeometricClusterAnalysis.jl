@@ -5,7 +5,6 @@ using DocumenterCitations
 
 ENV["GKSwstype"] = "100"
 
-
 bib = CitationBibliography(joinpath(@__DIR__, "references.bib"); style=:authoryear)
 
 makedocs(

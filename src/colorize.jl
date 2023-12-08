@@ -31,8 +31,8 @@ function colorize!(colors, μ, ω, points, k, nsignal::Int, centers, Σ)
 
         invΣ = inv(Σ[i])
 
-        for (j, x) in enumerate(eachcol(points))
-            dists[j] = sqmahalanobis(x, centers[i], invΣ)
+        for j in eachindex(dists)
+            dists[j] = sqmahalanobis(view(points,:,j), centers[i], invΣ)
         end
 
         partialsortperm!(idxs, dists, 1:k)

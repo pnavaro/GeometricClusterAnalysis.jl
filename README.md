@@ -42,12 +42,12 @@ include("examples/two_spirals.jl")
 ## See Also
 
 Topological Data Analysis
- - [JuliaTDA: Topological Data Analysis in Julia](https://github.com/JuliaTDA)
- - [ClusteringToMaTo.jl](https://github.com/pnavaro/ClusteringToMaTo.jl)
- - [RobustTDA.jl](https://github.com/sidv23/RobustTDA.jl)
  - [Ripserer.jl](https://github.com/mtsch/Ripserer.jl/tree/master)
  - [PersistenceDiagrams.jl](https://github.com/mtsch/PersistenceDiagrams.jl)
- - [TDA.jl](https://github.com/wildart/TDA.jl)
+ - [ClusteringToMaTo.jl](https://github.com/pnavaro/ClusteringToMaTo.jl)
+ - [RobustTDA.jl](https://github.com/sidv23/RobustTDA.jl)
+ - [JuliaTDA: Topological Data Analysis in Julia](https://github.com/JuliaTDA)
+ - [TDA.jl](https://github.com/wildart/TDA.jl): *the project seems to have been abandoned, but there are still some interesting implementations in the source code.*
 
 Julia packages providing clustering methods:
  - [Clustering.jl](https://github.com/JuliaStats/Clustering.jl)

@@ -61,7 +61,7 @@ rng = MersenneTwister(1234)
 
 dataset = infinity_symbol(rng, nsignal, nnoise, σ, dimension, noise_min, noise_max)
 
-f = Figure(; resolution = (600, 400))
+f = Figure(; size = (600, 400))
 ax = Axis(f[1, 1], aspect = 1)
 limits!(ax, -5, 5, -5, 5)
 scatter!(ax, dataset.points[1,:], dataset.points[2,:], 
@@ -274,7 +274,7 @@ Sampling on the circle with outlier
 n_obs = 150                            # number of points sampled on the circle
 n_out = 100                            # number of outliers 
 data = sample_on_circle(n_obs, n_out)  # sample points with outliers 
-f = Figure(resolution = (600, 400))
+f = Figure(size = (600, 400))
 ax = Axis(f[1, 1], 
           title = "$(n_obs)-sampling of the unit circle with $(n_out) outliers",
           aspect = 1)
@@ -302,7 +302,7 @@ dtm_values = [dtm(kdtree, px, py, q) for (px,py) in eachcol(data)]
 
 # plot of  the opposite of the DTM
 
-f = Figure(resolution=(600,400))
+f = Figure(;size=(600,400))
 ax = Axis(f[1, 1], 
                   title = "Values of -DTM on X with parameter q=$q",
                   aspect = 1)
@@ -370,7 +370,7 @@ iter_max = 100
 nstart = 10
 values, df = kPDTM(rng, data, data, q, k, sig, iter_max, nstart)  
 
-fig = Figure(; resolution=(600,400))
+fig = Figure(; size=(600,400))
 ax = Axis(fig[1, 1], aspect = 1,
     title = "Values of -kPDTM on X with parameter q=$(q) and k=$(k).",
 )
@@ -432,7 +432,7 @@ iter_max = 10
 nstart = 1
 values, df = kPLM(rng, data, data, q, k, sig, iter_max, nstart)  
 # plot of  the opposite of the DTM
-fig = Figure(; resolution = (600, 400))
+fig = Figure(; size = (600, 400))
 ax = Axis(fig[1,1], aspect = 1, 
      title = "Values of kPLM on data with parameter q=$(q) and k=$(k).")
 scatter!(ax, data[1,:], data[2,:], color = -values)
@@ -474,7 +474,7 @@ iter_max = 100
 nstart = 10
 values, df = kPDTM(rng, data, data, q, k, sig, iter_max, nstart)  
 # plot of  the opposite of the k-PDTM
-fig = Figure(; resolution=(600,400))
+fig = Figure(; size=(600,400))
 ax = Axis(fig[1, 1], aspect = 1,
     title = "Values of -kPDTM on X with parameter q=$(q) and k=$(k).",
 )
@@ -497,7 +497,7 @@ iter_max = 10
 nstart = 1
 values, df = kPLM(rng, data, data, q, k, sig, iter_max, nstart)  
 # plot of  the opposite of the k-PLM
-fig = Figure(; resolution = (600, 400))
+fig = Figure(; size = (600, 400))
 ax = Axis(fig[1,1], aspect = 1, 
      title = "Values of kPLM on data with parameter q=$(q) and k=$(k).")
 scatter!(ax, data[1,:], data[2,:], color = -values)
@@ -522,7 +522,7 @@ iter_max = 10
 nstart = 1
 values, df = kPDTM(rng, data, data, q, k, sig, iter_max, nstart)  
 
-fig = Figure(; resolution = (600, 400))
+fig = Figure(; size = (600, 400))
 ax = Axis(fig[1,1], aspect = 1,
 title = "Sublevel sets of the kPDTM on X with parameters q=$q and k=$k .")
 scatter!(ax, data[1,:], data[2,:], color = -values)
@@ -549,7 +549,7 @@ nstart = 1
 values, df = kPLM(rng, data, data, q, k, sig, iter_max, nstart)
 
 α = 10 # Level for the sub-level set of the k-PLM
-fig = Figure(; resolution = (600, 400))
+fig = Figure(; size = (600, 400))
 ax = Axis(fig[1,1], aspect = 1, 
 title = "Sublevel sets of the kPLM on X with parameters q=$q and k=$k .")
 function covellipse(μ, Σ, α)

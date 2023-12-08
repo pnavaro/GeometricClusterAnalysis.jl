@@ -6,9 +6,9 @@
 #       extension: .jl
 #       format_name: nomarker
 #       format_version: '1.0'
-#       jupytext_version: 1.14.7
+#       jupytext_version: 1.15.2
 #   kernelspec:
-#     display_name: Julia 1.9
+#     display_name: Julia 1.9.3
 #     language: julia
 #     name: julia-1.9
 # ---
@@ -45,6 +45,9 @@
 # We consider as a compact set $\mathcal{K}$, the infinity symbol:
 #
 
+import Pkg; Pkg.add("CairoMakie"); nothing;
+
+
 using GeometricClusterAnalysis
 using NearestNeighbors
 using CairoMakie
@@ -61,7 +64,7 @@ rng = MersenneTwister(1234)
 
 dataset = infinity_symbol(rng, nsignal, nnoise, σ, dimension, noise_min, noise_max)
 
-f = Figure(; resolution = (400, 400))
+f = Figure(; size = (400, 400))
 ax = Axis(f[1, 1], aspect = 1)
 limits!(ax, -5, 5, -5, 5)
 scatter!(ax, dataset.points[1,:], dataset.points[2,:], 
@@ -83,7 +86,6 @@ ys = LinRange(-5, 5, 100)
 kdtree = KDTree(dataset.points[:,1:nsignal])
 
 zs = [-dtm(kdtree, x, y) for x in xs, y in ys]
-
 surface(xs, ys, zs, cb = false)
 
 # We have generated a noisy sample $\mathbb X$. Then, $d_{\mathbb X}$ is a terrible approximation of $d_{\mathcal{K}}$. Indeed, the graph of $-d_{\mathbb X}$ is the following:
@@ -121,9 +123,7 @@ function dtm(kdtree, x, y, q)
 end
 
 q = 10
-
 zs = [-dtm(kdtree, x, y, q) for x in xs, y in ys]
-
 surface(xs, ys, zs, cb = false)
 
 # In this page, we define two functions, the $k$-PDTM $d_{\mathbb X,q,k}$ and the $k$-PLM $d'_{\mathbb X,q,k}$. The sublevel sets of the $k$-PDTM are unions of $k$ balls. The sublevel sets of the $k$-PLM are unions of $k$ ellipsoids.
@@ -155,10 +155,6 @@ zs = - kPDTM_values(rng, dataset.points, xs, ys, q, k, nsignal, iter_max, nstart
 surface(xs, ys, zs, axis=(type=Axis3,), cb = false)
 
 # and 
-
-using GeometricClusterAnalysis
-using CairoMakie
-using Random
 
 function f_Σ!(Σ) end
 
@@ -259,7 +255,7 @@ kdtree = KDTree(data)
 dtm_values = [dtm(kdtree, px, py, q) for (px,py) in eachcol(data)]
 
 # plot of  the opposite of the DTM
-f = Figure(resolution=(500,400))
+f = Figure(size=(500,400))
 ax = Axis(f[1, 1], 
                   title = "Values of -DTM on X with parameter q=$q",
                   aspect = 1)
@@ -345,13 +341,13 @@ k = 250
 sig = size(data, 2)
 iter_max = 10
 nstart = 1
-kPLM_values, centers, Sigma, means, weights, colors, cost = kPLM(data, data, q, k, sig; iter_max = iter_max, nstart = nstart)  
+values, centers, Sigma, means, weights, colors, cost = kPLM(data, data, q, k, sig; iter_max = iter_max, nstart = nstart)  
 # plot of  the opposite of the DTM
-fig = Figure(; resolution = (500, 400))
+fig = Figure(; size = (500, 400))
 ax = Axis(fig[1,1], aspect = 1, 
      title = "Values of kPLM on data with parameter q=$(q) and k=$(k).")
-scatter!(ax, data[1,:], data[2,:], color = -kPLM_values)
-Colorbar(fig[1, 2], limits = extrema(-kPLM_values), colormap = :viridis)
+scatter!(ax, data[1,:], data[2,:], color = -values)
+Colorbar(fig[1, 2], limits = extrema(-values), colormap = :viridis)
 scatter!(ax, getindex.(means,1), getindex.(means, 2), color = "black", marker = :utriangle)
 colsize!(fig.layout, 1, Aspect(1, 1.0)) # reduce size colorbar
 
@@ -380,7 +376,7 @@ nstart = 10
 values, centers, means, variances, colors, cost = kPDTM(data,data,q,k,sig,
 iter_max = iter_max, nstart = nstart)  
 # plot of  the opposite of the k-PDTM
-fig = Figure(; resolution=(500,500))
+fig = Figure(; size=(500,500))
 ax = Axis(fig[1, 1],
     title = "Values of -kPDTM on X with parameter q=$(q) and k=$(k).",
 )
@@ -398,7 +394,7 @@ nstart = 1
 values, centers, Sigma, means, weights, colors, cost = kPLM(data,data,q,k,sig;
 iter_max = iter_max, nstart = nstart)  
 # plot of  the opposite of the k-PLM
-fig = Figure(; resolution = (500, 400))
+fig = Figure(; size = (500, 400))
 ax = Axis(fig[1,1], aspect = 1, 
      title = "Values of kPLM on data with parameter q=$(q) and k=$(k).")
 scatter!(ax, data[1,:], data[2,:], color = -values)

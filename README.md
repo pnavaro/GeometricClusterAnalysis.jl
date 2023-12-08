@@ -6,6 +6,8 @@ Julia implementation of data clustering using underlying geometric and topologic
 
 [![Build Status](https://github.com/pnavaro/GeometricClusterAnalysis.jl/workflows/CI/badge.svg)](https://github.com/pnavaro/GeometricClusterAnalysis.jl/actions?query=workflow%3ACI+branch%3Amaster)
 [![codecov](https://codecov.io/gh/pnavaro/GeometricClusterAnalysis.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/pnavaro/GeometricClusterAnalysis.jl)
+[![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
+
 
 **Documentation**: [![][docs-stable-img]][docs-stable-url] [![][docs-latest-img]][docs-latest-url]
 

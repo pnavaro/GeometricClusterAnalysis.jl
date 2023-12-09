@@ -319,6 +319,6 @@ end
 
 export diagram
 
-diagram(hc::HClust) = PersistenceDiagram([ p for p  in zip(hc.birth, hc.death)])
+diagram(hc::HClust) = PersistenceDiagram([ p for p  in zip(hc.birth, hc.death)]; dim = 1)
 
                                  

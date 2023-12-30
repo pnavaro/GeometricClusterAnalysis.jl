@@ -15,7 +15,7 @@ pages:
   stage: deploy
   script:
     - julia --project=docs -e 'using Pkg; Pkg.instantiate(); Pkg.develop(PackageSpec(path=pwd()))'
-    - julia --project=docs --color=yes docs/make.jl
+    - julia --project=docs --color=yes docs/make_gitlab.jl
     - mv docs/build public # move to the directory picked up by Gitlab pages
   artifacts:
     paths:

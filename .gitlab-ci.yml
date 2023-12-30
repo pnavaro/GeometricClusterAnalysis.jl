@@ -1,5 +1,4 @@
-image: registry.plmlab.math.cnrs.fr/navaro/julia-rcall:1.9.4
-
+image: registry.plmlab.math.cnrs.fr/navaro/julia-rcall:latest
 
 before_script:
   - Rscript install.R

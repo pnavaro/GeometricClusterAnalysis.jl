@@ -31,7 +31,7 @@ X_pca = predict(pca, X)</code></pre><pre class="documenter-example-output"><code
  -60.7414      9.83193   -77.8121    …  165.516     164.319      132.117
  144.626     146.345     141.665          4.83876     4.48532    -40.2968
    2.86075    26.2327    -21.3985        62.1869     60.0662     120.151
- -69.6778    -63.8413    -78.3785       -73.6832    -57.7492     -76.9475
+  69.6778     63.8413     78.3785        73.6832     57.7492      76.9475
  -24.8752    -12.6836    -32.0202       -28.9607    -22.7359     -45.6323
  -11.4354     -6.21062   -23.8029    …   32.7799     23.1818      44.5347
    8.94384    45.751      13.0142       -35.717     -27.565      -37.1215
@@ -46,7 +46,7 @@ X_pca = predict(pca, X)</code></pre><pre class="documenter-example-output"><code
   -6.50688    -4.10144    -3.60888       -0.795095    4.65839      6.11248
   -0.394297    3.78447     1.90339        2.05996    -2.68061      1.92713
    2.0695     -0.447788    0.94063        1.51751    -3.63181      0.969622
-  -4.2428     -5.01362     4.58153   …   -6.10315    -7.88316      2.04012
+   4.2428      5.01362    -4.58153   …    6.10315     7.88316     -2.04012
   -1.61565    -0.938709   -5.43101       -1.10219     2.87962      2.44519</code></pre><p>Recoding <code>labels</code> for the linear discriminant analysis:</p><pre><code class="language-julia hljs">Y_labels = recode(
     X_labels,
     &quot;Obama&quot; =&gt; 1,
@@ -59,26 +59,26 @@ X_pca = predict(pca, X)</code></pre><pre class="documenter-example-output"><code
 
 lda = fit(MulticlassLDA, X_pca, Y_labels; outdim=20)
 points = predict(lda, X_pca)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">20×209 Matrix{Float64}:
-  0.0425391    0.100762    -0.0443951   …   0.0635746     0.0537748
-  0.0476023    0.0335414    0.0323627       0.187445      0.226327
-  0.466552     0.428397     0.50515         0.41138       0.335156
-  0.179813     0.279297     0.0988312       0.0381078     0.00635588
-  0.165531     0.14778      0.251933       -0.492498     -0.643294
-  0.0594561   -0.129702     0.0799047   …  -0.0945011     0.0768556
-  0.0571045   -0.044531    -0.0180089       0.0198591    -0.0449527
-  0.0249709   -0.0409255    0.0503854      -0.0192844     0.0237168
-  0.16309      0.044371    -0.063187        0.0362214    -0.0432292
-  0.0828578    0.164914    -0.0824338       0.00569814   -0.0420385
-  0.0561611    0.0822136    0.0145746   …   0.000213525  -0.0302594
- -0.00269161   0.00991247  -0.0656774       0.0341061    -0.00436337
-  0.174648    -0.109166    -0.034421       -0.00366673   -0.013572
-  0.20745      0.0721642   -0.0139667      -0.0284959    -0.0825373
- -0.0484692    0.0591101    0.0303699       0.0869307    -0.117854
- -0.14622      0.0343448    0.0115217   …   0.0473193     0.0172038
-  0.0384214   -0.00386743   0.0564464       0.0188665    -0.052819
-  0.0255546    0.0271023   -6.88611e-5      0.0152927     0.0756821
- -0.0912415   -0.11259      0.0261805       0.00927515   -0.0708342
- -0.202937    -0.00559176  -0.0933477      -0.0150637    -0.0584617</code></pre><p>Representation of data:</p><pre><code class="language-julia hljs">function plot_clustering( points, cluster, true_labels; axis = 1:2)
+  0.0425391   0.100762    -0.0443951  …   0.0635746    0.0537748
+ -0.0476023  -0.0335414   -0.0323627     -0.187445    -0.226327
+  0.466552    0.428397     0.50515        0.41138      0.335156
+  0.179813    0.279297     0.0988312      0.0381078    0.00635588
+  0.165531    0.14778      0.251933      -0.492498    -0.643294
+ -0.0169923   0.0517767   -0.0640841  …   0.0380897   -0.104371
+ -0.15124    -0.0906387   -0.0796038      0.00310871   0.0282575
+  0.0328233  -0.00191108  -0.081439       0.105777    -0.0338196
+ -0.0304685   0.0716366    0.0276993      0.00296056   0.00174264
+ -0.0733328  -0.131337     0.0478864     -0.00354468   0.0555406
+  0.103659   -0.12559     -0.0123341  …  -0.027959     0.0108726
+ -0.0140485  -0.0992294    0.0163172     -0.0278225   -0.0321585
+  0.0107203  -0.112733    -0.0628497     -0.00171432  -0.015996
+  0.0342722   0.137548     0.0161871     -0.00247884  -0.0916099
+  0.063174   -0.0192288   -0.0520502      0.0195034   -0.0356987
+ -0.0133432   0.00223252   0.124153   …   0.0235802    0.00187892
+ -0.040238   -0.0548456    0.034812       0.00448765  -0.0806262
+ -0.19582     0.0492696   -0.112352      -0.00700629  -0.0305518
+  0.123881   -0.00719929   0.0167019     -0.0289716    0.0996145
+ -0.221213    0.00749935  -0.0475717      0.0174744   -0.0196127</code></pre><p>Representation of data:</p><pre><code class="language-julia hljs">function plot_clustering( points, cluster, true_labels; axis = 1:2)
 
     pairs = Dict(1 =&gt; :rtriangle, 2 =&gt; :diamond, 3 =&gt; :square, 4 =&gt; :ltriangle,
                   5 =&gt; :star, 6 =&gt; :pentagon, 0 =&gt; :circle)
@@ -107,33 +107,33 @@ alpha = 20/209
 maxiter = 50
 nstart = 50</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">50</code></pre><h2 id="Application-of-the-classical-trimmed-k-means-algorithm."><a class="docs-heading-anchor" href="#Application-of-the-classical-trimmed-k-means-algorithm.">Application of the classical trimmed <span>$k$</span>-means algorithm.</a><a id="Application-of-the-classical-trimmed-k-means-algorithm.-1"></a><a class="docs-heading-anchor-permalink" href="#Application-of-the-classical-trimmed-k-means-algorithm." title="Permalink"></a></h2><p>(<a href="../references/#Cuesta-Albertos1997">Cuesta-Albertos <em>et al.</em>, 1997</a>)</p><pre><code class="language-julia hljs">tb_kmeans = trimmed_bregman_clustering(rng, points, k, alpha, euclidean, maxiter, nstart)
 
-plot_clustering(tb_kmeans.points, tb_kmeans.cluster, Y_labels)</code></pre><img src="d7d6224f.svg" alt="Example block output"/><h2 id="Using-the-Bregman-divergence-associated-to-the-Poisson-distribution"><a class="docs-heading-anchor" href="#Using-the-Bregman-divergence-associated-to-the-Poisson-distribution">Using the Bregman divergence associated to the Poisson distribution</a><a id="Using-the-Bregman-divergence-associated-to-the-Poisson-distribution-1"></a><a class="docs-heading-anchor-permalink" href="#Using-the-Bregman-divergence-associated-to-the-Poisson-distribution" title="Permalink"></a></h2><pre><code class="language-julia hljs">function standardize!( points )
+plot_clustering(tb_kmeans.points, tb_kmeans.cluster, Y_labels)</code></pre><img src="5b6cf670.svg" alt="Example block output"/><h2 id="Using-the-Bregman-divergence-associated-to-the-Poisson-distribution"><a class="docs-heading-anchor" href="#Using-the-Bregman-divergence-associated-to-the-Poisson-distribution">Using the Bregman divergence associated to the Poisson distribution</a><a id="Using-the-Bregman-divergence-associated-to-the-Poisson-distribution-1"></a><a class="docs-heading-anchor-permalink" href="#Using-the-Bregman-divergence-associated-to-the-Poisson-distribution" title="Permalink"></a></h2><pre><code class="language-julia hljs">function standardize!( points )
     points .-= minimum(points, dims=2)
 end
 
 standardize!(points)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">20×209 Matrix{Float64}:
- 0.371239   0.429461   0.284305  …  0.406523  0.392274   0.382475
- 0.418747   0.404686   0.403507     0.572759  0.558589   0.597472
- 0.753697   0.715542   0.792295     0.731444  0.698525   0.622301
- 0.676151   0.775636   0.59517      0.531942  0.534446   0.502694
- 0.817917   0.800165   0.904319     0.059263  0.159888   0.00909161
- 0.247718   0.0585598  0.268167  …  0.195415  0.0937612  0.265118
- 0.256925   0.15529    0.181812     0.278854  0.21968    0.154868
- 0.227106   0.16121    0.25252      0.148224  0.182851   0.225852
- 0.341926   0.223208   0.11565      0.295435  0.215058   0.135607
- 0.273122   0.355179   0.107831     0.235568  0.195963   0.148226
- 0.269251   0.295304   0.227665  …  0.201209  0.213304   0.182831
- 0.250768   0.263372   0.187782     0.272274  0.287565   0.249096
- 0.387359   0.103545   0.17829      0.179885  0.209044   0.199139
- 0.352566   0.217281   0.13115      0.180195  0.116621   0.0625794
- 0.158833   0.266413   0.237672     0.159499  0.294233   0.0894481
- 0.0686481  0.249213   0.22639   …  0.213527  0.262188   0.232072
- 0.276933   0.234644   0.294958     0.19847   0.257378   0.185693
- 0.309468   0.311016   0.283845     0.295541  0.299206   0.359596
- 0.0937051  0.0723562  0.211127     0.187605  0.194222   0.114112
- 0.0        0.197345   0.109589     0.272451  0.187873   0.144475</code></pre><pre><code class="language-julia hljs">tb_poisson = trimmed_bregman_clustering(rng, points, k, alpha, poisson, maxiter, nstart)
+ 0.371239   0.429461   0.284305   0.351883  …  0.406523  0.392274  0.382475
+ 0.445381   0.459442   0.460621   0.392174     0.291369  0.305539  0.266656
+ 0.753697   0.715542   0.792295   0.614593     0.731444  0.698525  0.622301
+ 0.676151   0.775636   0.59517    0.562054     0.531942  0.534446  0.502694
+ 0.817917   0.800165   0.904319   0.862279     0.059263  0.159888  0.00909161
+ 0.234037   0.302806   0.186945   0.0       …  0.235471  0.289119  0.146658
+ 0.0601579  0.120759   0.131794   0.245968     0.158027  0.214507  0.239655
+ 0.389972   0.355237   0.275709   0.286407     0.430856  0.462925  0.323329
+ 0.18849    0.290595   0.246658   0.267849     0.260358  0.221919  0.220701
+ 0.139707   0.0817024  0.260926   0.248796     0.21737   0.209495  0.26858
+ 0.295311   0.0660611  0.179317   0.224351  …  0.162675  0.163692  0.202524
+ 0.159309   0.0741285  0.189675   0.167506     0.197067  0.145535  0.141199
+ 0.206475   0.0830217  0.132905   0.0          0.17484   0.19404   0.179758
+ 0.240473   0.343749   0.222388   0.282089     0.210068  0.203722  0.114591
+ 0.299407   0.217004   0.184183   0.129202     0.24267   0.255736  0.200534
+ 0.163483   0.179059   0.300979   0.200116  …  0.186113  0.200406  0.178705
+ 0.14086    0.126252   0.21591    0.165868     0.174994  0.185586  0.100472
+ 0.0        0.245089   0.0834676  0.206437     0.134483  0.188814  0.165268
+ 0.302945   0.171865   0.195766   0.231095     0.184692  0.150092  0.278678
+ 0.0        0.228712   0.173641   0.355764     0.260298  0.238687  0.2016</code></pre><pre><code class="language-julia hljs">tb_poisson = trimmed_bregman_clustering(rng, points, k, alpha, poisson, maxiter, nstart)
 
-plot_clustering(points, tb_poisson.cluster, Y_labels)</code></pre><img src="f000f889.svg" alt="Example block output"/><p>By using the Bregman divergence associated to the Poisson distribution, we see that the clustering method is performant with the parameters <code>k = 4</code> and <code>alpha = 20/209</code>.  Indeed, the outliers are the texts from the bible and from the Obama speech.  Moreover, the other texts are mostly well clustered.</p><h2 id="Performance-comparison"><a class="docs-heading-anchor" href="#Performance-comparison">Performance comparison</a><a id="Performance-comparison-1"></a><a class="docs-heading-anchor-permalink" href="#Performance-comparison" title="Permalink"></a></h2><p>We measure the performance of two clustering methods (the one with the squared Euclidean distance and the one with the Bregman divergence associated to the Poisson distribution). For this, we use the normalised mutual information (NMI).</p><p>True labelling for which the texts from the bible and the Obama speech do have the same label:</p><pre><code class="language-julia hljs">true_labels = copy(Y_labels)
+plot_clustering(points, tb_poisson.cluster, Y_labels)</code></pre><img src="51dde11a.svg" alt="Example block output"/><p>By using the Bregman divergence associated to the Poisson distribution, we see that the clustering method is performant with the parameters <code>k = 4</code> and <code>alpha = 20/209</code>.  Indeed, the outliers are the texts from the bible and from the Obama speech.  Moreover, the other texts are mostly well clustered.</p><h2 id="Performance-comparison"><a class="docs-heading-anchor" href="#Performance-comparison">Performance comparison</a><a id="Performance-comparison-1"></a><a class="docs-heading-anchor-permalink" href="#Performance-comparison" title="Permalink"></a></h2><p>We measure the performance of two clustering methods (the one with the squared Euclidean distance and the one with the Bregman divergence associated to the Poisson distribution). For this, we use the normalised mutual information (NMI).</p><p>True labelling for which the texts from the bible and the Obama speech do have the same label:</p><pre><code class="language-julia hljs">true_labels = copy(Y_labels)
 true_labels[Y_labels .== 2] .= 1</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">15-element view(::Vector{Int64}, [190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204]) with eltype Int64:
  1
  1
@@ -149,7 +149,7 @@ true_labels[Y_labels .== 2] .= 1</code></pre><pre class="documenter-example-outp
  1
  1
  1
- 1</code></pre><p>For trimmed k-means :</p><pre><code class="language-julia hljs">mutualinfo(true_labels, tb_kmeans.cluster, normed = true)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">1.0</code></pre><p>For trimmed clustering with the Bregman divergence associated to the Poisson distribution :</p><pre><code class="language-julia hljs">mutualinfo(true_labels, tb_poisson.cluster, normed = true)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">0.9529773660189619</code></pre><p>The mutualy normalised information is larger for the Bregman divergence associated to the Poisson distribution. This illustrates the fact that using the correct Bregman divergence helps improving the clustering, in comparison to the classical trimmed <span>$k$</span>-means algorithm.  Indeed, the number of appearance of a word in a text of a fixed number of words, written by the same author, can be modelled by a random variable of Poisson distribution.  The independance between the number of appearance of the words is not realistic. However, since we do consider only some words (the 50 more frequent words), we make this approximation. We will use the Bregman divergence associated to the Poisson distribution.</p><h3 id="Selecting-the-parameters-k-and-\\alpha"><a class="docs-heading-anchor" href="#Selecting-the-parameters-k-and-\\alpha">Selecting the parameters <span>$k$</span> and <span>$\alpha$</span></a><a id="Selecting-the-parameters-k-and-\\alpha-1"></a><a class="docs-heading-anchor-permalink" href="#Selecting-the-parameters-k-and-\\alpha" title="Permalink"></a></h3><p>We display the risks curves as a function of <span>$k$</span> and <span>$\alpha$</span>. In practive, it is important to realise this step since we are not supposed to know the data set in advance, nor the number of outliers.</p><pre><code class="language-julia hljs">vect_k = collect(1:6)
+ 1</code></pre><p>For trimmed k-means :</p><pre><code class="language-julia hljs">mutualinfo(true_labels, tb_kmeans.cluster, normed = true)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">1.0</code></pre><p>For trimmed clustering with the Bregman divergence associated to the Poisson distribution :</p><pre><code class="language-julia hljs">mutualinfo(true_labels, tb_poisson.cluster, normed = true)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">0.9372246668789784</code></pre><p>The mutualy normalised information is larger for the Bregman divergence associated to the Poisson distribution. This illustrates the fact that using the correct Bregman divergence helps improving the clustering, in comparison to the classical trimmed <span>$k$</span>-means algorithm.  Indeed, the number of appearance of a word in a text of a fixed number of words, written by the same author, can be modelled by a random variable of Poisson distribution.  The independance between the number of appearance of the words is not realistic. However, since we do consider only some words (the 50 more frequent words), we make this approximation. We will use the Bregman divergence associated to the Poisson distribution.</p><h3 id="Selecting-the-parameters-k-and-\\alpha"><a class="docs-heading-anchor" href="#Selecting-the-parameters-k-and-\\alpha">Selecting the parameters <span>$k$</span> and <span>$\alpha$</span></a><a id="Selecting-the-parameters-k-and-\\alpha-1"></a><a class="docs-heading-anchor-permalink" href="#Selecting-the-parameters-k-and-\\alpha" title="Permalink"></a></h3><p>We display the risks curves as a function of <span>$k$</span> and <span>$\alpha$</span>. In practive, it is important to realise this step since we are not supposed to know the data set in advance, nor the number of outliers.</p><pre><code class="language-julia hljs">vect_k = collect(1:6)
 vect_alpha = [(1:5)./50; [0.15,0.25,0.75,0.85,0.9]]
 nstart = 20
 
@@ -162,9 +162,9 @@ for (i,k) in enumerate(vect_k)
    plot!( vect_alpha, params_risks[i, :], label =&quot;k=$k&quot;, markershape = :circle )
 end
 xlabel!(&quot;alpha&quot;)
-ylabel!(&quot;NMI&quot;)</code></pre><img src="b6ce38f0.svg" alt="Example block output"/><p>In order to select the parameters <code>k</code> and <code>alpha</code>, we will focus onf the different possible values for <code>alpha</code>. For <code>alpha</code> not smaller than 0.15, we see that we gain a lot going from 1 to 3 groups and from 2 to 3 groups. Therefore, we choose <code>k=3</code> and <code>alpha</code> of order <code>0.15</code> corresponding to the slope change, for the curve <code>k=3</code>.</p><p>For <code>alpha</code> smaller than 0.15, we see that we gain a lot going from 1 to 2 groups, from 2 to 3 groups and to 3 to 4 groups. However, we do not gain in terms of risk going from 4 to 5 groups or from 5 to 6 groups. Indeed, the curves associated to the parameters <span>$k = 4$</span>, <span>$k = 5$</span> and <span>$k = 6$</span> are very close. So, we cluster the data in <span>$k = 4$</span> groups.</p><p>The curve associated to the parameter <span>$k = 4$</span> strongly decreases with a slope that stabilises around <span>$\alpha = 0.1$</span>.</p><p>Then, since there is a slope jump at that curve <span>$k = 6$</span>, we can choose the parameter <code>k = 6</code>, with <code>alpha = 0</code>. We do not consider any outlier.</p><p>Note that the fact that our method is initialised by random centers implies that the curves representing the risk as a function of <span>$k$</span> and <span>$\alpha$</span> vary, quite strongly, from one time to another one. Consequently, the comment abovementionned does not necessarily corresponds to the figure. For more robustness, we should have increased the value of <code>nstart</code>, and so, the execution time. These curves for the selection of the parameters <code>k</code> and <code>alpha</code> are mostly indicative.</p><p>Finaly, here are three clustering obtained after choosing 3 pairs of parameters.</p><pre><code class="language-julia hljs">maxiter = 50
+ylabel!(&quot;NMI&quot;)</code></pre><img src="b02cb130.svg" alt="Example block output"/><p>In order to select the parameters <code>k</code> and <code>alpha</code>, we will focus onf the different possible values for <code>alpha</code>. For <code>alpha</code> not smaller than 0.15, we see that we gain a lot going from 1 to 3 groups and from 2 to 3 groups. Therefore, we choose <code>k=3</code> and <code>alpha</code> of order <code>0.15</code> corresponding to the slope change, for the curve <code>k=3</code>.</p><p>For <code>alpha</code> smaller than 0.15, we see that we gain a lot going from 1 to 2 groups, from 2 to 3 groups and to 3 to 4 groups. However, we do not gain in terms of risk going from 4 to 5 groups or from 5 to 6 groups. Indeed, the curves associated to the parameters <span>$k = 4$</span>, <span>$k = 5$</span> and <span>$k = 6$</span> are very close. So, we cluster the data in <span>$k = 4$</span> groups.</p><p>The curve associated to the parameter <span>$k = 4$</span> strongly decreases with a slope that stabilises around <span>$\alpha = 0.1$</span>.</p><p>Then, since there is a slope jump at that curve <span>$k = 6$</span>, we can choose the parameter <code>k = 6</code>, with <code>alpha = 0</code>. We do not consider any outlier.</p><p>Note that the fact that our method is initialised by random centers implies that the curves representing the risk as a function of <span>$k$</span> and <span>$\alpha$</span> vary, quite strongly, from one time to another one. Consequently, the comment abovementionned does not necessarily corresponds to the figure. For more robustness, we should have increased the value of <code>nstart</code>, and so, the execution time. These curves for the selection of the parameters <code>k</code> and <code>alpha</code> are mostly indicative.</p><p>Finaly, here are three clustering obtained after choosing 3 pairs of parameters.</p><pre><code class="language-julia hljs">maxiter = 50
 nstart = 50
 tb = trimmed_bregman_clustering(rng, points, 3, 0.15, poisson, maxiter, nstart)
-plot_clustering(points, tb.cluster, Y_labels)</code></pre><img src="91d114a4.svg" alt="Example block output"/><p>The texts of Twain, the bible and the Obama speech are considered as outliers.</p><pre><code class="language-julia hljs">tb = trimmed_bregman_clustering(rng, points, 4, 0.1, poisson, maxiter, nstart)
-plot_clustering(points, tb.cluster, Y_labels)</code></pre><img src="d076b129.svg" alt="Example block output"/><p>The texts from the bible and the Obama speech are considered as outliers.</p><pre><code class="language-julia hljs">tb = trimmed_bregman_clustering(rng, points, 6, 0.0, poisson, maxiter, nstart)
-plot_clustering(points, tb.cluster, Y_labels)</code></pre><img src="111b3cea.svg" alt="Example block output"/><p>We obtain 6 groups corresponding to the texts of the 4 authors and to the texts from the bible and from the Obama speech.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../poisson2/">« Two-dimensional data from the Poisson distribution</a><a class="docs-footer-nextpage" href="../dtm/">Robust approximations of compact sets »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="auto">Automatic (OS)</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.2.1 on <span class="colophon-date" title="Saturday 9 December 2023 18:56">Saturday 9 December 2023</span>. Using Julia version 1.9.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+plot_clustering(points, tb.cluster, Y_labels)</code></pre><img src="a3b50629.svg" alt="Example block output"/><p>The texts of Twain, the bible and the Obama speech are considered as outliers.</p><pre><code class="language-julia hljs">tb = trimmed_bregman_clustering(rng, points, 4, 0.1, poisson, maxiter, nstart)
+plot_clustering(points, tb.cluster, Y_labels)</code></pre><img src="134f326a.svg" alt="Example block output"/><p>The texts from the bible and the Obama speech are considered as outliers.</p><pre><code class="language-julia hljs">tb = trimmed_bregman_clustering(rng, points, 6, 0.0, poisson, maxiter, nstart)
+plot_clustering(points, tb.cluster, Y_labels)</code></pre><img src="b0333b96.svg" alt="Example block output"/><p>We obtain 6 groups corresponding to the texts of the 4 authors and to the texts from the bible and from the Obama speech.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../poisson2/">« Two-dimensional data from the Poisson distribution</a><a class="docs-footer-nextpage" href="../dtm/">Robust approximations of compact sets »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="auto">Automatic (OS)</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.2.1 on <span class="colophon-date" title="Monday 26 February 2024 09:15">Monday 26 February 2024</span>. Using Julia version 1.10.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

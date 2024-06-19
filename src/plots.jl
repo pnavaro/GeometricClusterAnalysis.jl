@@ -22,11 +22,34 @@ end
 
     title := @sprintf("time = %7.3f", α)
 
-    @series begin
-        seriestype := :scatter
-        color := pointcolors
-        label := "data"
-        x, y
+    signal = findall(pointcolors .> 0)
+    noise  = findall(pointcolors .== 0)
+
+    if length(noise) > 0
+
+        @series begin
+            seriestype := :scatter
+            markercolor := :black
+            markersize := 2
+            markeralpha := 0.5
+            markerstrokewidth := 0
+            label := "noise"
+            x[noise], y[noise]
+        end
+
+    end
+
+
+    if length(signal) > 0
+
+        @series begin
+            seriestype := :scatter
+            color := pointcolors[signal]
+            markerstrokewidth := 0
+            label := "signal"
+            x[signal], y[signal]
+        end
+
     end
 
     @series begin
@@ -122,7 +145,7 @@ end
     @series begin
 
         seriestype := :scatter
-        color := results.cluster
+        group := results.cluster
         label := "data"
         markersize := 3
         if d == 1
@@ -174,6 +197,7 @@ end
     colors = ps.args[2]
     framestyle --> :none
     aspect_ratio --> true
+    markerstrokewidth := 0
 
     for (i, l) in enumerate(unique(colors))
         which = colors .== l

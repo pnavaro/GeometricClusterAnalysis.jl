@@ -88,7 +88,7 @@ kdtree = KDTree(dataset.points[:,1:nsignal])
 
 zs = [-dtm(kdtree, x, y) for x in xs, y in ys]
 
-f = surface(xs, ys, zs, cb = false)
+f = surface(xs, ys, zs)
 save("assets/dtm2.png", f); nothing #hide
 ```
 
@@ -103,7 +103,7 @@ kdtree = KDTree(dataset.points)
 
 zs = [-dtm(kdtree, x, y) for x in xs, y in ys]
 
-f = surface(xs, ys, zs, cb = false)
+f = surface(xs, ys, zs)
 save("assets/dtm3.png", f); nothing #hide
 ```
 ![](assets/dtm3.png)
@@ -148,7 +148,7 @@ q = 10
 
 zs = [-dtm(kdtree, x, y, q) for x in xs, y in ys]
 
-fig = surface(xs, ys, zs, cb = false)
+fig = surface(xs, ys, zs)
 save("assets/dtm4.png", fig); nothing #hide
 ```
 
@@ -184,7 +184,7 @@ iter_max, nstart = 100, 10
 xs = LinRange(-10, 10, 200)
 ys = LinRange(-10, 10, 200)
 zs, df = kPDTM(rng, dataset.points, xs, ys, q, k, nsignal, iter_max, nstart)
-fig = surface(xs, ys, -zs, axis=(type=Axis3,), cb = false)
+fig = surface(xs, ys, -zs, axis=(type=Axis3,))
 save("assets/dtm5.png", fig); nothing #hide
 ```
 

@@ -8,12 +8,14 @@ deps <- c(
 "FNN", 
 "ggforce",
 "here", 
+"igraph", 
 "kernlab",
 "magrittr",
 "randomForest", 
 "tourr", 
 "tclust", 
-"TDA"
+"TDA",
+"xml2"
 )
 
 packages <- installed.packages()

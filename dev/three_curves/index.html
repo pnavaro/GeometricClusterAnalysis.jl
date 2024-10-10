@@ -17,7 +17,7 @@ rng = MersenneTwister(1234)
 
 data = noisy_three_curves(rng, nsignal, nnoise, sigma, dim)
 
-plot(data)</code></pre><img src="f56fd6f2.svg" alt="Example block output"/><h2 id="Hierarchical-clustering"><a class="docs-heading-anchor" href="#Hierarchical-clustering">Hierarchical clustering</a><a id="Hierarchical-clustering-1"></a><a class="docs-heading-anchor-permalink" href="#Hierarchical-clustering" title="Permalink"></a></h2><pre><code class="language-julia hljs">function f_Σ!(Σ) end
+plot(data)</code></pre><img src="e1901ee1.svg" alt="Example block output"/><h2 id="Hierarchical-clustering"><a class="docs-heading-anchor" href="#Hierarchical-clustering">Hierarchical clustering</a><a id="Hierarchical-clustering-1"></a><a class="docs-heading-anchor-permalink" href="#Hierarchical-clustering" title="Permalink"></a></h2><pre><code class="language-julia hljs">function f_Σ!(Σ) end
 
 df = kplm(rng, data.points, k, c, nsignal, iter_max, nstart, f_Σ!)
 
@@ -28,20 +28,20 @@ hc1 = hierarchical_clustering_lem(mh)
 lims = (min(minimum(hc1.birth), minimum(hc1.death)),
         max(maximum(hc1.birth), maximum(hc1.death[hc1.death .!= Inf]))+1)
 
-plot(hc1, xlims = lims, ylims = lims)</code></pre><img src="7cb3571d.svg" alt="Example block output"/><pre><code class="language-julia hljs">nb_means_removed = 2
+plot(hc1, xlims = lims, ylims = lims)</code></pre><img src="f52ff5da.svg" alt="Example block output"/><pre><code class="language-julia hljs">nb_means_removed = 2
 
 threshold = mean((hc1.birth[end - nb_means_removed],hc1.birth[end - nb_means_removed + 1]))
 
 hc2 = hierarchical_clustering_lem(mh, infinity = Inf, threshold = threshold)
 
-plot(hc2, xlims = lims, ylims = lims)</code></pre><img src="1a51d40e.svg" alt="Example block output"/><pre><code class="language-julia hljs">bd = birth_death(hc2)
+plot(hc2, xlims = lims, ylims = lims)</code></pre><img src="f116e39b.svg" alt="Example block output"/><pre><code class="language-julia hljs">bd = birth_death(hc2)
 sort!(bd)
 infinity = mean((bd[end - nb_clusters],bd[end - nb_clusters + 1]))
 
 hc3 = hierarchical_clustering_lem(mh; infinity = infinity, threshold = threshold)
 
-plot(hc3, xlims = lims, ylims = lims)</code></pre><img src="328e4a3e.svg" alt="Example block output"/><pre><code class="language-julia hljs">color_final = color_points_from_centers( data.points, k, nsignal, df, hc3)
+plot(hc3, xlims = lims, ylims = lims)</code></pre><img src="585a63b2.svg" alt="Example block output"/><pre><code class="language-julia hljs">color_final = color_points_from_centers( data.points, k, nsignal, df, hc3)
 
 remain_indices = hc3.startup_indices
 
-ellipsoids(data.points, remain_indices, color_final, color_final, df, 0 )</code></pre><img src="13caba42.svg" alt="Example block output"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../fleas/">« Fleas dataset</a><a class="docs-footer-nextpage" href="../two_spirals/">Two Spirals »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.5.0 on <span class="colophon-date" title="Tuesday 23 July 2024 09:12">Tuesday 23 July 2024</span>. Using Julia version 1.10.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+ellipsoids(data.points, remain_indices, color_final, color_final, df, 0 )</code></pre><img src="0f13391c.svg" alt="Example block output"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../fleas/">« Fleas dataset</a><a class="docs-footer-nextpage" href="../two_spirals/">Two Spirals »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.7.0 on <span class="colophon-date" title="Thursday 10 October 2024 12:28">Thursday 10 October 2024</span>. Using Julia version 1.10.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

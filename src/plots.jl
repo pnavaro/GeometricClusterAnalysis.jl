@@ -23,7 +23,7 @@ end
     title := @sprintf("time = %7.3f", α)
 
     signal = findall(pointcolors .> 0)
-    noise  = findall(pointcolors .== 0)
+    noise = findall(pointcolors .== 0)
 
     if length(noise) > 0
 
@@ -218,24 +218,29 @@ export create_ellipsoids_animation
 """
 $(SIGNATURES)
 """
-function create_ellipsoids_animation( distance_function, timesteps, 
-                                      ellipsoids_colors, points_colors, 
-                                      distances, remain_indices )
+function create_ellipsoids_animation(
+    distance_function,
+    timesteps,
+    ellipsoids_colors,
+    points_colors,
+    distances,
+    remain_indices,
+)
 
-    sq_time = (0:200) ./ 200 .* (timesteps[end-1] - timesteps[1]) .+ timesteps[1] 
+    sq_time = (0:200) ./ 200 .* (timesteps[end-1] - timesteps[1]) .+ timesteps[1]
     points_frames = Vector{Int}[]
     ellipsoids_frames = Vector{Int}[]
-    
+
     idx = 0
-    
+
     npoints = length(points_colors)
     nellipsoids = length(ellipsoids_colors)
     new_points_colors = zeros(Int, npoints)
     new_ellipsoids_colors = zeros(Int, nellipsoids)
     next_sqtime = timesteps[idx+1]
     updated = false
-    
-    for i = eachindex(sq_time)
+
+    for i in eachindex(sq_time)
         while sq_time[i] >= next_sqtime
             idx += 1
             next_sqtime = timesteps[idx+1]
@@ -243,22 +248,23 @@ function create_ellipsoids_animation( distance_function, timesteps,
         end
         if updated
             new_ellipsoids_colors = ellipsoids_colors[idx+1]
-            new_points_colors = return_color(points_colors, new_ellipsoids_colors, remain_indices)
+            new_points_colors =
+                return_color(points_colors, new_ellipsoids_colors, remain_indices)
             updated = false
         end
         push!(points_frames, copy(new_points_colors))
         push!(ellipsoids_frames, copy(new_ellipsoids_colors))
     end
-    
+
     # If the cost of the point is smaller to the time : label 0 (not in the ellipsoid)
-    for i = 1:length(points_frames), j = 1:npoints
-        points_frames[i][j] *= (distances[j] <= sq_time[i]) 
+    for i in eachindex(points_frames), j = 1:npoints
+        points_frames[i][j] *= (distances[j] <= sq_time[i])
     end
-    
-    μ = [distance_function.μ[i] for i in remain_indices if i > 0];
-    ω = [distance_function.ω[i] for i in remain_indices if i > 0];
-    Σ = [distance_function.Σ[i] for i in remain_indices if i > 0];
-    
-    return ellipsoids_frames, points_frames, μ, ω, Σ, sq_time 
+
+    μ = [distance_function.μ[i] for i in remain_indices if i > 0]
+    ω = [distance_function.ω[i] for i in remain_indices if i > 0]
+    Σ = [distance_function.Σ[i] for i in remain_indices if i > 0]
+
+    return ellipsoids_frames, points_frames, μ, ω, Σ, sq_time
 
 end

@@ -15,7 +15,7 @@ using Test
     iter_max = 100  # maximum number of iterations of the algorithm kPLM
     nstart = 1      # number of initializations of the algorithm kPLM
 
-    rng = MersenneTwister(1234)
+    rng = MersenneTwister(23)
 
     data = noisy_three_curves(rng, nsignal, nnoise, sigma, dim)
 

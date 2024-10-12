@@ -43,7 +43,7 @@ jobs:
     permissions:
       contents: write
     name: Documentation
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4

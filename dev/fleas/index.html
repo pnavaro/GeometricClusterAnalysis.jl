@@ -53,16 +53,16 @@ col_kmeans = kmeans(P,3)$cluster
 print(aricode::NMI(col_kmeans,true_color))
 &quot;&quot;&quot;
 col_kmeans = @rget col_kmeans
-println(&quot;NMI = $(mutualinfo(true_colors, col_kmeans))&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">[1] 0.5485858
-NMI = 0.5624370563031211</code></pre><pre><code class="language-julia hljs">l = @layout [a b]
+println(&quot;NMI = $(mutualinfo(true_colors, col_kmeans))&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">[1] 0.8249883
+NMI = 0.8249883014016558</code></pre><pre><code class="language-julia hljs">l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, col_kmeans)
-plot(p1, p2, layout = l, aspect_ratio = :equal)</code></pre><img src="aeecfdb5.svg" alt="Example block output"/><h2 id="K-means-from-Clustering.jl"><a class="docs-heading-anchor" href="#K-means-from-Clustering.jl">K-means from Clustering.jl</a><a id="K-means-from-Clustering.jl-1"></a><a class="docs-heading-anchor-permalink" href="#K-means-from-Clustering.jl" title="Permalink"></a></h2><pre><code class="language-julia hljs">features = collect(points&#39;)
+plot(p1, p2, layout = l, aspect_ratio = :equal)</code></pre><img src="f11d500b.svg" alt="Example block output"/><h2 id="K-means-from-Clustering.jl"><a class="docs-heading-anchor" href="#K-means-from-Clustering.jl">K-means from Clustering.jl</a><a id="K-means-from-Clustering.jl-1"></a><a class="docs-heading-anchor-permalink" href="#K-means-from-Clustering.jl" title="Permalink"></a></h2><pre><code class="language-julia hljs">features = collect(points&#39;)
 result = kmeans(features, 3)
 println(&quot;NMI = $(mutualinfo(true_colors, result.assignments))&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">NMI = 0.8249883014016558</code></pre><pre><code class="language-julia hljs">l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, result.assignments)
-plot(p1, p2, layout = l, aspect_ratio = :equal)</code></pre><img src="1490d32c.svg" alt="Example block output"/><h2 id="K-means-from-ClusterAnalysis.jl"><a class="docs-heading-anchor" href="#K-means-from-ClusterAnalysis.jl">K-means from ClusterAnalysis.jl</a><a id="K-means-from-ClusterAnalysis.jl-1"></a><a class="docs-heading-anchor-permalink" href="#K-means-from-ClusterAnalysis.jl" title="Permalink"></a></h2><pre><code class="language-julia hljs">import ClusterAnalysis
+plot(p1, p2, layout = l, aspect_ratio = :equal)</code></pre><img src="9554f433.svg" alt="Example block output"/><h2 id="K-means-from-ClusterAnalysis.jl"><a class="docs-heading-anchor" href="#K-means-from-ClusterAnalysis.jl">K-means from ClusterAnalysis.jl</a><a id="K-means-from-ClusterAnalysis.jl-1"></a><a class="docs-heading-anchor-permalink" href="#K-means-from-ClusterAnalysis.jl" title="Permalink"></a></h2><pre><code class="language-julia hljs">import ClusterAnalysis
 
 flea = rcopy(R&quot;tourr::flea&quot;)
 df = flea[:, 1:end-1];  # dataset is stored in a DataFrame
@@ -71,10 +71,10 @@ df = flea[:, 1:end-1];  # dataset is stored in a DataFrame
 k, nstart, maxiter = 3, 10, 10;
 
 model = ClusterAnalysis.kmeans(df, k, nstart = nstart, maxiter = maxiter)
-println(&quot;NMI = $(mutualinfo(true_colors, model.cluster))&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">NMI = 0.8249883014016554</code></pre><pre><code class="language-julia hljs">l = @layout [a b]
+println(&quot;NMI = $(mutualinfo(true_colors, model.cluster))&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">NMI = 0.8249883014016557</code></pre><pre><code class="language-julia hljs">l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, model.cluster)
-plot(p1, p2, layout = l, aspect_ratio = :equal)</code></pre><img src="9a94945e.svg" alt="Example block output"/><h2 id="Robust-trimmed-clustering-:-tclust"><a class="docs-heading-anchor" href="#Robust-trimmed-clustering-:-tclust">Robust trimmed clustering : tclust</a><a id="Robust-trimmed-clustering-:-tclust-1"></a><a class="docs-heading-anchor-permalink" href="#Robust-trimmed-clustering-:-tclust" title="Permalink"></a></h2><pre><code class="language-julia hljs">R&quot;&quot;&quot;
+plot(p1, p2, layout = l, aspect_ratio = :equal)</code></pre><img src="baab33e6.svg" alt="Example block output"/><h2 id="Robust-trimmed-clustering-:-tclust"><a class="docs-heading-anchor" href="#Robust-trimmed-clustering-:-tclust">Robust trimmed clustering : tclust</a><a id="Robust-trimmed-clustering-:-tclust-1"></a><a class="docs-heading-anchor-permalink" href="#Robust-trimmed-clustering-:-tclust" title="Permalink"></a></h2><pre><code class="language-julia hljs">R&quot;&quot;&quot;
 dataset = tourr::flea
 P = scale(dataset[,1:6])
 &quot;&quot;&quot;
@@ -82,13 +82,13 @@ tclust_color = Int.(rcopy(R&quot;tclust::tclust(P,3,alpha = 0,restr.fact = 10)$c
 println(&quot;NMI = $(mutualinfo(true_colors,tclust_color))&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">NMI = 1.0</code></pre><pre><code class="language-julia hljs">l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, tclust_color)
-plot(p1, p2, layout = l, aspect_ratio = :equal)</code></pre><img src="4563772d.svg" alt="Example block output"/><h2 id="ToMaTo"><a class="docs-heading-anchor" href="#ToMaTo">ToMaTo</a><a id="ToMaTo-1"></a><a class="docs-heading-anchor-permalink" href="#ToMaTo" title="Permalink"></a></h2><div class="admonition is-warning"><header class="admonition-header">This algorithm is not correctly implemented yet</header><div class="admonition-body"><p>This part is still in active developpement and does not work well.  Do not draw any conclusions about the performance of this algorithm from the results obtained below.</p></div></div><p>Algorithm ToMATo from paper &quot;Persistence-based clustering in Riemannian Manifolds&quot; Frederic Chazal, Steve Oudot, Primoz Skraba, Leonidas J. Guibas</p><pre><code class="language-julia hljs">nclusters, k, c, radius, iter_max, nstart = 3, 10, 10, 2., 100, 10
+plot(p1, p2, layout = l, aspect_ratio = :equal)</code></pre><img src="7a73020a.svg" alt="Example block output"/><h2 id="ToMaTo"><a class="docs-heading-anchor" href="#ToMaTo">ToMaTo</a><a id="ToMaTo-1"></a><a class="docs-heading-anchor-permalink" href="#ToMaTo" title="Permalink"></a></h2><div class="admonition is-warning"><header class="admonition-header">This algorithm is not correctly implemented yet</header><div class="admonition-body"><p>This part is still in active developpement and does not work well.  Do not draw any conclusions about the performance of this algorithm from the results obtained below.</p></div></div><p>Algorithm ToMATo from paper &quot;Persistence-based clustering in Riemannian Manifolds&quot; Frederic Chazal, Steve Oudot, Primoz Skraba, Leonidas J. Guibas</p><pre><code class="language-julia hljs">nclusters, k, c, radius, iter_max, nstart = 3, 10, 10, 2., 100, 10
 signal = size(points, 1)
 col_tomato = clustering_tomato(features, nclusters, k, c, signal, radius, iter_max, nstart)
 println(&quot;NMI = $(mutualinfo(true_colors, col_tomato))&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">NMI = 0.911166770886367</code></pre><pre><code class="language-julia hljs">l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, col_tomato)
-plot(p1, p2, layout = l)</code></pre><img src="8d24aeec.svg" alt="Example block output"/><h2 id="k-PLM"><a class="docs-heading-anchor" href="#k-PLM">k-PLM</a><a id="k-PLM-1"></a><a class="docs-heading-anchor-permalink" href="#k-PLM" title="Permalink"></a></h2><pre><code class="language-julia hljs">nb_clusters, k, c, iter_max, nstart = 3, 10, 50, 100, 10
+plot(p1, p2, layout = l)</code></pre><img src="ec719dcf.svg" alt="Example block output"/><h2 id="k-PLM"><a class="docs-heading-anchor" href="#k-PLM">k-PLM</a><a id="k-PLM-1"></a><a class="docs-heading-anchor-permalink" href="#k-PLM" title="Permalink"></a></h2><pre><code class="language-julia hljs">nb_clusters, k, c, iter_max, nstart = 3, 10, 50, 100, 10
 nsignal = size(points, 1)
 
 function f_Σ!(Σ) end
@@ -111,7 +111,7 @@ col_kplm = color_points_from_centers(x, k, nsignal, dist_func, hc)
 println(&quot;NMI = $(mutualinfo(true_colors, col_kplm))&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">NMI = 1.0</code></pre><pre><code class="language-julia hljs">l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, col_kplm)
-plot(p1, p2, layout = l)</code></pre><img src="340181c0.svg" alt="Example block output"/><h2 id="Witnessed"><a class="docs-heading-anchor" href="#Witnessed">Witnessed</a><a id="Witnessed-1"></a><a class="docs-heading-anchor-permalink" href="#Witnessed" title="Permalink"></a></h2><pre><code class="language-julia hljs">μ, ω, colors = k_witnessed_distance(x, k, c, nsignal)
+plot(p1, p2, layout = l)</code></pre><img src="ab7c2d40.svg" alt="Example block output"/><h2 id="Witnessed"><a class="docs-heading-anchor" href="#Witnessed">Witnessed</a><a id="Witnessed-1"></a><a class="docs-heading-anchor-permalink" href="#Witnessed" title="Permalink"></a></h2><pre><code class="language-julia hljs">μ, ω, colors = k_witnessed_distance(x, k, c, nsignal)
 
 distance_matrix = build_distance_matrix_power_function_buchet(sqrt.(ω), hcat(μ...))
 
@@ -124,7 +124,7 @@ witnessed_colors = return_color(colors, hc2.colors, hc2.startup_indices)
 println(&quot;NMI = $(mutualinfo(true_colors, witnessed_colors))&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">NMI = 0.911166770886367</code></pre><pre><code class="language-julia hljs">l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, witnessed_colors)
-plot(p1, p2, layout = l)</code></pre><img src="98f47604.svg" alt="Example block output"/><h2 id="k-PDTM"><a class="docs-heading-anchor" href="#k-PDTM">k-PDTM</a><a id="k-PDTM-1"></a><a class="docs-heading-anchor-permalink" href="#k-PDTM" title="Permalink"></a></h2><pre><code class="language-julia hljs">df_kpdtm = kpdtm(rng, x, k, c, nsignal, iter_max, nstart)
+plot(p1, p2, layout = l)</code></pre><img src="e2baa61d.svg" alt="Example block output"/><h2 id="k-PDTM"><a class="docs-heading-anchor" href="#k-PDTM">k-PDTM</a><a id="k-PDTM-1"></a><a class="docs-heading-anchor-permalink" href="#k-PDTM" title="Permalink"></a></h2><pre><code class="language-julia hljs">df_kpdtm = kpdtm(rng, x, k, c, nsignal, iter_max, nstart)
 distance_matrix = build_distance_matrix(df_kpdtm)
 hc1 = hierarchical_clustering_lem(distance_matrix, infinity = Inf, threshold = Inf)
 bd = hc1.death .- hc1.birth
@@ -135,7 +135,7 @@ kpdtm_colors = return_color(df_kpdtm.colors, hc2.colors, hc2.startup_indices)
 println(&quot;NMI = $(mutualinfo(true_colors, kpdtm_colors))&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">NMI = 1.0</code></pre><pre><code class="language-julia hljs">l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, kpdtm_colors)
-plot(p1, p2, layout = l)</code></pre><img src="a34ab9bf.svg" alt="Example block output"/><h2 id="Power-function-Buchet-et-al."><a class="docs-heading-anchor" href="#Power-function-Buchet-et-al.">Power function Buchet et al.</a><a id="Power-function-Buchet-et-al.-1"></a><a class="docs-heading-anchor-permalink" href="#Power-function-Buchet-et-al." title="Permalink"></a></h2><pre><code class="language-julia hljs">using GeometricClusterAnalysis
+plot(p1, p2, layout = l)</code></pre><img src="6bbb9450.svg" alt="Example block output"/><h2 id="Power-function-Buchet-et-al."><a class="docs-heading-anchor" href="#Power-function-Buchet-et-al.">Power function Buchet et al.</a><a id="Power-function-Buchet-et-al.-1"></a><a class="docs-heading-anchor-permalink" href="#Power-function-Buchet-et-al." title="Permalink"></a></h2><pre><code class="language-julia hljs">using GeometricClusterAnalysis
 
 m0 = k / size(x, 2)
 birth = sort(dtm(x, m0))
@@ -152,7 +152,7 @@ buchet_colors, returned_colors, hc2 =
 println(&quot;NMI = $(mutualinfo(true_colors, buchet_colors))&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">NMI = 1.0</code></pre><pre><code class="language-julia hljs">l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, buchet_colors)
-plot(p1, p2, layout = l)</code></pre><img src="103870f4.svg" alt="Example block output"/><h2 id="DTM-filtration"><a class="docs-heading-anchor" href="#DTM-filtration">DTM filtration</a><a id="DTM-filtration-1"></a><a class="docs-heading-anchor-permalink" href="#DTM-filtration" title="Permalink"></a></h2><pre><code class="language-julia hljs">m0 = k / size(x, 2)
+plot(p1, p2, layout = l)</code></pre><img src="36c21379.svg" alt="Example block output"/><h2 id="DTM-filtration"><a class="docs-heading-anchor" href="#DTM-filtration">DTM filtration</a><a id="DTM-filtration-1"></a><a class="docs-heading-anchor-permalink" href="#DTM-filtration" title="Permalink"></a></h2><pre><code class="language-julia hljs">m0 = k / size(x, 2)
 birth = sort(dtm(x, m0))
 @show threshold = birth[nsignal]
 
@@ -168,8 +168,8 @@ println(&quot;NMI = $(mutualinfo(true_colors, dtm_colors))&quot;)</code></pre><p
 NMI = 1.0</code></pre><pre><code class="language-julia hljs">l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, dtm_colors)
-plot(p1, p2, layout = l)</code></pre><img src="aa5ddb24.svg" alt="Example block output"/><h2 id="Spectral-with-specc"><a class="docs-heading-anchor" href="#Spectral-with-specc">Spectral with <code>specc</code></a><a id="Spectral-with-specc-1"></a><a class="docs-heading-anchor-permalink" href="#Spectral-with-specc" title="Permalink"></a></h2><pre><code class="language-julia hljs">spectral_colors = rcopy(R&quot;kernlab::specc(P, centers = 3)&quot;)
-println(&quot;NMI = $(mutualinfo(true_colors, spectral_colors))&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">NMI = 1.0000000000000002</code></pre><pre><code class="language-julia hljs">l = @layout [a b]
+plot(p1, p2, layout = l)</code></pre><img src="2592a951.svg" alt="Example block output"/><h2 id="Spectral-with-specc"><a class="docs-heading-anchor" href="#Spectral-with-specc">Spectral with <code>specc</code></a><a id="Spectral-with-specc-1"></a><a class="docs-heading-anchor-permalink" href="#Spectral-with-specc" title="Permalink"></a></h2><pre><code class="language-julia hljs">spectral_colors = rcopy(R&quot;kernlab::specc(P, centers = 3)&quot;)
+println(&quot;NMI = $(mutualinfo(true_colors, spectral_colors))&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">NMI = 1.0</code></pre><pre><code class="language-julia hljs">l = @layout [a b]
 p1 = plot_pointset(points, true_colors)
 p2 = plot_pointset(points, spectral_colors)
-plot(p1, p2, layout = l)</code></pre><img src="597cac84.svg" alt="Example block output"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../fake_data/">« Datasets</a><a class="docs-footer-nextpage" href="../three_curves/">Three Curves »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.7.0 on <span class="colophon-date" title="Sunday 13 October 2024 09:20">Sunday 13 October 2024</span>. Using Julia version 1.11.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+plot(p1, p2, layout = l)</code></pre><img src="a891f3ba.svg" alt="Example block output"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../fake_data/">« Datasets</a><a class="docs-footer-nextpage" href="../three_curves/">Three Curves »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.7.0 on <span class="colophon-date" title="Sunday 13 October 2024 09:28">Sunday 13 October 2024</span>. Using Julia version 1.11.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

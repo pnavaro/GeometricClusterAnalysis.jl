@@ -39,6 +39,6 @@ makedocs(
 
 deploydocs(
     branch = "gh-pages",
-    devbranch = "master",
+    devbranch = "main",
     repo = "github.com/pnavaro/GeometricClusterAnalysis.jl.git",
 )

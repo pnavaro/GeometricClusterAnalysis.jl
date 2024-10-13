@@ -4,9 +4,9 @@ Julia implementation of data clustering using underlying geometric and topologic
 
 **WARNING**: This package is not registered and may be subject to breaking changes anytime. 
 
-[![Build Status](https://github.com/pnavaro/GeometricClusterAnalysis.jl/workflows/CI/badge.svg)](https://github.com/pnavaro/GeometricClusterAnalysis.jl/actions?query=workflow%3ACI+branch%3Amaster)
-[![codecov](https://codecov.io/gh/pnavaro/GeometricClusterAnalysis.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/pnavaro/GeometricClusterAnalysis.jl)
-[![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
+[![Build Status](https://github.com/pnavaro/GeometricClusterAnalysis.jl/workflows/CI/badge.svg)](https://github.com/pnavaro/GeometricClusterAnalysis.jl/actions?query=workflow%3ACI+branch%3Amain)
+[![codecov](https://codecov.io/gh/pnavaro/GeometricClusterAnalysis.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/pnavaro/GeometricClusterAnalysis.jl)
+[![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/main/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
 
 **Documentation**: [![][docs-stable-img]][docs-stable-url] [![][docs-latest-img]][docs-latest-url]
@@ -44,7 +44,7 @@ include("examples/two_spirals.jl")
 ## See Also
 
 Topological Data Analysis
- - [Ripserer.jl](https://github.com/mtsch/Ripserer.jl/tree/master)
+ - [Ripserer.jl](https://github.com/mtsch/Ripserer.jl)
  - [PersistenceDiagrams.jl](https://github.com/mtsch/PersistenceDiagrams.jl)
  - [ClusteringToMaTo.jl](https://github.com/pnavaro/ClusteringToMaTo.jl)
  - [RobustTDA.jl](https://github.com/sidv23/RobustTDA.jl)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 using Clustering
 using GeometricClusterAnalysis
 using LinearAlgebra
@@ -20,11 +21,12 @@ data = infinity_symbol(rng, signal, noise, σ, dimension, noise_min, noise_max)
 
 @time result = kmeans(data.points, k); # run K-means for the 10 clusters
 
+# +
 function aux_dim_d(Σ, s2min, s2max, λmin, d_prim)
 
     eig = eigen(Σ)
-    v = eig.vectors
-    λ = eig.values
+    v = reverse(eig.vectors, dims=2)
+    λ = reverse(eig.values)
 
     new_λ = copy(λ)
 
@@ -33,19 +35,20 @@ function aux_dim_d(Σ, s2min, s2max, λmin, d_prim)
         new_λ[i] = (λ[i] - λmin) * (λ[i] >= λmin) + λmin
     end
     if d_prim < d
-        S = mean(λ[1:(end-d_prim)])
+        S = mean(λ[(d_prim+1):d])
         s2 =
             (S - s2min - s2max) * (s2min < S) * (S < s2max) +
             (-s2max) * (S <= s2min) +
             (-s2min) * (S >= s2max) +
             s2min +
             s2max
-        new_λ[1:(end-d_prim)] .= s2
+        new_λ[(d_prim+1):d] .= s2
     end
 
     return v * Diagonal(new_λ) * transpose(v)
 
 end
+# -
 
 d_prim = 1
 lambdamin = 0.1
@@ -105,3 +108,5 @@ f_Sigma_dim_d <- function(Sigma){
 """
 
 @time rcopy(R"kplm(P, k, c, signal, iter_max, nstart, f_Sigma_dim_d)")
+
+

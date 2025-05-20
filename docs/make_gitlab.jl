@@ -31,14 +31,15 @@ makedocs(
         "Trimmed Bregman Clustering" =>
             ["trimmed-bregman.md", "poisson1.md", "poisson2.md", "obama.md"],
         "Robust approximations of compact sets" => "dtm.md",
+        "Anisotropic robust kmeans" => "anisotropic.md",
         "Types" => "types.md",
         "Functions" => "functions.md",
     ],
     plugins = [bib],
+    remotes = nothing
 )
 
 deploydocs(
-    branch = "gh-pages",
-    devbranch = "master",
-    repo = "https://plmlab.math.cnrs.fr/geometric-cluster-analysis/KPLMCenters.jl",
+    devbranch = "dev_Claire",
+    repo = "plmlab.math.cnrs.fr/geometric-cluster-analysis/KPLMCenters.jl.git",
 )

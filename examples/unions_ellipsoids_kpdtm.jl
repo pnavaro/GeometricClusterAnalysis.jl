@@ -28,7 +28,7 @@ hc = hierarchical_clustering_lem(
 )
 
 
-# Tracer le diagramme de persistance
+Tracer le diagramme de persistance
 
 plot(hc)
 

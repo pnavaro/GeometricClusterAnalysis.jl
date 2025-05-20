@@ -1,7 +1,6 @@
 using Documenter
 using DocumenterCitations
 using GeometricClusterAnalysis
-using DocumenterCitations
 
 ENV["GKSwstype"] = "100"
 
